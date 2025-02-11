@@ -1,0 +1,211 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model tenants {
+  idTenant      Int       @id @default(autoincrement())
+
+  name          String    @unique @db.VarChar(30)
+  description   String?   @db.VarChar(255)
+
+  version       Int?      @default(0)
+  disabled      Boolean   @default(true)  //Desativa o Tenant como um todo
+  pendant       Boolean?  @default(false) //Tenant pode logar, mas se estiver suspenso, não poderá fazer nada.
+
+  //@@index([cpf, name, email1, mobile_phone1])
+}
+
+model users {
+  idUser        Int       @id @default(autoincrement())
+
+  cpf           String    @unique @db.VarChar(11)
+  name          String    @default("Nome") @db.VarChar(50)
+  surname       String?   @db.VarChar(50)
+  completename  String?   @db.VarChar(150)
+  password      String    @db.VarChar(64)
+  comments      String?   @db.VarChar(255)
+  pathphoto     String?
+  birthdate     DateTime?
+  hiringdate    DateTime?
+
+  address       String    @default("Rua A") @db.VarChar(100)
+  number        String?   @db.VarChar(20)
+  complement    String?   @db.VarChar(50)
+  neighborhood  String    @db.VarChar(50)
+  city          String    @default("Rio de Janeiro") @db.VarChar(30)
+  state         String    @default("RJ") @db.VarChar(2)
+  country       String    @default("Brasil") @db.VarChar(20)
+  cep           String?   @db.VarChar(8)
+
+  email1        String    @unique @db.VarChar(60)
+  email2        String?    @db.VarChar(60)
+  email3        String?    @db.VarChar(60)
+  wordkey       String    @default("Paravra-Secreta")
+  mobile_phone1 String    @unique @db.VarChar(13)
+  mobile_phone2 String?   @db.VarChar(13)
+  mobile_phone3 String?   @db.VarChar(13)
+
+  validated     Boolean   @default(false)  //Email validado?
+  validatedat   DateTime?                  //Data da validação
+  validationexpires DateTime?              //Data que expira o período de validação.
+
+  createdat     DateTime  @default(now())  //Automático
+  updatedat     DateTime  @updatedAt       //Automático
+  suspendedat   DateTime?                  //Automático
+  inactivatedat DateTime?                  //Automático
+
+  created       users[]    @relation("CreatedBy")
+  creatorId     Int?    // {OK} Auto-Relacionamento   
+  creator       users?     @relation("CreatedBy", fields: [creatorId], references: [idUser])
+  
+  updated       users[]    @relation("UpdatedBy")
+  updaterId     Int?    // {OK} Auto-Relacionamento   
+  updater       users?     @relation("UpdatedBy", fields: [updaterId], references: [idUser])
+  
+  suspended     users[]    @relation("SuspendedBy")
+  suspenderId   Int?    // {OK} Auto-Relacionamento   
+  suspender     users?    @relation("SuspendedBy", fields: [suspenderId], references: [idUser])
+
+  inactivate    users[]    @relation("InactivatedBy")
+  inactivatorId Int?    // {OK} Auto-Relacionamento   
+  inactivator   users?    @relation("InactivatedBy", fields: [inactivatorId], references: [idUser])
+
+  subordinate     users[]   @relation("ImmediateSuperior")
+  superiorId    Int?    // {OK} Auto-Relacionamento
+  superior   users?   @relation("ImmediateSuperior", fields: [superiorId], references: [idUser])
+
+  companycreated        organizations[] @relation("createdcompany")
+  companyupdated        organizations[] @relation("updatedcompany")
+
+  version                   Int? @default(0)
+  disabled      Boolean   @default(true) //Desativa o usuário como um todo
+  pendant       Boolean?  @default(false) //Usuário pode logar, mas se estiver suspenso, não poderá fazer nada.
+
+  @@index([cpf, name, email1, mobile_phone1])
+}
+
+model persons {
+  idPerson            Int @id @default(autoincrement())
+
+  cpf                 String    @unique @db.VarChar(11)
+  name                String    @default("Nome") @db.VarChar(100)
+  
+  createdat           DateTime  @default(now())
+  updatedat           DateTime  @updatedAt
+
+  version             Int? @default(0)
+  disabled            Boolean   @default(true) 
+  pendant             Boolean?  @default(false)
+
+  @@index([cpf, name])
+
+}
+
+model organizations {
+  idCompany           Int @id @default(autoincrement())
+
+  cnpj                String  @db.VarChar(14)                                                   //CNPJ 
+  statenumber         String? @db.VarChar(14) //Inscrição Estadual
+  municipalnumber     String? @db.VarChar(14)
+  duns                String? @db.VarChar(9)
+
+  companyname         String @default("Razão Social") @db.VarChar(100) //RAZÃO SOCIAL           //RAZAO_SOCIAL OU DSNOMERAZAO
+  businessname        String? @default("Nome Fantasia") @db.VarChar(100) //NOME FANTASIA        //NOME_FANTASIA
+  branchoffice        Boolean  @default(false) //FILIAL = TRUE/FALSE                            //MATRIZ FILIAL
+  isclient            Boolean  @default(false) //Padrão = false
+  idClient            String? @db.VarChar(20) //ID Cliente na VIVO
+
+  rfstatus            String?  @db.VarChar(10)   // Status Receita Federal                      //SITUACAO_CADASTRAL
+  daterfstatus        DateTime?                  // Data Status Receita Federal                 //DATA_SITUACAO_CADASTRAL
+  reasonrfstatus      String?  @db.VarChar(10)   // Motivo Status Receita Federal               //MOTIVO_SITUACAO_CADASTRAL
+  legalnature         String?  @db.VarChar(50)  // Natureza Jurídica                            //NATUREZA_JURIDICA
+  openingdate         DateTime?                  // Data de Abertura                            //DATA_INICIO_ATIVIDADES 
+  cnaecode            String?  @db.VarChar(10)  // CNAE                                         //CNAE_CODIGO ou CNAE
+  cnaecodesecondary   String?  @db.VarChar(255)  // CNAE Secundário                             //CNAE_FISCAL_SECUNDARIA
+  cnaedescription     String?  @db.VarChar(255)  // Descrição CNAE                              //CNAE_FISCAL ou DESCRICAO_CNAE
+  cnaedescriptionsecondary String?  @db.VarChar(255)  // Descrição CNAE Secundário              //CNAE_FISCAL_SECUNDARIA
+  qualifyresponsible  String?  @db.VarChar(50)   // Qualificação do Responsável                 //QUALIFICACAO_RESPONSAVEL
+  capital             Float?   @default(0)       // Capital Social (R$)                         //CAPITAL_SOCIAL
+  companysize         String?  @db.VarChar(50)   // Porte da Empresa                            //PORTE_EMPRESA
+  optionalsize        Boolean  @default(false)   // Opção do Simples?                           //OPCAO_SIMPLES
+  optiondatesize      DateTime?                  // Data da Opção do Simples                    //DATA_OPCAO_SIMPLES
+  excludedatesize     DateTime?                  // Data da Exclusão do Simples                 //DATA_EXCLUSAO_SIMPLES
+  optionmei           Boolean  @default(false)   // Opção do MEI?                               //OPCAO_MEI
+  specialsituation    String?  @db.VarChar(50)   // Situação Especial                           //SITUACAO_ESPECIAL
+  specialsituationdate DateTime?                  // Data da Situação Especial                  //DATA_SITUACAO_ESPECIAL
+  partners            String?  @db.VarChar(255)   // Sócios                                     //SOCIOS
+  
+  semaphore                       String?  @db.VarChar(10)   // Semáforo SERASA
+  serasamessage                   String?  @db.VarChar(10)   // Mensagem SERASA
+  
+  typestreet          String?   @db.VarChar(10)  // Tipo de Logradouro                          //TIPO_LOGRADOURO
+  address             String    @default("Rua A") @db.VarChar(100)                              //LOGRADOURO ou DSLOGRADOURO ou DSENDERECO
+  number              String?   @db.VarChar(20)                                                 //NUMERO ou DSNUMERO
+  complement          String?   @db.VarChar(50)                                                 //COMPLEMENTO ou DSCOMPLEMENTO    
+  neighborhood        String    @db.VarChar(50)                                                 //BAIRRO ou DSBAIRRO
+  city                String    @default("Rio de Janeiro") @db.VarChar(30)                      //MUNICIPIO ou DSCIDADE
+  state               String    @default("RJ") @db.VarChar(2)                                   //UF ou DSUF
+  country             String    @default("Brasil") @db.VarChar(20)                              //PAIS
+  cep                 String?   @db.VarChar(8)                                                  //CEP ou DSCEP
+  dstitle             String?   @db.VarChar(20)                                                 //DSTITLE
+
+  ddd1                String    @db.VarChar(2)                                                  //DDD1 ou DDD
+  phone1              String?   @db.VarChar(13)                                                 //TELEFONE1 ou NUMERO ou N_LINHAS ou TELEFONE
+  mobilephone1        String?   @db.VarChar(13)                                                 //TELEFONE1_CELULAR
+  ddd2                String?   @db.VarChar(2)                                                  //DDD2
+  phone2              String?   @db.VarChar(13)                                                 //TELEFONE2
+  mobilephone2        String?   @db.VarChar(13)                                                 //ELEFONE1_CELULAR
+  ddd_fax             String?   @db.VarChar(2)                                                  //DDD_FAX
+  fax                 String?   @db.VarChar(13)                                                 //FAX
+  email1              String?   @unique @db.VarChar(60)                                         //CORREIO_ELETRONICO
+
+  fidelity                        DateTime?     //Fidelity                                      //FIDELITY
+  startofcontract                 DateTime?     //Início do Contrato                            //INCIO_CONTRATO
+  instalationdate                 DateTime?     //Data de Instalação                            //DT_INSTALACAO
+  operatorname                    String?  @db.VarChar(50)  //Nome Operadora                    //NOMEOPERADORA ou OPERADORA
+  QT                              Int?  @default(0)         //QT                                //QT
+  numberlines                     Int?  @default(0)         //Quantidade de Linhas              //PARQUE
+  base                            Int?  @default(0)         //Base                              //BASE
+  doctype                         String?  @db.VarChar(10)  //Tipo de Documento                 //TIPODOC
+  status                          String?  @db.VarChar(20)  //Status                            //STATUS
+  datacreated_at                  DateTime?  //Automático                                       //CREATED_AT
+  dataupdated_at                  DateTime?  //Automático                                       //UPDATED_AT
+
+  blcoverage                      String?  @default("0") @db.VarChar(10)
+  actualactivelineoperator        String?  @default("0") @db.VarChar(10) //Linha Ativa Operadora Atual
+  linepropensitywithcompetition   String?  @default("0") @db.VarChar(10)//Propenção de Linhas com a Concorrência
+  monthbilling                    Float?     @default(0)      //Faturamento Mensal (R$)
+  mobilecredits                   Int?     @default(0)      //Credito Aparelhos (R$)
+  tower                           String?  @db.VarChar(10)  //Torre
+
+  businessarea                    String?  @db.VarChar(20)   //Ramo de atividade
+
+  relatedsorganizations           organizations[] @relation("relatedorganizations")
+  idrelatedorganizations          Int?  // Organizações relacionadas / AUTO-RELACIONAMENTO
+  relatedsorganization            organizations? @relation("relatedorganizations", fields: [idrelatedorganizations], references: [idCompany]) 
+
+  creatorId           Int 
+  creator             users     @relation("createdcompany", fields: [creatorId], references: [idUser]) // {OK}
+  updaterId           Int?
+  updater             users?     @relation("updatedcompany", fields: [updaterId], references: [idUser]) // {OK}
+  
+  createdat           DateTime  @default(now())  //Automático
+  updatedat           DateTime  @updatedAt       //Automático
+
+  version             Int? @default(0)
+  disabled            Boolean   @default(true) 
+  pendant             Boolean?  @default(false)
+
+  @@index([cnpj, companyname, email1, phone1])
+}
