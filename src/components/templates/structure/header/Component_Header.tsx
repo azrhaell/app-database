@@ -1,8 +1,8 @@
 const Component_Header = () => {
     return (
-      <header>
+      <header className="flex flex-row justify-center w-screen gap-2 bg-blue-600">
 
-        <div className="flex flex-col gap-2">
+        <div>
 
           <p>DataBase</p>
 

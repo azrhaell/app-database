@@ -1,6 +1,6 @@
 const Component_Footer = () => {
     return (
-      <footer>
+      <footer className="flex flex-row gap-2 w-screen bg-green-600">
 
           <div>
 

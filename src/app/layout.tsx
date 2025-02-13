@@ -28,8 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`flex flex-col w-full h-max`}
-      >
+      <body className={`flex flex-col w-screen h-screen bg-gray-950`}>
       
         <Component_Header />      
 

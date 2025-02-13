@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-export default function UploadPage() {
+export default function UploadPageExcel() {
   const { register, handleSubmit, reset } = useForm<FormData>();
   const [progress, setProgress] = useState(0);
   const [jsonData, setJsonData] = useState<Record<string, unknown> | null>(null);
@@ -16,9 +16,6 @@ export default function UploadPage() {
   interface UploadResponse {
     count: number; // Adiciona a contagem de registros
     data: Record<string, unknown>;
-    
-    operadoraCount: Record<string, number>; // Adiciona a contagem de operadoras
-    prefixCount: Record<string, number>; // Adiciona a contagem de prefixos
   }
 
   const onSubmit = async (data: FormData) => {
@@ -34,7 +31,7 @@ export default function UploadPage() {
     formData.append("file", data.file[0]);
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/upload", true);
+    xhr.open("POST", "/api/uploadExcel", true);
 
     xhr.upload.onprogress = (event: ProgressEvent) => {
       if (event.lengthComputable) {
@@ -47,10 +44,7 @@ export default function UploadPage() {
       if (xhr.status === 200) {
         const response: UploadResponse = JSON.parse(xhr.responseText);
         setJsonData(response.data);
-        setMessage(`Arquivo enviado com sucesso! Total de registros: ${response.count - 1} \n
-          Operadoras: ${JSON.stringify(response.operadoraCount)} \n
-          Prefixos: ${JSON.stringify(response.prefixCount)}`);
-
+        setMessage(`Arquivo enviado com sucesso! Total de registros: ${response.count - 1}`);
         reset();
       } else {
         setMessage(`Erro no upload! ${xhr.responseText}`);

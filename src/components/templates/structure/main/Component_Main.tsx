@@ -1,8 +1,10 @@
 const Component_Main = ({children,}: Readonly<{children: React.ReactNode;}>) => {
     return (
       <>
-        <main className="flex flex-row px-1 w-screen">
+        <main className="flex flex-row w-screen">
 
+            {/*Navbar*/}
+            
             {children}
             
         </main>

@@ -1,29 +1,22 @@
 import fs from "fs";
 import path from "path";
-import ExcelJS from "exceljs";
+import XLSX from "xlsx";
 import { NextApiRequest, NextApiResponse } from "next";
 import { IncomingForm, Fields, Files } from "formidable";
 
 export const config = {
-  api: {
-    bodyParser: false, // Importante para permitir upload de arquivos
-  },
+  api: { bodyParser: false },
 };
 
-interface RowData {
-  [key: string]: string | number | boolean | null;
-}
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido." });
   }
 
   const form = new IncomingForm({
-    maxFileSize: 2000 * 1024 * 1024, // Aumenta o limite para 1GB
-    maxTotalFileSize: 2000 * 1024 * 1024, // Limite total de 2GB
-    multiples: false, // Apenas 1 arquivo por vez
-    uploadDir: "./public/uploads", // Define um diretório temporário
+    maxFileSize: 2 * 1024 * 1024 * 1024, // Até 2GB
+    multiples: false,
+    uploadDir: "./public/uploads",
     keepExtensions: true,
   });
 
@@ -36,62 +29,97 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const filePath = files.file[0].filepath;
-      const workbook = new ExcelJS.Workbook();
-      const stream = fs.createReadStream(filePath);
-      await workbook.xlsx.read(stream);
+      const fileName = path.basename(filePath, path.extname(filePath)); // Obtém o nome do arquivo sem a extensão
+      const jsonPath = path.join(process.cwd(), `public/uploads/${fileName}.json`);
 
-      const worksheet = workbook.worksheets[0];
+      console.log("📥 Lendo arquivo Excel...");
 
-      const jsonPath = path.join(process.cwd(), "public/uploads/data.json");
-      const writeStream = fs.createWriteStream(jsonPath, { flags: "w" });
+      if (!fs.existsSync(filePath)) {
+        throw new Error("Arquivo não encontrado no servidor!");
+      }
 
-      writeStream.write("[\n");
+      const buffer = await fs.promises.readFile(filePath);
 
-      let firstRow = true;
-      let rowCount = 0;
-      const maxRows = 5_000_000; // Limite máximo de registros a processar
+      console.log("✅ Arquivo carregado na memória, tentando processar...");
 
-      //worksheet.eachRow((row: ExcelJS.Row) => {
-        for (let i = 1; i <= worksheet.rowCount; i++) {
-          if (rowCount >= maxRows) break;
-  
-          const row = worksheet.getRow(i);
-          const rowData: RowData = {};
-  
-          row.eachCell((cell, colNumber) => {
-            const cellValue = cell.value;
-            if (cellValue instanceof Date) {
-              rowData[`Campo${colNumber}`] = cellValue.toISOString();
-            } else if (typeof cellValue === 'object' && cellValue !== null) {
-              rowData[`Campo${colNumber}`] = JSON.stringify(cellValue);
-            } else {
-              rowData[`Campo${colNumber}`] = cellValue ?? null;
-            }
-          });
-  
-          if (!firstRow) {
-            writeStream.write(",\n");
-          }
-          writeStream.write(JSON.stringify(rowData));
-          firstRow = false;
-          rowCount++;
-          
-          if (rowCount % 100_000 === 0) {
-            console.log(`Processados: ${rowCount} registros...`);
+      const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true, dense: true });
+
+      console.log(`📊 Planilhas encontradas: ${workbook.SheetNames.join(", ")}`);
+
+      if (workbook.SheetNames.length === 0) {
+        throw new Error("Nenhuma planilha encontrada no arquivo!");
+      }
+
+      let sheetName = workbook.SheetNames[0]; // Pega a primeira planilha
+      let sheet = workbook.Sheets[sheetName];
+
+      // 🔹 Se a planilha principal não for encontrada ou estiver vazia, procurar outra
+      if (!sheet || Object.keys(sheet).length === 0) {
+        console.warn(`⚠️ Planilha "${sheetName}" vazia. Procurando outra...`);
+        for (const name of workbook.SheetNames) {
+          const tempSheet = workbook.Sheets[name];
+          if (tempSheet && Object.keys(tempSheet).length > 0) {
+            sheetName = name;
+            sheet = tempSheet;
+            console.log(`✅ Planilha válida encontrada: ${sheetName}`);
+            break;
           }
         }
-
-        writeStream.write("\n]");
-        writeStream.end();
-  
-        res.status(200).json({
-          message: "Upload concluído!",
-          count: rowCount,
-        });
-      } catch (error) {
-        console.error(error);
-        const err = error as Error;
-        res.status(500).json({ error: "Erro ao processar arquivo: " + err.message });
       }
-    });
+
+      if (!sheet || Object.keys(sheet).length === 0) {
+        throw new Error("Nenhuma planilha válida encontrada no arquivo!");
+      }
+
+      console.log(`✅ Processando planilha: ${sheetName}`);
+
+      // 🔹 Depuração: Mostrar os primeiros 5 registros
+      const testData = XLSX.utils.sheet_to_json(sheet, { raw: false, range: 0, header: 1, sheetRows: 5 });
+      console.log("🔎 Exemplo de dados extraídos:", testData);
+
+      // 🔹 Criando o stream para salvar JSON
+      const writeStream = fs.createWriteStream(jsonPath, { flags: "w" });
+      writeStream.write("[\n");
+
+      // 🔹 Lendo em chunks para evitar travamento com arquivos grandes
+      let rowCount = 0;
+      interface ExcelRow {
+        [key: string]: string | number | boolean | null;
+      }
+
+      interface StreamResponse {
+        message: string;
+        count: number;
+      }
+
+      interface StreamError {
+        error: string;
+      }
+
+            XLSX.stream.to_json(sheet, { raw: false, defval: null })
+              .on("data", (row: ExcelRow) => {
+                if (rowCount > 0) writeStream.write(",\n");
+                writeStream.write(JSON.stringify(row));
+                rowCount++;
+
+                if (rowCount % 100_000 === 0) {
+                  console.log(`✅ Processados: ${rowCount} registros...`);
+                }
+              })
+              .on("end", () => {
+                writeStream.write("\n]");
+                writeStream.end();
+                console.log(`✅ Processamento finalizado: ${rowCount} registros salvos.`);
+                res.status(200).json({ message: "Upload concluído!", count: rowCount } as StreamResponse);
+              })
+              .on("error", (error: Error) => {
+                console.error("❌ Erro ao processar planilha:", error);
+                res.status(500).json({ error: "Erro ao processar arquivo: " + error.message } as StreamError);
+              });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Erro ao processar arquivo: " + (error as Error).message });
+    }
+  });
 }

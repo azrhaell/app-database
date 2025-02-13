@@ -14,6 +14,25 @@ interface RowData {
   [key: string]: string | number | boolean | null;
 }
 
+// Função para detectar automaticamente o delimitador correto
+const detectDelimiter = (filePath: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(filePath, { encoding: "utf8" });
+
+    stream.once("data", (chunk) => {
+      const firstLine = chunk.toString('utf8').split("\n")[0]; // Pega a primeira linha do arquivo
+      if (firstLine.includes(";")) {
+        resolve(";");
+      } else {
+        resolve(",");
+      }
+      stream.destroy();
+    });
+
+    stream.on("error", (error) => reject(error));
+  });
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido." });
@@ -36,17 +55,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const filePath = files.file[0].filepath;
-      const jsonPath = path.join(process.cwd(), "public/uploads/data.json");
+      const fileName = path.basename(filePath, path.extname(filePath)); // Obtém o nome do arquivo sem a extensão
+      const jsonPath = path.join(process.cwd(), `public/uploads/${fileName}.json`);
+      
       const writeStream = fs.createWriteStream(jsonPath, { flags: "w" });
 
       writeStream.write("[\n");
 
       let firstRow = true;
       let rowCount = 0;
-      const maxRows = 5_000_000; // Limite máximo de registros a processar
+      const maxRows = 50_000_000; // Limite máximo de registros a processar
+      const operadoraCount: Record<string, number> = {};
+      const prefixCount: Record<string, number> = {};
+
+      // Detecta o delimitador antes de processar o CSV
+      const delimiter = await detectDelimiter(filePath);
 
       fs.createReadStream(filePath)
-        .pipe(csv())
+        .pipe(csv({ separator: delimiter })) // Usa o delimitador detectado
         .on("data", (row: RowData) => {
           if (rowCount >= maxRows) return;
 
@@ -56,6 +82,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           writeStream.write(JSON.stringify(row));
           firstRow = false;
           rowCount++;
+
+          if (row.operadora) {
+            operadoraCount[row.operadora as string] = (operadoraCount[row.operadora as string] || 0) + 1;
+          }
+
+          if (row.number && typeof row.number === "string" && row.number.length >= 2) {
+            const prefix = row.number.substring(0, 2);
+            prefixCount[prefix] = (prefixCount[prefix] || 0) + 1;
+          }
 
           if (rowCount % 100_000 === 0) {
             console.log(`Processados: ${rowCount} registros...`);
@@ -68,6 +103,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           res.status(200).json({
             message: "Upload concluído!",
             count: rowCount,
+            operadoraCount,
+            prefixCount,
           });
         })
         .on("error", (error) => {

@@ -1,14 +1,14 @@
-import DownloadLink from "@/components/templates/forms/telein/Form_Telein";
-import Form_UploadExcel from "@/components/templates/forms/upload/uploadform/Form_UploadExcel";
+//import DownloadLink from "@/components/templates/forms/telein/Form_Telein";
+//import Form_UploadExcel from "@/components/templates/forms/upload/uploadformexcel/Form_UploadExcel";
 
 export default function Home() {
   return (
-    <div className="flex flex-col h-screen w-screen justify-center items-center
+    <div className="flex flex-col justify-center w-11/12 h-screen items-center
                    bg-gray-600">
       
-      <Form_UploadExcel />
-      {/*<DownloadLink />*/}
+      <h1>HOME</h1>
     
     </div>
   );
 }
+
