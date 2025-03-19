@@ -12,27 +12,36 @@ const NavBar = () => {
                             Home
                         </Link>
                     </li>
-                    <li>
-                        <Link href="/list" className="hover:underline">
-                            Lista
+                    <li className="hover:bg-green-400">
+                        <Link href="/upload/selectmainbdpage" className="hover:underline">
+                            Importar Arquivos p/ BD Principal
                         </Link>
                     </li>
-                    <li>
-                        <Link href="/upload/fileexcel" className="hover:underline">
-                            Upload Excel
+                    <li className="hover:bg-blue-400">
+                        <Link href="/upload/selectbdpage" className="hover:underline">
+                            Importar Arquivos p/ Atualização
                         </Link>
                     </li>
-                    <li>
-                        <Link href="/upload/filecsv" className="hover:underline">
-                            Upload CSV
+                    <li className="hover:bg-yellow-400">
+                        <Link href="/listinput" className="hover:underline">
+                            INPUTAR Registros BD
                         </Link>
                     </li>
-                    <li>
+                    <li className="hover:bg-gray-400">
+                        <Link href="/statistics" className="hover:underline">
+                            Estatísticas
+                        </Link>
+                    </li>
+                    <li className="hover:bg-red-400">
                         <Link href="/download/filetelein" className="hover:underline">
                             Download Tele IN
                         </Link>
                     </li>
-                    
+                    <li className="hover:bg-gray-400">
+                        <Link href="/configs" className="hover:underline">
+                            Configurações
+                        </Link>
+                    </li>
                 </ul>
 
             </nav>

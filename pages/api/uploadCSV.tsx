@@ -3,29 +3,25 @@ import path from "path";
 import { NextApiRequest, NextApiResponse } from "next";
 import { IncomingForm, Fields, Files } from "formidable";
 import csv from "csv-parser";
+import prisma from "@/app/api/database/dbclient";
 
 export const config = {
   api: {
-    bodyParser: false, // Importante para permitir upload de arquivos
+    bodyParser: false,
   },
 };
 
 interface RowData {
-  [key: string]: string | number | boolean | null;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
-// Função para detectar automaticamente o delimitador correto
 const detectDelimiter = (filePath: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const stream = fs.createReadStream(filePath, { encoding: "utf8" });
 
     stream.once("data", (chunk) => {
-      const firstLine = chunk.toString('utf8').split("\n")[0]; // Pega a primeira linha do arquivo
-      if (firstLine.includes(";")) {
-        resolve(";");
-      } else {
-        resolve(",");
-      }
+      const firstLine = chunk.toString("utf8").split("\n")[0];
+      resolve(firstLine.includes(";") ? ";" : ",");
       stream.destroy();
     });
 
@@ -39,10 +35,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const form = new IncomingForm({
-    maxFileSize: 2000 * 1024 * 1024, // Aumenta o limite para 2GB
-    maxTotalFileSize: 2000 * 1024 * 1024, // Limite total de 2GB
-    multiples: false, // Apenas 1 arquivo por vez
-    uploadDir: "./public/uploads", // Define um diretório temporário
+    maxFileSize: 2000 * 1024 * 1024,
+    maxTotalFileSize: 2000 * 1024 * 1024,
+    multiples: false,
+    uploadDir: "./public/uploads",
     keepExtensions: true,
   });
 
@@ -54,57 +50,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: "Arquivo não encontrado" });
       }
 
-      const filePath = files.file[0].filepath;
-      const fileName = path.basename(filePath, path.extname(filePath)); // Obtém o nome do arquivo sem a extensão
+      const file = files.file[0];
+      const filePath = file.filepath;
+      const fileName = path.basename(filePath, path.extname(filePath));
+      const fileExtension = path.extname(file.originalFilename || "").toLowerCase();
       const jsonPath = path.join(process.cwd(), `public/uploads/${fileName}.json`);
-      
-      const writeStream = fs.createWriteStream(jsonPath, { flags: "w" });
 
+      const writeStream = fs.createWriteStream(jsonPath, { flags: "w" });
       writeStream.write("[\n");
 
       let firstRow = true;
       let rowCount = 0;
-      const maxRows = 50_000_000; // Limite máximo de registros a processar
-      const operadoraCount: Record<string, number> = {};
-      const prefixCount: Record<string, number> = {};
-
-      // Detecta o delimitador antes de processar o CSV
+      const maxRows = 50_000_000;
       const delimiter = await detectDelimiter(filePath);
 
       fs.createReadStream(filePath)
-        .pipe(csv({ separator: delimiter })) // Usa o delimitador detectado
+        .pipe(csv({ separator: delimiter }))
         .on("data", (row: RowData) => {
           if (rowCount >= maxRows) return;
 
-          if (!firstRow) {
-            writeStream.write(",\n");
-          }
-          writeStream.write(JSON.stringify(row));
-          firstRow = false;
-          rowCount++;
-
-          if (row.operadora) {
-            operadoraCount[row.operadora as string] = (operadoraCount[row.operadora as string] || 0) + 1;
-          }
-
-          if (row.number && typeof row.number === "string" && row.number.length >= 2) {
-            const prefix = row.number.substring(0, 2);
-            prefixCount[prefix] = (prefixCount[prefix] || 0) + 1;
+          if (Object.keys(row).length > 0) { // Only write if the row has at least one key
+            if (!firstRow) {
+              writeStream.write(",\n");
+            }
+            writeStream.write(JSON.stringify(row));
+            firstRow = false;
+            rowCount++;
           }
 
           if (rowCount % 100_000 === 0) {
             console.log(`Processados: ${rowCount} registros...`);
           }
         })
-        .on("end", () => {
+        .on("end", async () => {
           writeStream.write("\n]");
           writeStream.end();
+
+          await prisma.listfiles.create({
+            data: {
+              name: fileName,
+              qtdregisters: rowCount,
+              path: jsonPath,
+              extension: fileExtension,
+              origin: "MAIN",
+            },
+          });
 
           res.status(200).json({
             message: "Upload concluído!",
             count: rowCount,
-            operadoraCount,
-            prefixCount,
+            fileName,
+            filePath: jsonPath,
+            extension: fileExtension,
+            origin: "MAIN",
           });
         })
         .on("error", (error) => {
@@ -113,8 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
     } catch (error) {
       console.error(error);
-      const err = error as Error;
-      res.status(500).json({ error: "Erro ao processar arquivo: " + err.message });
+      res.status(500).json({ error: "Erro ao processar arquivo: " + (error as Error).message });
     }
   });
 }

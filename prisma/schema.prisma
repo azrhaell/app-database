@@ -19,7 +19,7 @@ model tenants {
 model users {
   idUser            Int             @id @default(autoincrement())
   cpf               String          @unique @db.VarChar(11)
-  name              String          @default("Nome") @db.VarChar(50)
+  name              String          @default("Nome") @db.VarChar(50) @unique
   surname           String?         @db.VarChar(50)
   completename      String?         @db.VarChar(150)
   password          String          @db.VarChar(64)
@@ -92,8 +92,8 @@ model organizations {
   statenumber                   String?         @db.VarChar(14)
   municipalnumber               String?         @db.VarChar(14)
   duns                          String?         @db.VarChar(9)
-  companyname                   String?          @default("Razão Social") @db.VarChar(100)
-  businessname                  String?         @default("Nome Fantasia") @db.VarChar(100)
+  companyname                   String?          @default("Razão Social") @db.VarChar(255)
+  businessname                  String?         @default("Nome Fantasia") @db.VarChar(255)
   branchoffice                  Boolean?         @default(false)
   isclient                      Boolean?         @default(false)
   idClient                      String?         @db.VarChar(20)
@@ -146,8 +146,8 @@ model organizations {
   excludedatesize               DateTime?
   fax                           String?         @db.VarChar(13)
   instalationdate               DateTime?
-  legalnature                   String?         @db.VarChar(50)
-  mobilephone1                  String?         @db.VarChar(13)
+  legalnature                   String?         @db.VarChar(100)
+  mobilephone1                  String?         @db.VarChar(13) @unique
   mobilephone2                  String?         @db.VarChar(13)
   operatorname                  String?         @db.VarChar(50)
   optionalsize                  Boolean?         @default(false)
@@ -169,4 +169,82 @@ model organizations {
   updater                       users?          @relation("updatedcompany", fields: [updaterId], references: [idUser])
 
   @@index([cnpj, companyname, email1, phone1])
+}
+
+model listfiles {
+  idFile  Int      @id @default(autoincrement())
+  name    String   @db.VarChar(255)
+  path    String?   @db.VarChar(255)
+  qtdregisters Int? @default(0)
+  extension    String?   @default("") @db.VarChar(10)
+  origin      String?   @default("") @db.VarChar(10)
+  created DateTime @default(now())
+  updated DateTime? @updatedAt
+  sincronized Boolean  @default(false)
+  version     Int?     @default(0)
+}
+
+model operators {
+  idOperator   Int      @id @default(autoincrement())
+  name         String   @default("Nome") @db.VarChar(50) @unique
+  description  String?  @db.VarChar(255)
+  codeoperador String?  @db.VarChar(2)
+  codeantel    String?  @db.VarChar(2)
+
+  createdat    DateTime @default(now())
+  updatedat    DateTime @updatedAt
+  disabled     Boolean  @default(true)
+  pendant      Boolean? @default(false)
+
+  version      Int?     @default(0)
+}
+
+model codeddd {
+  idDDD        Int      @id @default(autoincrement())
+  ddd          String   @default("00") @db.VarChar(2) @unique
+
+  createdat    DateTime @default(now())
+  updatedat    DateTime @updatedAt
+  disabled     Boolean  @default(true)
+  pendant      Boolean? @default(false)
+
+  version      Int?     @default(0)
+}
+
+model legalnatures {
+  idLegalNature  Int      @id @default(autoincrement())
+  name           String   @default("Nome") @db.VarChar(100) @unique
+  description    String?  @db.VarChar(255)
+
+  createdat      DateTime @default(now())
+  updatedat      DateTime @updatedAt
+  disabled       Boolean  @default(true)
+  pendant        Boolean? @default(false)
+
+  version        Int?     @default(0)
+}
+
+model states {
+  idState     Int      @id @default(autoincrement())
+  name        String   @default("XX") @db.VarChar(2) @unique
+
+  createdat   DateTime @default(now())
+  updatedat   DateTime @updatedAt
+  disabled    Boolean  @default(true)
+  pendant     Boolean? @default(false)
+
+  version     Int?     @default(0)
+}
+
+model companysizes {
+  idCompanySize  Int      @id @default(autoincrement())
+  name           String   @default("Nome") @db.VarChar(50) @unique
+  description    String?  @db.VarChar(255)
+
+  createdat      DateTime @default(now())
+  updatedat      DateTime @updatedAt
+  disabled       Boolean  @default(true)
+  pendant        Boolean? @default(false)
+
+  version        Int?     @default(0)
 }

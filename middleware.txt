@@ -1,0 +1,19 @@
+import { NextResponse } from "next/server";
+
+export function middleware(req: Request) {
+  const contentLength = req.headers.get("content-length");
+  const MAX_SIZE = 2000 * 1024 * 1024; //2000MB
+
+  if (contentLength && parseInt(contentLength) > MAX_SIZE) {
+    return NextResponse.json(
+      { error: "Arquivo muito grande. O limite é 2000MB." },
+      { status: 413 }
+    );
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: "/api/upload/:path*", // Aplica o middleware apenas às rotas de upload
+};

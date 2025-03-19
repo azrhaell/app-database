@@ -1,0 +1,24 @@
+import { NextResponse } from 'next/server';
+import prisma from '@/app/api/database/dbclient';
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const state = searchParams.get('state');
+
+  if (!state) {
+    return NextResponse.json({ error: 'Estado não fornecido' }, { status: 400 });
+  }
+
+  try {
+    const cities = await prisma.organizations.findMany({
+      where: { state },
+      select: { city: true },
+      distinct: ['city'],
+    });
+
+    return NextResponse.json(cities.map(c => c.city).filter(Boolean));
+  } catch (error) {
+    console.error('Erro ao buscar cidades:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+  }
+}

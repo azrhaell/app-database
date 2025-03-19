@@ -1,0 +1,75 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+
+interface CitySelectorProps {
+  states: string[]; // Lista de estados disponíveis
+}
+
+interface City {
+  name: string;
+  checked: boolean;
+}
+
+export default function Component_CitySelector({ states }: CitySelectorProps) {
+  const { control, watch } = useForm();
+  const selectedState = watch('state');
+  const [cities, setCities] = useState<City[]>([]);
+
+  useEffect(() => {
+    async function fetchCities() {
+      if (selectedState) {
+        const response = await fetch(`/api/stats/relative/listCities/listcityselector?state=${selectedState}`);
+        const data: string[] = await response.json();
+        setCities(data.map(city => ({ name: city, checked: false })));
+      } else {
+        setCities([]);
+      }
+    }
+    fetchCities();
+  }, [selectedState]);
+
+  const handleCheckboxChange = (index: number) => {
+    setCities(prevCities => {
+      const newCities = [...prevCities];
+      newCities[index].checked = !newCities[index].checked;
+      return newCities;
+    });
+  };
+
+  return (
+    <div>
+      <Controller
+        name="state"
+        control={control}
+        defaultValue=""
+        render={({ field }) => (
+          <select {...field}>
+            <option value="">Selecione um estado</option>
+            {states.map(state => (
+              <option key={state} value={state}>{state}</option>
+            ))}
+          </select>
+        )}
+      />
+
+      {cities.length > 0 && (
+        <ul>
+          {cities.map((city, index) => (
+            <li key={city.name}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={city.checked}
+                  onChange={() => handleCheckboxChange(index)}
+                />
+                {city.name}
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
