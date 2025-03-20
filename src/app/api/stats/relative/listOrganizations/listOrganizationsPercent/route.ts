@@ -9,10 +9,10 @@ interface RequestBody {
   endDate?: string;
   operatorname?: string[];
   ddd?: string[];
-  companySize?: string[];
-  legalNature?: string[];
-  mei: string;
-  simple: string;
+  companysize?: string[];
+  legalnature?: string[];
+  optionalsize: string;
+  optionmei: string;
   rfstatus?: string;
   state?: string[];
 }
@@ -28,14 +28,14 @@ export async function POST(request: NextRequest) {
       percentage = 1,
       minLines = 1,
       maxLines = 100,
-      startDate,
-      endDate,
+      startDate = null,
+      endDate = null,
       operatorname,
       ddd,
-      companySize,
-      legalNature,
-      mei,
-      simple,
+      companysize,
+      legalnature,
+      optionalsize,
+      optionmei,
       rfstatus,
       state
     } = body;
@@ -64,6 +64,8 @@ export async function POST(request: NextRequest) {
     const whereClauseFinal: any = {};
 
     if (startDate || endDate) {
+      console.log("Continua considerando a data quando vazia")
+
       whereClause.startofcontract = {};
       whereClauseFinal.startofcontract = {};
 
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
           const startDateObj = new Date(`${startDate}T00:00:00.000Z`);
           console.log(`Data de início formatada: ${startDateObj.toISOString()}`);
           whereClause.startofcontract.gte = startDateObj;
-          whereClauseFinal.startofcontract.gte = whereClause.startofcontract.gte;
+          whereClauseFinal.startofcontract.gte = startDateObj;
         } catch (error: any) {
           console.error("Erro ao formatar data de início:", error);
           return NextResponse.json({ message: "Data de início inválida", error: error.message }, { status: 400 });
@@ -84,11 +86,22 @@ export async function POST(request: NextRequest) {
           const endDateObj = new Date(`${endDate}T23:59:59.999Z`);
           console.log(`Data de fim formatada: ${endDateObj.toISOString()}`);
           whereClause.startofcontract.lte = endDateObj;
-          whereClauseFinal.startofcontract.lte = whereClause.startofcontract.lte;
+          whereClauseFinal.startofcontract.lte = endDateObj;
         } catch (error: any) {
           console.error("Erro ao formatar data de fim:", error);
           return NextResponse.json({ message: "Data de fim inválida", error: error.message }, { status: 400 });
         }
+      }
+
+      // Se não houver filtros válidos de data, remove a chave
+      if ((Object.keys(whereClause.startofcontract).length === 0) || (startDate == null) || (endDate == null) || (startDate == '') || (endDate == '')) {
+        console.log("Removendo chave startofcontract");
+        delete whereClause.startofcontract;
+      }
+      
+      if ((Object.keys(whereClauseFinal.startofcontract).length === 0) || (startDate == null) || (endDate == null) || (startDate == '') || (endDate == '')) {
+        console.log("Removendo chave startofcontract");
+        delete whereClauseFinal.startofcontract;
       }
     }
 
@@ -102,37 +115,27 @@ export async function POST(request: NextRequest) {
           }
         }));
     }
-    
-    /*if (companySize && companySize.length > 0) {
-      if (!(companySize[0] == '' && companySize.length == 1)) {
-        whereClause.companysize = { in: companySize };
-      }
-    }*/
 
-    if (Array.isArray(companySize) && companySize.length > 0 && !(companySize.length === 1 && companySize[0] === '')) {
-      whereClause.companySize = { in: companySize.filter(s => typeof s === "string" && s.trim() !== "") };
+    if (Array.isArray(companysize) && companysize.length > 0 && companysize.some(s => s.trim() !== "")) {
+      const list_companysize = { in: companysize.filter(s => typeof s === "string" && s.trim() !== ""), not: null };
+      whereClause.companysize = list_companysize
     }
 
-    /*if (legalNature && legalNature.length > 0) {
-      if (!(legalNature[0] == '' && legalNature.length == 1)) {
-        whereClause.legalnature = { in: legalNature };
-      }
-    }*/
-
-    if (Array.isArray(legalNature) && legalNature.length > 0 && !(legalNature.length === 1 && legalNature[0] === '')) {
-      whereClause.legalNature = { in: legalNature.filter(s => typeof s === "string" && s.trim() !== "") };
+    if (Array.isArray(legalnature) && legalnature.length > 0 && legalnature.some(s => s.trim() !== "")) {
+      const list_legalnature = { in: legalnature.filter(s => typeof s === "string" && s.trim() !== ""), not: null };
+      whereClause.legalnature = list_legalnature
     }
 
-    if (mei === "SIM") {
+    if (optionmei && optionmei.toUpperCase() === "SIM") {
       whereClause.optionmei = true;
     } else {
       delete whereClause.optionmei;
     }
 
-    if (simple == 'SIM') {
+    if (optionalsize && optionalsize.toUpperCase() === "SIM") {
       whereClause.optionalsize = true;
     } else {
-      delete whereClause.optionalsize
+      delete whereClause.optionalsize;
     }
 
     if (rfstatus == 'ATIVA') {
@@ -161,33 +164,76 @@ export async function POST(request: NextRequest) {
 
     console.log("WhereClause final antes da consulta:", JSON.stringify(prismaQuery, null, 2));
     console.log("Dados considerados na Primeira Consulta: ", whereClause);
+    console.log("Consulta Prisma:", JSON.stringify(whereClause, null, 2));
 
-    if (Object.keys(whereClause).length === 0) {
-      whereClause.startofcontract = {
-        gte: new Date("2001-01-01T00:00:00.000Z"),
-        lte: new Date("2025-12-31T23:59:59.999Z"),
-      };
+    const allOrganizations: any = [];
+    const batchSize = 30000;  // Quantidade de registros por lote
+    let page = 0;
+
+    if (Object.keys(whereClause).length > 0) {
+      console.log("WHERE CLAUSE NÃO VAZIO");
+
+      while (true) {
+        const batchResult = await prisma.organizations.findMany({
+          where: whereClause,
+          take: batchSize,
+          skip: page * batchSize,
+          select: {
+            idCompany: true,
+            cnpj: true,
+            companyname: true,
+            operatorname: true,
+            mobilephone1: true,
+            startofcontract: true,
+            legalnature: true,
+            companysize: true,
+            optionalsize: true,
+            optionmei: true,
+            rfstatus: true,
+            city: true,
+            state: true,
+            updatedat: true,
+          },
+        });
+
+        if (batchResult.length === 0) break;
+
+        allOrganizations.push(...batchResult);
+        page++;
+      }
     }
-    
-    const allOrganizations = await prisma.organizations.findMany({
-      where: whereClause,
-      select: {
-        idCompany: true,
-        cnpj: true,
-        companyname: true,
-        operatorname: true,
-        mobilephone1: true,
-        startofcontract: true,
-        legalnature: true,
-        companysize: true,
-        optionalsize: true,
-        optionmei: true,
-        rfstatus: true,
-        city: true,
-        state: true,
-        updatedat: true,
-      },
-    });
+    else {
+      console.log("WHERE CLAUSE VAZIO");
+
+      while (true) {
+        const batchResult = await prisma.organizations.findMany({
+          take: batchSize,
+          skip: page * batchSize,
+          select: {
+            idCompany: true,
+            cnpj: true,
+            companyname: true,
+            operatorname: true,
+            mobilephone1: true,
+            startofcontract: true,
+            legalnature: true,
+            companysize: true,
+            optionalsize: true,
+            optionmei: true,
+            rfstatus: true,
+            city: true,
+            state: true,
+            updatedat: true,
+          },
+        });
+
+        if (batchResult.length === 0) break;
+
+        allOrganizations.push(...batchResult);
+        page++;
+      }
+    }
+
 
     console.log("PRIMEIRA CONSULTA FEITA ...");
 
@@ -203,6 +249,7 @@ export async function POST(request: NextRequest) {
     console.log("VERIFICAR OPERATORNAME ...");
     if ((operatorname && operatorname.length > 0) && (!(operatorname[0] == '' && operatorname.length == 1))) {
       console.log("OPERATORNAME VÁLIDO");
+      console.log("Total de allOrganizations encontrados:", allOrganizations.length);  
       for (const org of allOrganizations) {
         if (!org.cnpj) {
           console.log(`CNPJ INVÁLIDO: ${org.cnpj}`);
@@ -221,11 +268,12 @@ export async function POST(request: NextRequest) {
           }
         }
       }
-
+      console.log("Total de allCnpjCount encontrados:", Object.keys(allCnpjCount).length);
+      console.log("Total de operatorCnpjCount encontrados:", Object.keys(operatorCnpjCount).length);
       resultCnpj = Object.keys(operatorCnpjCount).filter(cnpj =>
         (cnpj && (((operatorCnpjCount[cnpj] / allCnpjCount[cnpj]) * 100) >= percentageValue) && (allCnpjCount[cnpj] >= minLinesValue) && (allCnpjCount[cnpj] <= maxLinesValue))
       );
-
+      console.log("Total de resultCnpj encontrados:", resultCnpj.length);
     } else {
       console.log("OPERATORNAME VAZIO");
 
@@ -247,20 +295,20 @@ export async function POST(request: NextRequest) {
 
     if (!resultCnpj.length) {
       return NextResponse.json({ message: "Nenhum CNPJ atende aos critérios definidos" }, { status: 404 });
+    } else {
+      console.log("Total de CNPJs encontrados:", resultCnpj.length);
     }
 
     console.log("Dados considerados na Segunda Consulta: ", whereClauseFinal);
-    const batchSize = 5000;
+    const finalBatchSize = 5000;
     const resultDetails = [];
 
-    for (let i = 0; i < resultCnpj.length; i += batchSize) {
-      const batchCnpj = resultCnpj.slice(i, i + batchSize);
-      //whereClauseFinal.cnpj = { in: batchCnpj };
+    for (let i = 0; i < resultCnpj.length; i += finalBatchSize) {
+      const batchCnpj = resultCnpj.slice(i, i + finalBatchSize);
 
       const whereBatch = { ...whereClauseFinal, cnpj: { in: batchCnpj } }; //////
 
       const batchResult = await prisma.organizations.findMany({
-        //where: whereClauseFinal,
         where: whereBatch,
         select: {
           cnpj: true,

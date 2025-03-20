@@ -20,7 +20,7 @@ interface FormInputs {
   legalnature?: string[];
   companysize?: string[];
   optionalsize?: string;
-  optionsize?: string;
+  optionmei?: string;
 }
 
 interface OrganizationDetails {
@@ -421,7 +421,7 @@ export default function Component_ListPercentOrganization() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700" defaultValue="">Opção MEI</label>
-              <select {...register('optionsize')} className="border p-2 rounded" >
+              <select {...register('optionmei')} className="border p-2 rounded" >
                 <option value="">Qualquer opção</option>
                 <option value="SIM">Sim</option>
                 <option value="NÃO">Não</option>

@@ -35,7 +35,7 @@ export default function UploadPageCSV() {
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/uploadCSV", true);
-
+    
     xhr.upload.onprogress = (event: ProgressEvent) => {
       if (event.lengthComputable) {
         const percentComplete = Math.round((event.loaded / event.total) * 100);

@@ -33,6 +33,7 @@ export default function UploadPageExcel() {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/uploadExcel", true);
 
+
     xhr.upload.onprogress = (event: ProgressEvent) => {
       if (event.lengthComputable) {
         const percentComplete = Math.round((event.loaded / event.total) * 100);
