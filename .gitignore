@@ -49,3 +49,9 @@ next-env.d.ts
 .xlsx
 .xls
 .csv
+
+/public/uploads
+/public/uploads/*
+/public/uploads/**/*
+/public/uploads/**/**/*
+/public/uploads/**/**/**/*
