@@ -67,17 +67,17 @@ export default function Page() {
         if (!response.ok) throw new Error('Erro ao buscar estatísticas');
         const data = await response.json();
 
-        setUniqueCNPJs(data.uniqueCNPJs || 0);
-        setLoadingCNPJs(false);
+        //setUniqueCNPJs(data.uniqueCNPJs || 0);
+        //setLoadingCNPJs(false);
 
-        setUniquePhones(data.uniquePhones || 0);
-        setLoadingPhones(false);
+        //setUniquePhones(data.uniquePhones || 0);
+        //setLoadingPhones(false);
 
-        setCnpjsByState(data.cnpjsByState || []);
-        setLoadingCnpjsByState(false);
+        //setCnpjsByState(data.cnpjsByState || []);
+        //setLoadingCnpjsByState(false);
 
-        setPhonesByState(data.phonesByState || []);
-        setLoadingPhonesByState(false);
+        //setPhonesByState(data.phonesByState || []);
+        //setLoadingPhonesByState(false);
 
         setPhonesByOperator(data.phonesByOperator || []);
         setLoadingPhonesByOperator(false);
@@ -93,6 +93,74 @@ export default function Page() {
 
         setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
         setLoadingMaxPhonesByCNPJ(false);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //COUNT CNPJ
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpj');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs');
+        const data = await response.json();
+
+        setUniqueCNPJs(data.uniqueCNPJs || 0);
+        setLoadingCNPJs(false);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //COUNT PHONES
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countphones');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de Telefones');
+        const data = await response.json();
+
+        setUniquePhones(data.uniquePhones || 0);
+        setLoadingPhones(false);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //CNPJ BY STATE
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/cnpjbystate');
+        if (!response.ok) throw new Error('Erro ao buscar estatísticas de CNPJs');
+        const data = await response.json();
+
+        setCnpjsByState(data.cnpjsByState || 0);
+        setLoadingCnpjsByState(false);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //PHONE BY STATE
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/phonesbystate');
+        if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones');
+        const data = await response.json();
+
+        setPhonesByState(data.phonesByState || 0);
+        setLoadingPhonesByState(false);
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
       }

@@ -4,16 +4,16 @@ import prisma from '../database/dbclient';
 export async function GET() {
   try {
     // Executando as queries separadamente para evitar estouro do pool de conexões
-    const uniqueCNPJs = await prisma.organizations.groupBy({ by: ['cnpj'] });
-    const uniquePhones = await prisma.organizations.groupBy({ by: ['mobilephone1'] });
-    const cnpjsByStateRaw = await prisma.organizations.findMany({
+    //const uniqueCNPJs = await prisma.organizations.groupBy({ by: ['cnpj'] });
+    //const uniquePhones = await prisma.organizations.groupBy({ by: ['mobilephone1'] });
+    /*const cnpjsByStateRaw = await prisma.organizations.findMany({
       distinct: ['cnpj'],
       select: { state: true, cnpj: true },
-    });
-    const phonesByState = await prisma.organizations.groupBy({
+    });*/
+    /*const phonesByState = await prisma.organizations.groupBy({
       by: ['state'],
       _count: { mobilephone1: true },
-    });
+    });*/
     const phonesByOperator = await prisma.organizations.groupBy({
       by: ['operatorname'],
       _count: { mobilephone1: true },
@@ -31,13 +31,13 @@ export async function GET() {
       _count: { mobilephone1: true },
     });
 
-    // Contar CNPJs únicos por estado
+    /* Contar CNPJs únicos por estado
     const cnpjsByState = Object.entries(
       cnpjsByStateRaw.reduce((acc, { state }) => {
         acc[state] = (acc[state] || 0) + 1;
         return acc;
       }, {} as Record<string, number>)
-    ).map(([state, count]) => ({ state, count }));
+    ).map(([state, count]) => ({ state, count }));*/
 
     // Determinar a maior operadora por estado
     const maxOperatorByStateMap = phonesByOperatorStateRaw.reduce((acc, { state, operatorname, _count }) => {
@@ -76,13 +76,13 @@ export async function GET() {
     await prisma.$disconnect(); // Fecha a conexão após executar as consultas
 
     return NextResponse.json({
-      uniqueCNPJs: uniqueCNPJs.length,
-      uniquePhones: uniquePhones.length,
-      cnpjsByState,
-      phonesByState: phonesByState.map(({ state, _count }) => ({
+      //uniqueCNPJs: uniqueCNPJs.length,
+      //uniquePhones: uniquePhones.length,
+      //cnpjsByState,
+      /*phonesByState: phonesByState.map(({ state, _count }) => ({
         state,
         count: _count.mobilephone1,
-      })),
+      })),*/
       phonesByOperator: phonesByOperator
         .filter(({ operatorname }) => operatorname !== null && operatorname !== '')
         .map(({ operatorname, _count }) => ({
