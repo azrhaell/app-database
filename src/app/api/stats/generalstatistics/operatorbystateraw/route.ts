@@ -4,26 +4,26 @@ import prisma from '@/app/api/database/dbclient';
 export async function GET() {
   try {
     // Executando as queries separadamente para evitar estouro do pool de conexões
-    const cnpjsByStateRaw = await 
-      prisma.organizations.findMany({
-        distinct: ['cnpj'],
-        select: { state: true, cnpj: true },
-      });
+    const operatorsByStateRaw = await prisma.organizations.groupBy({
+      by: ['state', 'operatorname'],
+      where: { operatorname: { not: '' } },
+    });
 
-    // Contar CNPJs únicos por estado
-    const cnpjsByState = Object.entries(
-        cnpjsByStateRaw.reduce((acc, { state }) => {
-          if (state) {
-            acc[state] = (acc[state] || 0) + 1;
-          }
-          return acc;
-        }, {} as Record<string, number>)
-      ).map(([state, count]) => ({ state, count }));
+    // Agrupar operadores únicos por estado
+    const operatorsByStateCount = operatorsByStateRaw.reduce((acc, { state }) => {
+      acc[state] = (acc[state] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const operatorsByState = Object.entries(operatorsByStateCount).map(([state, count]) => ({
+      state,
+      count,
+    }));
 
     await prisma.$disconnect(); // Fecha a conexão após executar as consultas
 
     return NextResponse.json({
-        cnpjsByState,
+      operatorsByState,
           });
   } catch (error) {
     console.error(error);

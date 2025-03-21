@@ -14,22 +14,25 @@ export async function GET() {
       by: ['state'],
       _count: { mobilephone1: true },
     });*/
-    const phonesByOperator = await prisma.organizations.groupBy({
+    /*const phonesByOperator = await prisma.organizations.groupBy({
       by: ['operatorname'],
       _count: { mobilephone1: true },
-    });
-    const phonesByCNPJ = await prisma.organizations.groupBy({
+    });*/
+
+
+    /*const phonesByCNPJ = await prisma.organizations.groupBy({
       by: ['cnpj'],
       _count: { mobilephone1: true },
-    });
-    const operatorsByStateRaw = await prisma.organizations.groupBy({
+    });*/
+    /*const operatorsByStateRaw = await prisma.organizations.groupBy({
       by: ['state', 'operatorname'],
       where: { operatorname: { not: '' } },
-    });
-    const phonesByOperatorStateRaw = await prisma.organizations.groupBy({
+    });*/
+
+    /*const phonesByOperatorStateRaw = await prisma.organizations.groupBy({
       by: ['state', 'operatorname'],
       _count: { mobilephone1: true },
-    });
+    });*/
 
     /* Contar CNPJs únicos por estado
     const cnpjsByState = Object.entries(
@@ -39,7 +42,7 @@ export async function GET() {
       }, {} as Record<string, number>)
     ).map(([state, count]) => ({ state, count }));*/
 
-    // Determinar a maior operadora por estado
+    /* Determinar a maior operadora por estado
     const maxOperatorByStateMap = phonesByOperatorStateRaw.reduce((acc, { state, operatorname, _count }) => {
       if (!acc[state] || _count.mobilephone1 > acc[state]._count.mobilephone1) {
         acc[state] = { state, operatorname, _count };
@@ -50,9 +53,9 @@ export async function GET() {
     const maxOperatorByState = Object.values(maxOperatorByStateMap).map(({ state, operatorname }) => ({
       state,
       operatorname,
-    }));
+    }));*/
 
-    // Agrupar operadores únicos por estado
+    /* Agrupar operadores únicos por estado
     const operatorsByStateCount = operatorsByStateRaw.reduce((acc, { state }) => {
       acc[state] = (acc[state] || 0) + 1;
       return acc;
@@ -61,17 +64,17 @@ export async function GET() {
     const operatorsByState = Object.entries(operatorsByStateCount).map(([state, count]) => ({
       state,
       count,
-    }));
+    }));*/
 
-    // Encontrar a operadora com mais linhas no total
+    /* Encontrar a operadora com mais linhas no total
     const maxPhonesByOperator = phonesByOperator.reduce((max, item) => {
       return item._count.mobilephone1 > (max?._count.mobilephone1 || 0) ? item : max;
-    }, null as { operatorname: string | null; _count: { mobilephone1: number } } | null);
+    }, null as { operatorname: string | null; _count: { mobilephone1: number } } | null);*/
 
     // Encontrar o CNPJ com mais linhas
-    const maxPhonesByCNPJ = phonesByCNPJ.reduce((max, item) => {
+    /*const maxPhonesByCNPJ = phonesByCNPJ.reduce((max, item) => {
       return item._count.mobilephone1 > (max?._count.mobilephone1 || 0) ? item : max;
-    }, null as { cnpj: string; _count: { mobilephone1: number } } | null);
+    }, null as { cnpj: string; _count: { mobilephone1: number } } | null);*/
 
     await prisma.$disconnect(); // Fecha a conexão após executar as consultas
 
@@ -83,20 +86,20 @@ export async function GET() {
         state,
         count: _count.mobilephone1,
       })),*/
-      phonesByOperator: phonesByOperator
+      /*phonesByOperator: phonesByOperator
         .filter(({ operatorname }) => operatorname !== null && operatorname !== '')
         .map(({ operatorname, _count }) => ({
           operatorname,
           count: _count.mobilephone1,
-        })),
-      operatorsByState,
-      maxOperatorByState,
-      maxPhonesByOperator: maxPhonesByOperator
+        })),*/
+      //operatorsByState,
+      //maxOperatorByState,
+      /*maxPhonesByOperator: maxPhonesByOperator
         ? { operatorname: maxPhonesByOperator.operatorname, count: maxPhonesByOperator._count.mobilephone1 }
-        : null,
-      maxPhonesByCNPJ: maxPhonesByCNPJ
+        : null,*/
+      /*maxPhonesByCNPJ: maxPhonesByCNPJ
         ? { cnpj: maxPhonesByCNPJ.cnpj, count: maxPhonesByCNPJ._count.mobilephone1 }
-        : null,
+        : null,*/
     });
   } catch (error) {
     console.error(error);
