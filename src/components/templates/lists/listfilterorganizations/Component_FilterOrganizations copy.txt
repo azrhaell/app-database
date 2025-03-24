@@ -29,7 +29,7 @@ interface Organization {
 }
 
 export default function FilterOrganizations() {
-  const { register, handleSubmit, formState: {  }, } = useForm({
+  const { register, handleSubmit, formState: {  }, setValue, watch } = useForm({
     resolver: zodResolver(filterSchema),
   });
   const [data, setData] = useState<{ totalCNPJs: number; totalPhones: number; records: Organization[] }>({
