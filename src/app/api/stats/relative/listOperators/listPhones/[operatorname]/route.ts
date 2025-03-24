@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/api/database/dbclient';
 
-export async function GET(req: NextRequest, { params }: { params: { operatorname: string } }) {
+export async function GET(req: NextRequest, { }: { params: { operatorname: string } }) {
   // Extrai o caminho da URL
   const pathname = req.nextUrl.pathname;
 

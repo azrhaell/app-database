@@ -27,7 +27,15 @@ export async function GET(req: Request) {
       return new Date(`${year}-${month}-${day}T00:00:00.000Z`); // Retorna um objeto Date
     };
 
-    const where: any = {};
+    const where: {
+      cnpj?: string;
+      operatorname?: { in: string[] };
+      status?: string;
+      mobilephone1?: { startsWith: string };
+      OR?: { mobilephone1: { startsWith: string } }[];
+      state?: { in: string[] };
+      startofcontract?: { gte?: Date; lte?: Date };
+    } = {};
 
     if (params.cnpj) where.cnpj = params.cnpj;
 
