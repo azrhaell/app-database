@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     // Filtrar cidades inválidas
     const validCities = cities
       .map(({ city }) => city?.trim())
-      .filter((city) => city && city !== '');
+      .filter((city): city is string => city !== undefined && city !== '');
 
     if (validCities.length === 0) {
       return NextResponse.json([], { headers: { 'Content-Type': 'application/json' } });
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     operatorCounts.forEach(({ city, operatorname, _count }) => {
       if (!city || !operatorname) return;
       const current = topOperatorsMap.get(city);
-      if (!current || _count.cnpj > (topOperatorsMap.get(city) || 0)) {
+      if (!current || _count.cnpj > Number(topOperatorsMap.get(city) || 0)) {
         topOperatorsMap.set(city, operatorname);
       }
     });
