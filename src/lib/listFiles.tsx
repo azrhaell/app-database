@@ -1,3 +1,5 @@
+export const revalidate = 0; // Evita cache
+
 import prisma from '@/app/api/database/dbclient';
 
 export async function getJsonFiles() {

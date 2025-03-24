@@ -23,6 +23,7 @@ export default function Home({ files }: Props) {
         method: 'POST',
         body: JSON.stringify({ fileName }),
         headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
       });
       const data = await response.json() as { message?: string; error?: string };
 
