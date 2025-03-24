@@ -5,8 +5,7 @@ export async function getJsonFiles() {
     const files = await prisma.listfiles.findMany({
       where: {
         path: {
-          endsWith: ".json", // Certifique-se de filtrar por arquivos .json
-          //contains: ".json",
+          contains: ".json",
         },
         sincronized: false,
       },
