@@ -11,7 +11,9 @@ export async function GET() {
 
     // Agrupar operadores únicos por estado
     const operatorsByStateCount = operatorsByStateRaw.reduce((acc, { state }) => {
-      acc[state] = (acc[state] || 0) + 1;
+      if (state) {
+        acc[state] = (acc[state] || 0) + 1;
+      }
       return acc;
     }, {} as Record<string, number>);
 

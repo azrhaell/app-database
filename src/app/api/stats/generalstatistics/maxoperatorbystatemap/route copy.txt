@@ -12,7 +12,7 @@ export async function GET() {
     // Determinar a maior operadora por estado
     
     const maxOperatorByStateMap = phonesByOperatorStateRaw.reduce((acc, { state, operatorname, _count }) => {
-      if (state && operatorname && (!acc[state] || _count.mobilephone1 > (acc[state]?._count.mobilephone1 ?? 0))) {
+      if (!acc[state] || _count.mobilephone1 > acc[state]._count.mobilephone1) {
         acc[state] = { state, operatorname, _count };
       }
       return acc;
