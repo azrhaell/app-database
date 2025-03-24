@@ -13,7 +13,7 @@ interface Phone {
 }
 
 export default function CNPJSearchForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm<{ cnpj: string }>();
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const [phones, setPhones] = useState<Phone[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
