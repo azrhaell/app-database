@@ -47,7 +47,8 @@ export default function Home({ initialFiles }: Props) {
     try {
       const response = await fetch('/api/upload', {
         method: 'POST',
-        body: JSON.stringify({ fileName }),
+        //body: JSON.stringify({ fileName }),
+        body: JSON.stringify({ fileName: fullFileName }),
         headers: { 'Content-Type': 'application/json' },
       });
       //const data = await response.json();
