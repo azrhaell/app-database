@@ -27,6 +27,8 @@ export async function getJsonFiles() {
       createdAt: file.created,
     }));
 
+    await prisma.$disconnect();
+
     return { fileNames };
   } catch (error) {
     console.error("Erro ao buscar arquivos:", error);
