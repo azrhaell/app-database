@@ -47,7 +47,8 @@ export default function Home({ initialFiles }: Props) {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      const data = await response.json();
+      //const data = await response.json();
+      const data = await response.json() as { message?: string; error?: string };
       if (response.ok) {
         setMessage(`✅ ${data.message}`);
         fetchFiles(); // Atualiza lista após upload
@@ -80,7 +81,7 @@ export default function Home({ initialFiles }: Props) {
                 <p><strong>🌎 Origem:</strong> {file.origin}</p>
               </div>
               <button
-                onClick={() => handleUpload(file.name)}
+                onClick={() => handleUpload(`${file.name}.json`)}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                 disabled={loadingFiles[file.name]}
               >
