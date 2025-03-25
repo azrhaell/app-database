@@ -13,11 +13,9 @@ interface Props {
 export default function Home({ initialFiles }: Props) {
   const [fileList, setFileList] = useState<FileType[]>(initialFiles.fileNames);
   const [loadingFiles, setLoadingFiles] = useState<{ [key: string]: boolean }>({});
-  //const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   async function fetchFiles() {
-    //setLoading(true);
 
     try {
       const response = await fetch('/api/database/getjsonfiles', {
@@ -28,7 +26,6 @@ export default function Home({ initialFiles }: Props) {
     } catch {
       setMessage('Erro ao buscar arquivos.');
     }
-    //setLoading(false);
   }
 
   useEffect(() => {
@@ -36,22 +33,17 @@ export default function Home({ initialFiles }: Props) {
   }, []);
 
   async function handleUpload(fileName: string) {
-    //setLoading(true);
-    //**********************
     const fullFileName = fileName.endsWith('.json') ? fileName : `${fileName}.json`; // ✅ Garante que tem .json
     console.log(`Iniciando upload de ${fullFileName}`); // 🔍 Debug
-    //**********************
-    setLoadingFiles((prev) => ({ ...prev, [fileName]: true }));
+    setLoadingFiles((prev) => ({ ...prev, [fullFileName]: true }));
     setMessage('');
 
     try {
       const response = await fetch('/api/upload', {
         method: 'POST',
-        //body: JSON.stringify({ fileName }),
         body: JSON.stringify({ fileName: fullFileName }),
         headers: { 'Content-Type': 'application/json' },
       });
-      //const data = await response.json();
       const data = await response.json() as { message?: string; error?: string };
       if (response.ok) {
         setMessage(`✅ ${data.message}`);
@@ -63,13 +55,10 @@ export default function Home({ initialFiles }: Props) {
       setMessage('❌ Erro ao conectar com o servidor.');
     }
 
-    //setLoading(false);
-    //*******************
     setTimeout(() => {
       setLoadingFiles((prev) => ({ ...prev, [fullFileName]: false }));
       console.log(`Upload concluído para ${fullFileName}`); // 🔍 Debug
     }, 500);
-    //*************************
   }
 
   return (
