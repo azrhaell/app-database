@@ -10,5 +10,5 @@ export interface FileType {
 
 export default async function Page() {
   const files = await getJsonFiles(); // Busca inicial do lado do servidor
-  return <Home initialFiles={files.fileNames || []} />;
+  return <Home initialFiles={{ fileNames: files.fileNames || [] }} />;
 }

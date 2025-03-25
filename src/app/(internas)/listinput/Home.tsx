@@ -4,26 +4,31 @@ import { useEffect, useState } from 'react';
 import { FileType } from './page';
 
 interface Props {
-  initialFiles: FileType[];
+  initialFiles: {
+    fileNames: FileType[];
+    error?: string;
+  };
 }
 
 export default function Home({ initialFiles }: Props) {
-  const [files, setFiles] = useState<FileType[]>(initialFiles);
-  const [loading, setLoading] = useState(false);
+  const [fileList, setFileList] = useState<FileType[]>(initialFiles.fileNames);
+  const [loadingFiles, setLoadingFiles] = useState<{ [key: string]: boolean }>({});
+  //const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   async function fetchFiles() {
-    setLoading(true);
+    //setLoading(true);
+
     try {
       const response = await fetch('/api/database/getjsonfiles', {
         cache: 'no-store', // Força busca sem cache
       });
       const data = await response.json();
-      setFiles(data.fileNames);
+      setFileList(data.fileNames);
     } catch {
       setMessage('Erro ao buscar arquivos.');
     }
-    setLoading(false);
+    //setLoading(false);
   }
 
   useEffect(() => {
@@ -31,7 +36,8 @@ export default function Home({ initialFiles }: Props) {
   }, []);
 
   async function handleUpload(fileName: string) {
-    setLoading(true);
+    //setLoading(true);
+    setLoadingFiles((prev) => ({ ...prev, [fileName]: true }));
     setMessage('');
 
     try {
@@ -52,7 +58,8 @@ export default function Home({ initialFiles }: Props) {
       setMessage('❌ Erro ao conectar com o servidor.');
     }
 
-    setLoading(false);
+    //setLoading(false);
+    setLoadingFiles((prev) => ({ ...prev, [fileName]: false }));
   }
 
   return (
@@ -63,21 +70,21 @@ export default function Home({ initialFiles }: Props) {
         Atualizar Lista
       </button>
       <ul className="space-y-2">
-        {files.length > 0 ? (
-          files.map((file, index) => (
+        {fileList.length > 0 ? (
+          fileList.map((file, index) => (
             <li key={index} className="border p-2 rounded-lg shadow flex justify-between items-center">
               <div>
-                <p><strong>Nome:</strong> {file.name}</p>
-                <p><strong>Data do Upload:</strong> {new Date(file.createdAt).toLocaleString()}</p>
-                <p><strong>Número de Registros:</strong> {file.recordCount}</p>
-                <p><strong>Origem:</strong> {file.origin}</p>
+                <p><strong>📂 Nome:</strong> {file.name.replace('.json', '')}</p>
+                <p><strong>📅 Data do Upload:</strong> {new Date(file.createdAt).toLocaleString()}</p>
+                <p><strong>📊 Registros:</strong> {file.recordCount}</p>
+                <p><strong>🌎 Origem:</strong> {file.origin}</p>
               </div>
               <button
                 onClick={() => handleUpload(file.name)}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                disabled={loading}
+                disabled={loadingFiles[file.name]}
               >
-                {loading ? 'Salvando...' : 'Salvar'}
+                {loadingFiles[file.name] ? '⏳ Salvando...' : '💾 Salvar'}
               </button>
             </li>
           ))
