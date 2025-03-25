@@ -7,7 +7,14 @@ import parse from "csv-parser";
 import prisma from "../../database/dbclient";
 
 export const runtime = "nodejs";
-export const config = { api: { bodyParser: false } };
+//export const config = {   api: {     bodyParser: false } };
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '2000mb', // Ajuste para o tamanho máximo necessário
+    },
+  },
+};
 
 export async function POST(req: Request) {
   try {
