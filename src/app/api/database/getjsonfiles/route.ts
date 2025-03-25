@@ -1,4 +1,5 @@
 export const revalidate = 0; // Evita cache
+import { NextResponse } from 'next/server';
 
 import prisma from '@/app/api/database/dbclient';
 
@@ -26,10 +27,12 @@ export async function GET() {
       createdAt: file.created?.toISOString() ?? new Date().toISOString(), // Converte para string ISO válida
     }));
 
-    return { fileNames };
+    return NextResponse.json({ fileNames }, { status: 200 }); // ✅ Agora retorna um NextResponse válido
+
   } catch (error) {
     console.error("Erro ao buscar arquivos:", error);
-    return { error: "Erro ao buscar arquivos." };
+    return NextResponse.json({ error: 'Erro ao buscar arquivos.' }, { status: 500 }); // ✅ Retorna erro corretamente
+
   } finally {
     await prisma.$disconnect();
   }
