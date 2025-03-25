@@ -2,7 +2,7 @@ export const revalidate = 0; // Evita cache
 
 import prisma from '@/app/api/database/dbclient';
 
-export async function getJsonFiles() {
+export async function GET() {
   try {
     const files = await prisma.listfiles.findMany({
       where: {

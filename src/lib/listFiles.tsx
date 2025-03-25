@@ -22,9 +22,9 @@ export async function getJsonFiles() {
 
     const fileNames = files.map((file) => ({
       name: file.name,
-      recordCount: file.qtdregisters,
-      origin: file.origin,
-      createdAt: file.created,
+      recordCount: file.qtdregisters ?? 0, // Garante um número válido
+      origin: file.origin ?? "Desconhecido", // Garante uma string válida
+      createdAt: file.created
     }));
 
     await prisma.$disconnect();
