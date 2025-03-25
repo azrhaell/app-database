@@ -8,7 +8,8 @@ export interface FileType {
   createdAt: Date;
 }
 
+
 export default async function Page() {
-  const files = await getJsonFiles(); // Busca inicial do lado do servidor
-  return <Home initialFiles={files.fileNames || []} />;
+  const files = await getJsonFiles(); // Busca os arquivos no servidor
+  return <Home files={{ fileNames: files.fileNames || [] }} />; // Passa os arquivos para o componente Home
 }
