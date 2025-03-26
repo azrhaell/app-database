@@ -106,6 +106,7 @@ export async function POST(req: Request) {
       if (batch.length >= batchSize) {
         await prisma.listfiles.createMany({ data: batch });
         batch = []; // Limpa o batch
+        console.log('🔹 Batch parcial salvo no banco de dados');
         await new Promise(resolve => setTimeout(resolve, 200)); // Pequeno delay
       }
     }
