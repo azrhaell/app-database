@@ -19,11 +19,11 @@ interface Props {
 }
 
 const Component_ListBRF = ({ files }: Props) => {
+ 
   const [syncStatus, setSyncStatus] = useState<{ [key: string]: string }>({});
-  const [fileList, setFileList] = useState<FileType[]>(files.fileNames);
 
   // 🔹 Filtra apenas arquivos com origem "BRF"
-  const filteredFiles = fileList.filter((file) => file.origin === "BRF");
+  const filteredFiles = files.fileNames.filter((file) => file.origin === "BRF");
 
   // 🔹 Função para sincronizar um arquivo específico
   const handleSync = async (file: FileType) => {
@@ -47,18 +47,11 @@ const Component_ListBRF = ({ files }: Props) => {
 
       if (response.ok) {
         setSyncStatus((prev) => ({ ...prev, [file.name]: "✅ Sincronizado!" }));
-
-        // 🔹 Atualiza a lista de arquivos, marcando o arquivo como sincronizado
-        setFileList((prevFiles) =>
-          prevFiles.map((f) =>
-            f.name === file.name ? { ...f, sincronized: true } : f
-          )
-        );
       } else {
         setSyncStatus((prev) => ({ ...prev, [file.name]: `❌ Erro: ${result.error}` }));
       }
     } catch (error) {
-      console.log(error);
+      console.log(error)
       setSyncStatus((prev) => ({ ...prev, [file.name]: "❌ Erro na sincronização" }));
     }
   };
@@ -77,7 +70,7 @@ const Component_ListBRF = ({ files }: Props) => {
               <strong>Registros:</strong> {file.recordCount ?? "N/A"} <br />
               <strong>Origem:</strong> {file.origin ?? "Desconhecida"} <br />
               <strong>Criado em:</strong> {new Date(file.createdAt).toLocaleString()} <br />
-
+            
               {/* Botão Sincronizar */}
               <button
                 className={`mt-2 px-4 py-2 rounded ${
