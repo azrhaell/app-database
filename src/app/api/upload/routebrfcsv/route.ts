@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       })
     );
 
-    const batchSize = 5000;
+    const batchSize = 32000;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let batch: any[] = [];
     let verifiedCount = 0;
