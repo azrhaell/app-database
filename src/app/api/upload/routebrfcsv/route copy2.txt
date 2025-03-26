@@ -11,8 +11,8 @@ export const config = {
     bodyParser: {
       sizeLimit: "2000mb",
     },
-    responseLimit: false,
-    externalResolver: true,
+    responseLimit: false, // 🔹 Evita que a resposta seja interrompida
+    externalResolver: true, // 🔹 Indica que a API lida com a resposta de forma assíncrona
   },
 };
 
@@ -79,22 +79,35 @@ export async function POST(req: Request) {
       const UF = record["UF"]?.trim() || "";
       const DDD1 = record["DDD1"]?.trim() || "";
 
+      if (!headerMapping["CNPJ"]) {
+        console.error("❌ ERRO: Coluna 'CNPJ' não encontrada no CSV.");
+        return NextResponse.json({ error: "Coluna 'CNPJ' não encontrada." }, { status: 400 });
+      }
+
       if (!CNPJ || !RAZAO_SOCIAL || !SITUACAO_CADASTRAL || !UF) {
         console.log("⚠️ Ignorando linha por falta de campos essenciais:", record);
+        console.log("ℹ️ CNPJ:", CNPJ);
+        console.log("ℹ️ RAZAO_SOCIAL:", RAZAO_SOCIAL);
+        console.log("ℹ️ SITUACAO_CADASTRAL:", SITUACAO_CADASTRAL);
+        //console.log("ℹ️ NATUREZA_JURIDICA:", NATUREZA_JURIDICA);
+        //console.log("ℹ️ PORTE_EMPRESA:", PORTE_EMPRESA);
+        //console.log("ℹ️ OPCAO_SIMPLES:", OPCAO_SIMPLES);
+        //console.log("ℹ️ OPCAO_MEI:", OPCAO_MEI);
+        console.log("ℹ️ UF:", UF);
         continue;
       }
 
       if (SITUACAO_CADASTRAL === "ATIVA") {
-        batch.push({ CNPJ, RAZAO_SOCIAL, SITUACAO_CADASTRAL, NATUREZA_JURIDICA, PORTE_EMPRESA, OPCAO_SIMPLES, OPCAO_MEI, UF, DDD1 });
+        batch.push({ CNPJ, RAZAO_SOCIAL, SITUACAO_CADASTRAL, NATUREZA_JURIDICA, PORTE_EMPRESA, OPCAO_SIMPLES, OPCAO_MEI, UF, DDD1});
         writeStream.write(`${CNPJ}${delimiter}${RAZAO_SOCIAL}${delimiter}${SITUACAO_CADASTRAL}${delimiter}${NATUREZA_JURIDICA}${delimiter}${PORTE_EMPRESA}${delimiter}${OPCAO_SIMPLES}${delimiter}${OPCAO_MEI}${delimiter}${UF}${delimiter}${DDD1}\n`);
         verifiedCount++;
       }
 
       if (batch.length >= batchSize) {
         await prisma.listfiles.createMany({ data: batch });
-        batch = [];
-        console.log("🔹 Batch parcial salvo no banco de dados");
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        batch = []; // Limpa o batch
+        console.log('🔹 Batch parcial salvo no banco de dados');
+        await new Promise(resolve => setTimeout(resolve, 200)); // Pequeno delay
       }
     }
 
@@ -106,6 +119,7 @@ export async function POST(req: Request) {
     console.log(`✅ Processamento concluído! Linhas verificadas: ${verifiedCount}`);
     console.log(`📂 Arquivo verificado salvo em: ${verifiedFilePath}`);
 
+    // 🔹 Salvar os detalhes no banco de dados
     await prisma.listfiles.create({
       data: {
         name: verifiedFileName,
