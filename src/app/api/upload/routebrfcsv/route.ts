@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       })
     );
 
-    const batchSize = 5000;
+    const batchSize = 1000;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let batch: any[] = [];
     let verifiedCount = 0;
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
         await prisma.listfiles.createMany({ data: batch });
         batch = [];
         console.log("🔹 Batch parcial salvo no banco de dados");
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
