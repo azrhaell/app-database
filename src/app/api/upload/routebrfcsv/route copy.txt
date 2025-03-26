@@ -1,3 +1,5 @@
+//RESPONSÁVEL POR REALIZAR O UPLOAD DO ARQUIVO CSV BASE DE DADOS DA RECEITA FEDERAL
+
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
@@ -63,9 +65,6 @@ export async function POST(req: Request) {
       })
     );
 
-    const batchSize = 5000;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let batch: any[] = [];
     let verifiedCount = 0;
 
     for await (const record of parser) {
@@ -98,20 +97,10 @@ export async function POST(req: Request) {
       }
 
       if (SITUACAO_CADASTRAL === "ATIVA") {
-        batch.push({ CNPJ, RAZAO_SOCIAL, SITUACAO_CADASTRAL, NATUREZA_JURIDICA, PORTE_EMPRESA, OPCAO_SIMPLES, OPCAO_MEI, UF, DDD1});
         writeStream.write(`${CNPJ}${delimiter}${RAZAO_SOCIAL}${delimiter}${SITUACAO_CADASTRAL}${delimiter}${NATUREZA_JURIDICA}${delimiter}${PORTE_EMPRESA}${delimiter}${OPCAO_SIMPLES}${delimiter}${OPCAO_MEI}${delimiter}${UF}${delimiter}${DDD1}\n`);
+        //writeStream.write(`${CNPJ}${delimiter}${RAZAO_SOCIAL}${delimiter}${SITUACAO_CADASTRAL}${delimiter}${UF}${delimiter}${DDD1}\n`);
         verifiedCount++;
       }
-
-      if (batch.length >= batchSize) {
-        await prisma.listfiles.createMany({ data: batch });
-        batch = []; // Limpa o batch
-        await new Promise(resolve => setTimeout(resolve, 200)); // Pequeno delay
-      }
-    }
-
-    if (batch.length > 0) {
-      await prisma.listfiles.createMany({ data: batch });
     }
 
     writeStream.end();

@@ -3,7 +3,12 @@ import { PrismaClient } from '@prisma/client'
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
-    log: ['query', 'info', 'warn', 'error'], // Exibe logs detalhados
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL, // ⚠️ Confirme que a variável está correta
+      },
+    },
+    log: ["query", "info", "warn", "error"], // 🔹 Log útil para debug
   })
 }
 
