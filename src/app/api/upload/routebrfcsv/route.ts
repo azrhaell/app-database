@@ -11,8 +11,10 @@ export const runtime = "nodejs";
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '2000mb', // Ajuste para o tamanho máximo necessário
+      sizeLimit: "2000mb",
     },
+    responseLimit: false, // 🔹 Evita que a resposta seja interrompida
+    externalResolver: true, // 🔹 Indica que a API lida com a resposta de forma assíncrona
   },
 };
 
