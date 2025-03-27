@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import readline from "readline";
 import prisma from "../../database/dbclient";
 
 export const runtime = "nodejs";
@@ -39,20 +38,6 @@ export async function POST(req: Request) {
     fs.writeFileSync(filePath, Buffer.from(await file.arrayBuffer()));
     console.log(`📂 Arquivo salvo: ${filePath}`);
 
-    // Contar número de registros no arquivo (excluindo cabeçalho)
-    let qtdregisters = 0;
-    const fileStream = fs.createReadStream(filePath);
-    const rl = readline.createInterface({ input: fileStream });
-
-    let isFirstLine = true;
-    for await (const line of rl) {
-      if (isFirstLine) {
-        isFirstLine = false; // Ignora o cabeçalho
-        continue;
-      }
-      if (line.trim() !== "") qtdregisters++;
-    }
-
     const now = new Date();
     const timestamp = now.toISOString().replace(/[:.]/g, "-");
     const verifiedFileName = `verified_${timestamp}_${file.name}`;
@@ -60,7 +45,6 @@ export async function POST(req: Request) {
     await prisma.listfiles.create({ 
       data: {
         name: verifiedFileName,
-        qtdregisters, 
         path: `/uploads/BDO/${file.name}`,
         extension: path.extname(file.name),
         origin: "BDO",
@@ -70,7 +54,6 @@ export async function POST(req: Request) {
     return NextResponse.json({
       message: "Upload CSV concluído com sucesso!",
       caminhoArquivo: `/uploads/BDO/${file.name}`,
-      qtdregisters,
     });
   } catch (error) {
     console.error("❌ Erro ao fazer upload do arquivo:", error);
