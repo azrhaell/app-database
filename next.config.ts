@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
  
 module.exports = {
-    experimental: {
-      serverActions: {
-        bodySizeLimit: '2000mb',
-      },
+  api: {
+    responseLimit: "false",
+    bodyParser: {
+      sizeLimit: "5000mb", // Aumenta o limite de tamanho do corpo
     },
-  }
+  },
+};
