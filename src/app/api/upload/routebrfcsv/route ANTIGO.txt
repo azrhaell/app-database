@@ -45,8 +45,8 @@ export async function POST(req: Request) {
     const timestamp = now.toISOString().replace(/[:.]/g, "-");
     const verifiedFileName = `verified_${timestamp}_${file.name}`;
     const verifiedFilePath = path.join(verifiedBRFDir, verifiedFileName);
-    const writeStream = fs.createWriteStream(verifiedFilePath);
 
+    const writeStream = fs.createWriteStream(verifiedFilePath);
     const firstLine = fs.readFileSync(originalFilePath, "utf8").split("\n")[0];
     const delimiter = firstLine.includes(";") ? ";" : ",";
     console.log(`🔍 Delimitador detectado: '${delimiter}'`);
@@ -105,6 +105,7 @@ export async function POST(req: Request) {
 
     writeStream.end();
     console.log(`✅ Processamento concluído! Linhas verificadas: ${verifiedCount}`);
+    
     console.log(`📂 Arquivo verificado salvo em: ${verifiedFilePath}`);
 
     // 🔹 Salvar os detalhes no banco de dados

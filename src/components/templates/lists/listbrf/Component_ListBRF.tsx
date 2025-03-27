@@ -32,7 +32,7 @@ const Component_ListBRF = ({ files }: Props) => {
       return;
     }
 
-    setSyncStatus((prev) => ({ ...prev, [file.name]: "Sincronizando..." }));
+    setSyncStatus((prev) => ({ ...prev, [file.name]: "⏳ Sincronizando..." }));
 
     try {
       const response = await fetch("/api/syncBRF", {
@@ -80,13 +80,15 @@ const Component_ListBRF = ({ files }: Props) => {
 
               {/* Botão Sincronizar */}
               <button
-                className={`mt-2 px-4 py-2 rounded ${
-                  file.sincronized ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
-                } text-white`}
-                onClick={() => handleSync(file)}
-                disabled={file.sincronized}
-              >
-                {file.sincronized ? "Já sincronizado" : "Sincronizar"}
+                  className={`mt-2 px-4 py-2 rounded ${
+                    file.sincronized || syncStatus[file.name] === "⏳ Sincronizando..."
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  } text-white`}
+                  onClick={() => handleSync(file)}
+                  disabled={file.sincronized || syncStatus[file.name] === "..."}
+                >
+                  {syncStatus[file.name] || (file.sincronized ? "Já sincronizado" : "Sincronizar")}
               </button>
 
               {/* Status da sincronização */}
