@@ -5,6 +5,7 @@ import prisma from "../../database/dbclient";
 
 export const runtime = "nodejs";
 
+// This is a Node.js runtime for the API route
 export const config = {
   api: {
     bodyParser: false,
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
 
     const uploadDir = path.join(process.cwd(), "public/uploads");
     if (!fs.existsSync(uploadDir)) {
+      
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
