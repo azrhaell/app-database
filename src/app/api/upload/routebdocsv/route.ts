@@ -32,28 +32,32 @@ export async function POST(req: Request) {
     const filePath = path.join(uploadDir, file.name);
     console.log("📂 Caminho do arquivo:", filePath);
     console.log("Iniciando leitura do arquivo...");
-    const writeStream = fs.createWriteStream(filePath);
+    const writeStream = fs.createWriteStream(filePath, { highWaterMark: 16 * 1024 }); // 16KB chunks
     console.log("📥 Criando stream de escrita...");
     const reader = file.stream().getReader();
     console.log("📥 Criando stream de leitura...");
 
     //console.log("📥 Iniciando upload...");
 
-    let totalSize = 0;
+    //let totalSize = 0;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        totalSize += value.length;
-        writeStream.write(Buffer.from(value));
+    async function streamToFile(reader, writeStream) {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          const ok = writeStream.write(Buffer.from(value));
+          if (!ok) {
+            await new Promise(resolve => writeStream.once("drain", resolve));
+          }
+        }
       }
+      writeStream.end();
     }
-    console.log("📥 Upload concluído!");
+    await streamToFile(reader, writeStream);
 
-    writeStream.end();
     console.log(`📂 Arquivo salvo: ${filePath}`);
-    console.log(`📦 Tamanho final: ${(totalSize / (1024 * 1024)).toFixed(2)} MB`);
+    //console.log(`📦 Tamanho final: ${(totalSize / (1024 * 1024)).toFixed(2)} MB`);
 
     await prisma.listfiles.create({ 
       data: {
