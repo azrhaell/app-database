@@ -38,17 +38,44 @@ export async function POST(req: Request) {
     console.log("📥 Criando stream de leitura...");
 
     //console.log("📥 Iniciando upload...");
+    /*
+     console.log("📁 Diretório de upload:", uploadDir);
+    const filePath = path.join(uploadDir, file.name);
+    console.log("📂 Caminho do arquivo:", filePath);
+    console.log("Iniciando leitura do arquivo...");
+    const writeStream = fs.createWriteStream(filePath);
+    console.log("📥 Criando stream de escrita...");
+    const reader = file.stream().getReader();
+    console.log("📥 Criando stream de leitura...");
 
+    //console.log("📥 Iniciando upload...");
+
+    let totalSize = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        totalSize += value.length;
+        writeStream.write(Buffer.from(value));
+      }
+    }
+    console.log("📥 Upload concluído!");
+
+    writeStream.end();
+    console.log(`📂 Arquivo salvo: ${filePath}`);
+    console.log(`📦 Tamanho final: ${(totalSize / (1024 * 1024)).toFixed(2)} MB`);
+    */
     //let totalSize = 0;
 
-    async function streamToFile(reader, writeStream) {
+    async function streamToFile(reader: ReadableStreamDefaultReader<Uint8Array<ArrayBufferLike>>, writeStream: fs.WriteStream) {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         if (value) {
           const ok = writeStream.write(Buffer.from(value));
           if (!ok) {
-            await new Promise(resolve => writeStream.once("drain", resolve));
+            await new Promise<void>(resolve => writeStream.once("drain", () => resolve()));
           }
         }
       }
