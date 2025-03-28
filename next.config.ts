@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
- 
+
 module.exports = {
   api: {
     responseLimit: "false",
@@ -8,3 +8,18 @@ module.exports = {
     },
   },
 };
+
+const nextConfig = {
+  experimental: {
+    turbo: {
+      loaders: {
+        ".js": { cache: false },
+        ".jsx": { cache: false },
+        ".ts": { cache: false },
+        ".tsx": { cache: false },
+      },
+    },
+  },
+};
+
+module.exports = nextConfig;
