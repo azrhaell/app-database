@@ -7,10 +7,8 @@ export const runtime = "nodejs";
 
 export const config = {
   api: {
-    bodyParser: {
-      sizeLimit: "2000mb",
-    },
-    responseLimit: false,
+    bodyParser: false,
+    responseLimit: "4gb", // Aumenta o limite da resposta
     externalResolver: true,
   },
 };

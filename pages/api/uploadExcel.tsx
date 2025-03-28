@@ -6,7 +6,11 @@ import { IncomingForm, Fields, Files } from "formidable";
 import prisma from "@/app/api/database/dbclient";
 
 export const config = {
-  api: { bodyParser: false },
+  api: {
+    bodyParser: false,
+    responseLimit: "4gb", // Aumenta o limite da resposta
+    externalResolver: true,
+  },
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
