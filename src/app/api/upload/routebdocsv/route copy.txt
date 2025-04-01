@@ -58,7 +58,7 @@ export async function POST(req: Request) {
         filteredCount++;
       }
     }
-sssss
+
     writeStream.end();
     console.log(`✅ Processamento concluído! Linhas filtradas: ${filteredCount}`);
     console.log(`📂 Arquivo filtrado salvo em: ${filteredFilePath}`);

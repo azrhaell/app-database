@@ -1,45 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export interface FileType {
   name: string;
   path: string | null;
-  qtdregisters: number | null;
+  recordCount: number | null;
   origin: string | null;
-  created: Date;
+  createdAt: Date;
 }
 
-const Component_ListBDO = () => {
-  const [files, setFiles] = useState<FileType[]>([]);
-  const [loading, setLoading] = useState<string | null>(null);
-  const [isLoadingFiles, setIsLoadingFiles] = useState(true);
-
-  // 🔹 Função para buscar os arquivos no servidor
-  const fetchFiles = async () => {
-    setIsLoadingFiles(true);
-    try {
-      const response = await fetch("/api/database/getfilesbdo");
-      const result = await response.json();
-
-      if (response.ok) {
-        setFiles(result.fileNames);
-      } else {
-        console.error("Erro ao carregar arquivos:", result.error);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar arquivos:", error);
-    } finally {
-      setIsLoadingFiles(false);
-    }
+interface Props {
+  files: {
+    fileNames: FileType[];
+    error?: string;
   };
+}
 
-  // 🔹 Buscar arquivos ao montar o componente
-  useEffect(() => {
-    fetchFiles();
-  }, []);
+const Component_ListBDO = ({ files }: Props) => {
+  const [loading, setLoading] = useState<string | null>(null);
 
-  // 🔹 Função para sincronizar um arquivo
   const handleSync = async (file: FileType) => {
     if (!file.path) return alert("Caminho do arquivo inválido.");
 
@@ -56,7 +36,6 @@ const Component_ListBDO = () => {
 
       if (response.ok) {
         alert(`✅ ${result.message}`);
-        fetchFiles(); // Atualiza a lista após sincronização
       } else {
         alert(`❌ Erro: ${result.error}`);
       }
@@ -69,26 +48,22 @@ const Component_ListBDO = () => {
   };
 
   // 🔹 Filtra apenas arquivos com origem "BDO"
-  const filteredFiles = files.filter((file) => file.origin === "BDO");
+  const filteredFiles = files.fileNames.filter((file) => file.origin === "BDO");
 
   return (
     <div>
       <h2>Arquivos da Base de Dados de Operadoras (Origem: BDO)</h2>
 
-      <button onClick={fetchFiles} className="px-4 py-2 bg-green-500 text-white rounded mb-4">
-        Recarregar Lista
-      </button>
-
-      {isLoadingFiles ? (
-        <p>Carregando arquivos...</p>
+      {files.error ? (
+        <p className="text-red-500">{files.error}</p>
       ) : filteredFiles.length > 0 ? (
         <ul>
           {filteredFiles.map((file) => (
-            <li key={file.name} className="mb-4 p-2 border">
+            <li key={file.name}>
               <strong>Nome:</strong> {file.name} <br />
-              <strong>Registros:</strong> {file.qtdregisters ?? "N/A"} <br />
+              <strong>Registros:</strong> {file.recordCount ?? "N/A"} <br />
               <strong>Origem:</strong> {file.origin ?? "Desconhecida"} <br />
-              <strong>Criado em:</strong> {new Date(file.created).toLocaleString()} <br />
+              <strong>Criado em:</strong> {new Date(file.createdAt).toLocaleString()} <br />
               <button
                 onClick={() => handleSync(file)}
                 disabled={loading === file.name}

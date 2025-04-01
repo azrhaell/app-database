@@ -28,7 +28,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Arquivo já sincronizado ou não cadastrado." }, { status: 404 });
     }
 
-    // 🔹 Detecta o delimitador do CSV
     const detectDelimiter = async (filePath: string): Promise<string> => {
       const fileStream = fs.createReadStream(filePath);
       const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
@@ -45,13 +44,7 @@ export async function POST(req: Request) {
     const delimiter = await detectDelimiter(absolutePath);
     console.log(`📌 Delimitador detectado: "${delimiter}"`);
 
-    // 🔹 Filtragem dos registros pelos DDDs permitidos
     const dddsPermitidos = ["21", "22", "24", "27", "28"];
-
-    // 🔹 Criando novo arquivo apenas com os DDDs permitidos
-    const filteredFilePath = absolutePath.replace(".csv", "_filtered.csv");
-    const writeStream = fs.createWriteStream(filteredFilePath);
-    writeStream.write("number,operadora,datahora\n");
 
     const records: { number: string; datahora: string; operadora: string }[] = await new Promise((resolve, reject) => {
       const results: { number: string; datahora: string; operadora: string }[] = [];
@@ -75,20 +68,15 @@ export async function POST(req: Request) {
           if (data.number && data.datahora && data.operadora) {
             const ddd = data.number.replace(/\D/g, "").slice(0, 2);
             if (dddsPermitidos.includes(ddd)) {
-              const cleanedNumber = data.number.replace(/\D/g, "");
               results.push({
-                number: cleanedNumber,
+                number: data.number.replace(/\D/g, ""),
                 datahora: data.datahora,
                 operadora: data.operadora,
               });
-              writeStream.write(`${cleanedNumber},${data.operadora},${data.datahora}\n`);
             }
           }
         })
-        .on("end", () => {
-          writeStream.end();
-          resolve(results);
-        })
+        .on("end", () => resolve(results))
         .on("error", (error) => reject(error));
     });
 
@@ -98,7 +86,6 @@ export async function POST(req: Request) {
 
     console.log(`🔄 Comparando ${records.length} registros com a base de dados...`);
 
-    // 🔹 Atualiza os registros na tabela organizations
     const batchSize = 10000;
 
     for (let i = 0; i < records.length; i += batchSize) {
@@ -109,7 +96,7 @@ export async function POST(req: Request) {
           prisma.organizations.updateMany({
             where: {
               mobilephone1: number,
-              startofcontract: { lt: new Date(datahora) }, // 🔹 Só atualiza se startofcontract for mais antigo que datahora
+              startofcontract: { lt: new Date(datahora) },
             },
             data: {
               startofcontract: new Date(datahora),
@@ -122,16 +109,12 @@ export async function POST(req: Request) {
       console.log(`✅ Atualizados ${batch.length} registros (${i + batch.length}/${records.length})`);
     }
 
-    // 🔹 Atualiza o status do arquivo na tabela listfiles
     await prisma.listfiles.update({
       where: { idFile: file.idFile },
       data: { sincronized: true },
     });
 
-    return NextResponse.json({
-      message: `Sincronização concluída. ${records.length} registros processados.`,
-      filteredFilePath,
-    });
+    return NextResponse.json({ message: `Sincronização concluída. ${records.length} registros processados.` });
   } catch (error) {
     console.error("❌ Erro na sincronização:", error);
     return NextResponse.json({ error: "Erro ao processar a sincronização." }, { status: 500 });
