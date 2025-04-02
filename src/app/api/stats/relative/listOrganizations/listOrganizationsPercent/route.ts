@@ -204,6 +204,13 @@ export async function POST(request: NextRequest) {
         if (batchResult.length === 0) break;
 
         allOrganizations.push(...batchResult);
+
+        // Se já atingiu 1 milhão de registros, interrompe o loop
+        /*if (allOrganizations.length >= 1000001) {
+          allOrganizations.length = 1000001; // Garante que não ultrapasse
+          break;
+        }*/
+
         page++;
       }
     }
@@ -235,6 +242,13 @@ export async function POST(request: NextRequest) {
         if (batchResult.length === 0) break;
 
         allOrganizations.push(...batchResult);
+
+        // Se já atingiu 1 milhão de registros, interrompe o loop
+        /*if (allOrganizations.length >= 1000001) {
+          allOrganizations.length = 1000001; // Garante que não ultrapasse
+          break;
+        }*/
+
         page++;
       }
     }
@@ -307,6 +321,7 @@ export async function POST(request: NextRequest) {
     console.log("Dados considerados na Segunda Consulta: ", whereClauseFinal);
     const finalBatchSize = 5000;
     const resultDetails = [];
+    let pagefinal = 0;
 
     for (let i = 0; i < resultCnpj.length; i += finalBatchSize) {
       const batchCnpj = resultCnpj.slice(i, i + finalBatchSize);
@@ -315,7 +330,8 @@ export async function POST(request: NextRequest) {
 
       const batchResult = await prisma.organizations.findMany({
         where: whereBatch,
-        take: 1000001, // Limite de 1 milhão de registros
+        take: finalBatchSize, // Limite de 1 milhão registros
+        skip: pagefinal * finalBatchSize,
         select: {
           cnpj: true,
           companyname: true,
@@ -333,13 +349,14 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      resultDetails.push(...batchResult);
-      
       // Se já atingiu 1 milhão de registros, interrompe o loop
-      if (resultDetails.length >= 1000001) {
+      /*if (resultDetails.length >= 1000001) {
         resultDetails.length = 1000001; // Garante que não ultrapasse
         break;
-  }
+      }*/
+
+      resultDetails.push(...batchResult);
+      pagefinal++;
     }
 
     console.log("ÚLTIMA CONSULTA FEITA ...");
