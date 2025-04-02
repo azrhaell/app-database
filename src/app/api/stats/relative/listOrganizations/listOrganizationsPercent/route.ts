@@ -315,6 +315,7 @@ export async function POST(request: NextRequest) {
 
       const batchResult = await prisma.organizations.findMany({
         where: whereBatch,
+        take: 1000001, // Limite de 1 milhão de registros
         select: {
           cnpj: true,
           companyname: true,
@@ -333,7 +334,12 @@ export async function POST(request: NextRequest) {
       });
 
       resultDetails.push(...batchResult);
-      //resultDetails.concat(...batchResult);
+      
+      // Se já atingiu 1 milhão de registros, interrompe o loop
+      if (resultDetails.length >= 1000001) {
+        resultDetails.length = 1000001; // Garante que não ultrapasse
+        break;
+  }
     }
 
     console.log("ÚLTIMA CONSULTA FEITA ...");

@@ -15,9 +15,7 @@ const Page = async () => {
   const files = await getBDFiles();
   return (
     
-    <div className="
-                    flex flex-col justify-center w-11/12 h-screen items-center bg-gray-600"
-                    >
+    <div className="flex flex-col justify-center w-11/12 h-screen items-center bg-gray-600"                   >
       <CsvUploadForm />
       <Component_ListBDO files={{ fileNames: files.fileNames || [] }} />;
 

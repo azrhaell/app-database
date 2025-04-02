@@ -4,6 +4,7 @@ import React from 'react'
 const Component_SelectMainBDPage = () => {
   return (
     <>
+    {/*
         <Link href="/upload/fileexcel" className="hover:underline">
             <button type="button" className="text-white
                                             bg-blue-700 
@@ -24,7 +25,7 @@ const Component_SelectMainBDPage = () => {
                 Importar Excel
             </button>
         </Link>
-
+    */}
         <Link href="/upload/filecsv" className="hover:underline">
             <button type="button" className="text-white
                                                 bg-red-700 

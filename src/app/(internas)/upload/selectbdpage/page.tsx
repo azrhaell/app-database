@@ -48,7 +48,7 @@ const page = () => {
                 </button>
         </Link>
 
-
+{/*
         <Link href="/upload/selectcsvbdt" className="hover:underline">
             <button type="button" className="text-white
                                                 bg-green-700 
@@ -90,7 +90,7 @@ const page = () => {
                     Importar BD Mailing
                 </button>
         </Link>
-
+*/}
     </div>
 
   )

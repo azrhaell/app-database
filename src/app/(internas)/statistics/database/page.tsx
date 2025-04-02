@@ -97,7 +97,7 @@ export default function Page() {
         console.error('Erro ao buscar estatísticas:', err);
       }
     }
-    fetchStats();
+    fetchStats(); //
   }, []);*/
 
   //COUNT CNPJ
