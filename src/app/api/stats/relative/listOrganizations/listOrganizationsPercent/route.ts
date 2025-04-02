@@ -360,6 +360,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("ÚLTIMA CONSULTA FEITA ...");
+    
 
     return NextResponse.json(resultDetails, { status: 200 });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
