@@ -5,9 +5,10 @@ import { getBDFiles } from "@/lib/listBDFiles";
 export interface FileType {
   name: string;
   path: string | null;
-  recordCount: number | null;
+  qtdregisters: number | null;
   origin: string | null;
-  createdAt: Date;
+  created: Date;
+  sincronized?: boolean; // 🔹 Indica se o arquivo já foi sincronizado
 }
 
 const Page = async () => {

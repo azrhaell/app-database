@@ -29,9 +29,9 @@ export async function getBDFiles() {
     const fileNames = files.map((file) => ({
       name: file.name,
       path: file.path,
-      recordCount: file.qtdregisters,
+      qtdregisters: file.qtdregisters,
       origin: file.origin,
-      createdAt: file.created,
+      created: file.created,
     }));
 
     return { fileNames };

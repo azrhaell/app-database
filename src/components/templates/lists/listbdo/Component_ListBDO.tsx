@@ -8,10 +8,19 @@ export interface FileType {
   qtdregisters: number | null;
   origin: string | null;
   created: Date;
+  sincronized?: boolean; // 🔹 Indica se o arquivo já foi sincronizado
 }
 
-const Component_ListBDO = () => {
-  const [files, setFiles] = useState<FileType[]>([]);
+interface Props {
+  files: {
+    fileNames: FileType[];
+    error?: string;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Component_ListBDO = ({ files }: Props) => {
+  const [fileList, setFileList] = useState<FileType[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const [isLoadingFiles, setIsLoadingFiles] = useState(true);
 
@@ -23,7 +32,7 @@ const Component_ListBDO = () => {
       const result = await response.json();
 
       if (response.ok) {
-        setFiles(result.fileNames);
+        setFileList(result.fileNames);
       } else {
         console.error("Erro ao carregar arquivos:", result.error);
       }
@@ -69,7 +78,7 @@ const Component_ListBDO = () => {
   };
 
   // 🔹 Filtra apenas arquivos com origem "BDO"
-  const filteredFiles = files.filter((file) => file.origin === "BDO");
+  const filteredFiles = fileList.filter((file) => file.origin === "BDO");
 
   return (
     <div>
