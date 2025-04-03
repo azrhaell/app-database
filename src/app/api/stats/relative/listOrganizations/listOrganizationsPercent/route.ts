@@ -205,12 +205,6 @@ export async function POST(request: NextRequest) {
 
         allOrganizations.push(...batchResult);
 
-        // Se já atingiu 1 milhão de registros, interrompe o loop
-        /*if (allOrganizations.length >= 1000001) {
-          allOrganizations.length = 1000001; // Garante que não ultrapasse
-          break;
-        }*/
-
         page++;
       }
     }
@@ -243,16 +237,9 @@ export async function POST(request: NextRequest) {
 
         allOrganizations.push(...batchResult);
 
-        // Se já atingiu 1 milhão de registros, interrompe o loop
-        /*if (allOrganizations.length >= 1000001) {
-          allOrganizations.length = 1000001; // Garante que não ultrapasse
-          break;
-        }*/
-
         page++;
       }
     }
-
 
     console.log("PRIMEIRA CONSULTA FEITA ...");
 
@@ -331,7 +318,7 @@ export async function POST(request: NextRequest) {
       const batchResult = await prisma.organizations.findMany({
         where: whereBatch,
         take: finalBatchSize, // Limite de 1 milhão registros
-        skip: pagefinal * finalBatchSize,
+        //skip: pagefinal * finalBatchSize,
         select: {
           cnpj: true,
           companyname: true,
@@ -349,18 +336,13 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Se já atingiu 1 milhão de registros, interrompe o loop
-      /*if (resultDetails.length >= 1000001) {
-        resultDetails.length = 1000001; // Garante que não ultrapasse
-        break;
-      }*/
-
       resultDetails.push(...batchResult);
       pagefinal++;
     }
 
     console.log("ÚLTIMA CONSULTA FEITA ...");
 
+    console.log("Total considerado em resultCNPJ:", resultCnpj.length);
     console.log("Total de allOrganizations encontrados:", allOrganizations.length);
     console.log("Total de resultDetails encontrados:", resultDetails.length);
 
