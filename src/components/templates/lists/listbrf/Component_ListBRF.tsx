@@ -87,6 +87,10 @@ const Component_ListBRF = ({ files }: Props) => {
     <div>
       <h2>Arquivos da Base de Dados da Receita Federal (Origem: BRF)</h2>
 
+      <button onClick={fetchFiles} className="px-4 py-2 bg-green-500 text-white rounded mb-4">
+        Recarregar Lista
+      </button>
+
       {loading ? (
         <p>🔄 Carregando arquivos...</p>
       ) : filteredFiles.length > 0 ? (
