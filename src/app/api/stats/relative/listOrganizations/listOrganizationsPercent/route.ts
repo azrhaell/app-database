@@ -311,7 +311,7 @@ export async function POST(request: NextRequest) {
     const resultDetails: any[] = [];
     //let pagefinal = 0;
 
-    const MAX_RESULTS = 1_000_000; // Limite de 1 milhão de registros
+    const MAX_RESULTS = 750000; // Limite de 1 milhão de registros
     let totalRecords = 0; // Contador de registros processados
 
     for (let i = 0; i < resultCnpj.length; i += finalBatchSize) {
@@ -352,36 +352,8 @@ export async function POST(request: NextRequest) {
     console.log("Total de allOrganizations encontrados:", allOrganizations.length);
     console.log("Total de resultDetails encontrados:", resultDetails.length);
 
-    // Retorno via STREAM
-    return new NextResponse(
-      new ReadableStream({
-        start(controller) {
-          try {
-            controller.enqueue("["); // Início da lista JSON
+    return NextResponse.json(resultDetails, { status: 200 });
 
-            for (let i = 0; i < resultDetails.length; i++) {
-              controller.enqueue(JSON.stringify(resultDetails[i]));
-
-              // Adiciona vírgula entre os objetos, exceto no último
-              if (i < resultDetails.length - 1) {
-                controller.enqueue(",");
-              }
-            }
-
-            controller.enqueue("]"); // Fim da lista JSON
-            controller.close();
-          } catch (error) {
-            console.error("Erro ao transmitir dados via Stream:", error);
-            controller.error(error);
-          }
-        },
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Erro na busca:", error);
