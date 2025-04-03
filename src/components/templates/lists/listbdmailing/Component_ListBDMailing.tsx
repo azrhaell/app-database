@@ -52,9 +52,9 @@ import { useState } from "react";
 export interface FileType {
   name: string;
   path: string | null;
-  recordCount: number | null;
+  qtdregisters: number | null;
   origin: string | null;
-  createdAt: Date;
+  created: Date;
 }
 
 interface Props {
@@ -102,9 +102,9 @@ const Component_ListBDMailing = ({ files }: Props) => {
           {filteredFiles.map((file, index) => (
             <li key={index} className="mb-4 border-b pb-2">
               <strong>Nome:</strong> {file.name} <br />
-              <strong>Registros:</strong> {file.recordCount ?? "N/A"} <br />
+              <strong>Registros:</strong> {file.qtdregisters ?? "N/A"} <br />
               <strong>Origem:</strong> {file.origin ?? "Desconhecida"} <br />
-              <strong>Criado em:</strong> {new Date(file.createdAt).toLocaleString()} <br />
+              <strong>Criado em:</strong> {new Date(file.created).toLocaleString()} <br />
               <button
                 className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
                 onClick={() => handleSync(file)}

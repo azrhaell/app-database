@@ -52,9 +52,9 @@ import { useState } from "react";
 export interface FileType {
   name: string;
   path: string | null;
-  recordCount: number | null;
+  qtdregisters: number | null;
   origin: string | null;
-  createdAt: Date;
+  created: Date;
 }
 
 interface Props {
@@ -108,9 +108,9 @@ const Component_ListBDT = ({ files }: Props) => {
           {filteredFiles.map((file) => (
             <li key={file.name}>
               <strong>Nome:</strong> {file.name} <br />
-              <strong>Registros:</strong> {file.recordCount ?? "N/A"} <br />
+              <strong>Registros:</strong> {file.qtdregisters ?? "N/A"} <br />
               <strong>Origem:</strong> {file.origin ?? "Desconhecida"} <br />
-              <strong>Criado em:</strong> {new Date(file.createdAt).toLocaleString()} <br />
+              <strong>Criado em:</strong> {new Date(file.created).toLocaleString()} <br />
               <button
                 onClick={() => handleSync(file)}
                 disabled={loading === file.name}

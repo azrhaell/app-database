@@ -5,9 +5,9 @@ import { getBDFiles } from "@/lib/listBDFiles";
 export interface FileType {
   name: string;
   path: string | null;
-  recordCount: number | null;
+  qtdregisters: number | null;
   origin: string | null;
-  createdAt: Date;
+  created: Date;
 }
 
 const Page = async () => {
