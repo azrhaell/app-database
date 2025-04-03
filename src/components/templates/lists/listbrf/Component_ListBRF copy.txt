@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export interface FileType {
   name: string;
   path: string | null;
-  recordCount: number | null;
+  qtdregisters: number | null;
   origin: string | null;
-  createdAt: Date;
+  created: Date;
   sincronized?: boolean; // 🔹 Indica se o arquivo já foi sincronizado
 }
 
@@ -18,9 +18,33 @@ interface Props {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Component_ListBRF = ({ files }: Props) => {
+  const [fileList, setFileList] = useState<FileType[]>([]);
   const [syncStatus, setSyncStatus] = useState<{ [key: string]: string }>({});
-  const [fileList, setFileList] = useState<FileType[]>(files.fileNames);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // 🔹 Busca os arquivos da API ao carregar o componente
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const response = await fetch("/api/database/getfilesbrf");
+        const result = await response.json();
+
+        if (response.ok) {
+          setFileList(result.fileNames);
+        } else {
+          console.error("Erro ao buscar arquivos:", result.error);
+        }
+      } catch (error) {
+        console.error("Erro na requisição:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFiles();
+  }, []);
 
   // 🔹 Filtra apenas arquivos com origem "BRF"
   const filteredFiles = fileList.filter((file) => file.origin === "BRF");
@@ -67,26 +91,28 @@ const Component_ListBRF = ({ files }: Props) => {
     <div>
       <h2>Arquivos da Base de Dados da Receita Federal (Origem: BRF)</h2>
 
-      {files.error ? (
-        <p className="text-red-500">{files.error}</p>
+      {loading ? (
+        <p>🔄 Carregando arquivos...</p>
       ) : filteredFiles.length > 0 ? (
         <ul>
           {filteredFiles.map((file, index) => (
             <li key={index} className="mb-4 border p-2 rounded">
               <strong>Nome:</strong> {file.name} <br />
-              <strong>Registros:</strong> {file.recordCount ?? "N/A"} <br />
+              <strong>Registros:</strong> {file.qtdregisters ?? "N/A"} <br />
               <strong>Origem:</strong> {file.origin ?? "Desconhecida"} <br />
-              <strong>Criado em:</strong> {new Date(file.createdAt).toLocaleString()} <br />
+              <strong>Criado em:</strong> {new Date(file.created).toLocaleString()} <br />
 
               {/* Botão Sincronizar */}
               <button
-                className={`mt-2 px-4 py-2 rounded ${
-                  file.sincronized ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
-                } text-white`}
-                onClick={() => handleSync(file)}
-                disabled={file.sincronized}
-              >
-                {file.sincronized ? "Já sincronizado" : "Sincronizar"}
+                  className={`mt-2 px-4 py-2 rounded ${
+                    file.sincronized || syncStatus[file.name] === "⏳ Sincronizando..."
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  } text-white`}
+                  onClick={() => handleSync(file)}
+                  disabled={file.sincronized || syncStatus[file.name] === "..."}
+                >
+                  {syncStatus[file.name] || (file.sincronized ? "Já sincronizado" : "Sincronizar")}
               </button>
 
               {/* Status da sincronização */}

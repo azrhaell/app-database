@@ -8,7 +8,7 @@ export interface FileType {
   qtdregisters: number | null;
   origin: string | null;
   created: Date;
-  sincronized?: boolean; // 🔹 Indica se o arquivo já foi sincronizado
+  sincronized?: boolean;
 }
 
 interface Props {
@@ -24,30 +24,29 @@ const Component_ListBRF = ({ files }: Props) => {
   const [syncStatus, setSyncStatus] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState<boolean>(true);
 
-  // 🔹 Busca os arquivos da API ao carregar o componente
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await fetch("/api/database/getfilesbrf");
-        const result = await response.json();
+  // 🔹 Função para buscar arquivos no banco
+  const fetchFiles = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/database/getfilesbrf");
+      const result = await response.json();
 
-        if (response.ok) {
-          setFileList(result.fileNames);
-        } else {
-          console.error("Erro ao buscar arquivos:", result.error);
-        }
-      } catch (error) {
-        console.error("Erro na requisição:", error);
-      } finally {
-        setLoading(false);
+      if (response.ok) {
+        setFileList(result.fileNames);
+      } else {
+        console.error("Erro ao buscar arquivos:", result.error);
       }
-    };
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // 🔹 Busca arquivos ao carregar o componente
+  useEffect(() => {
     fetchFiles();
   }, []);
-
-  // 🔹 Filtra apenas arquivos com origem "BRF"
-  const filteredFiles = fileList.filter((file) => file.origin === "BRF");
 
   // 🔹 Função para sincronizar um arquivo específico
   const handleSync = async (file: FileType) => {
@@ -61,9 +60,7 @@ const Component_ListBRF = ({ files }: Props) => {
     try {
       const response = await fetch("/api/syncBRF", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: file.name, path: file.path }),
       });
 
@@ -72,12 +69,8 @@ const Component_ListBRF = ({ files }: Props) => {
       if (response.ok) {
         setSyncStatus((prev) => ({ ...prev, [file.name]: "✅ Sincronizado!" }));
 
-        // 🔹 Atualiza a lista de arquivos, marcando o arquivo como sincronizado
-        setFileList((prevFiles) =>
-          prevFiles.map((f) =>
-            f.name === file.name ? { ...f, sincronized: true } : f
-          )
-        );
+        // 🔹 Recarrega os arquivos após sincronizar
+        fetchFiles();
       } else {
         setSyncStatus((prev) => ({ ...prev, [file.name]: `❌ Erro: ${result.error}` }));
       }
@@ -86,6 +79,9 @@ const Component_ListBRF = ({ files }: Props) => {
       setSyncStatus((prev) => ({ ...prev, [file.name]: "❌ Erro na sincronização" }));
     }
   };
+
+  // 🔹 Filtra apenas arquivos com origem "BRF"
+  const filteredFiles = fileList.filter((file) => file.origin === "BRF");
 
   return (
     <div>
@@ -104,15 +100,15 @@ const Component_ListBRF = ({ files }: Props) => {
 
               {/* Botão Sincronizar */}
               <button
-                  className={`mt-2 px-4 py-2 rounded ${
-                    file.sincronized || syncStatus[file.name] === "⏳ Sincronizando..."
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  } text-white`}
-                  onClick={() => handleSync(file)}
-                  disabled={file.sincronized || syncStatus[file.name] === "..."}
-                >
-                  {syncStatus[file.name] || (file.sincronized ? "Já sincronizado" : "Sincronizar")}
+                className={`mt-2 px-4 py-2 rounded ${
+                  file.sincronized || syncStatus[file.name] === "⏳ Sincronizando..."
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600"
+                } text-white`}
+                onClick={() => handleSync(file)}
+                disabled={file.sincronized || syncStatus[file.name] === "⏳ Sincronizando..."}
+              >
+                {syncStatus[file.name] || (file.sincronized ? "Já sincronizado" : "Sincronizar")}
               </button>
 
               {/* Status da sincronização */}
