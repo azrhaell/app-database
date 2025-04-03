@@ -308,7 +308,7 @@ export async function POST(request: NextRequest) {
     console.log("Dados considerados na Segunda Consulta: ", whereClauseFinal);
     const finalBatchSize = 5000;
     const resultDetails = [];
-    let pagefinal = 0;
+    //let pagefinal = 0;
 
     for (let i = 0; i < resultCnpj.length; i += finalBatchSize) {
       const batchCnpj = resultCnpj.slice(i, i + finalBatchSize);
@@ -337,7 +337,7 @@ export async function POST(request: NextRequest) {
       });
 
       resultDetails.push(...batchResult);
-      pagefinal++;
+      //pagefinal++;
     }
 
     console.log("ÚLTIMA CONSULTA FEITA ...");
