@@ -310,7 +310,11 @@ export async function POST(request: NextRequest) {
     const resultDetails = [];
     //let pagefinal = 0;
 
+    const MAX_RESULTS = 1_000_000; // Limite de 1 milhão de registros
+    let totalRecords = 0; // Contador de registros processados
+
     for (let i = 0; i < resultCnpj.length; i += finalBatchSize) {
+      if (totalRecords >= MAX_RESULTS) break; // Interrompe se já atingiu o limite
       const batchCnpj = resultCnpj.slice(i, i + finalBatchSize);
 
       const whereBatch = { ...whereClauseFinal, cnpj: { in: batchCnpj } }; //////
@@ -338,6 +342,7 @@ export async function POST(request: NextRequest) {
 
       resultDetails.push(...batchResult);
       //pagefinal++;
+      totalRecords++;
     }
 
     console.log("ÚLTIMA CONSULTA FEITA ...");
