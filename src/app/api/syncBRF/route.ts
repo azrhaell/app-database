@@ -64,8 +64,8 @@ export async function POST(req: Request) {
               rfstatus: data["SITUACAO_CADASTRAL"] || "",
               legalnature: data["NATUREZA_JURIDICA"] || "",
               companysize: data["PORTE_EMPRESA"] || "",
-              optionalsize: (data["OPCAO_SIMPLES"] || "").toUpperCase() === "SIM",
-              optionmei: (data["OPCAO_MEI"] || "").toUpperCase() === "SIM",
+              optionalsize: (data["OPCAO_SIMPLES"] || "").toUpperCase() === "SIM" ? true : false,
+              optionmei: (data["OPCAO_MEI"] || "").toUpperCase() === "SIM" ? true : false,
             });
 
             // 🔹 Processa em lotes de 10.000 registros para evitar sobrecarga
@@ -119,8 +119,8 @@ async function processBatch(batch: any[]) {
           rfstatus: org.rfstatus,
           legalnature: org.legalnature,
           companysize: org.companysize,
-          optionalsize: org.optionalsize === "SIM" ? true : false,
-          optionmei: org.optionmei === "SIM" ? true : false,
+          optionalsize: org.optionalsize,
+          optionmei: org.optionmei,
         },
       });
 
