@@ -1,7 +1,5 @@
-//Obter "operatorname" da tabela operators
-
 import { NextResponse } from 'next/server';
-import prisma from '@/app/api/database/dbclient'
+import prisma from '@/app/api/database/dbclient';
 
 export async function GET() {
   try {
@@ -11,8 +9,9 @@ export async function GET() {
       },
     });
 
-    // Remove qualquer caractere que não seja número
-    const uniqueDDDs = fetchListDDDs.map((ln) => ln.ddd.replace(/\D/g, ""));
+    const uniqueDDDs = fetchListDDDs
+      .map((ln) => ln.ddd?.replace(/\D/g, "")) // remove não numéricos
+      .filter((ddd) => ddd && ddd.trim().length > 0); // remove nulos/vazios
 
     return NextResponse.json(uniqueDDDs);
   } catch (error) {
