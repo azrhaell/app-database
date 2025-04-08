@@ -1,11 +1,8 @@
-//Obter "operatorname" da tabela operators
-
 import { NextResponse } from 'next/server';
 import prisma from '@/app/api/database/dbclient'
 
 export async function GET() {
   try {
-    // Buscar nomes da tabela legalnatures
     const fetchListOperators = await prisma.operators.findMany({
       select: {
         name: true,
@@ -14,8 +11,10 @@ export async function GET() {
       },
     });
 
-    // Retornar os nomes únicos
-    const uniqueOperators = fetchListOperators.map(ln => ln.name);
+    // Filtra e remove valores nulos/vazios, e trim nos nomes
+    const uniqueOperators = fetchListOperators
+      .map(op => op.name?.trim())
+      .filter(name => name && name.length > 0);
 
     return NextResponse.json(uniqueOperators);
   } catch (error) {

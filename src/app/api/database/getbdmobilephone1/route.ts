@@ -5,15 +5,14 @@ import prisma from '@/app/api/database/dbclient'
 
 export async function GET() {
   try {
-    // Buscar nomes da tabela states
     const fetchListDDDs = await prisma.codeddd.findMany({
       select: {
         ddd: true,
       },
     });
 
-    // Retornar os nomes únicos
-    const uniqueDDDs = fetchListDDDs.map(ln => ln.ddd);
+    // Remove qualquer caractere que não seja número
+    const uniqueDDDs = fetchListDDDs.map((ln) => ln.ddd.replace(/\D/g, ""));
 
     return NextResponse.json(uniqueDDDs);
   } catch (error) {
