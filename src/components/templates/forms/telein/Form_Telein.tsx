@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const DownloadLink = () => {
   const [tipo, setTipo] = useState("movel");
-  const chave = "1a2b3c4d5e";
+  const chave = "RC0Pm0Oy69K8";
 
   const baseUrl = "http://integrador.telein.com.br/download.php";
   
