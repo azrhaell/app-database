@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       ddd1: string;
       phone1: string;
       phone2: string;
-      email1: string;
+
       qualifyresponsible: string;
 
       rfstatus: string;
@@ -84,7 +84,6 @@ export async function POST(req: Request) {
               ddd1: data["DDD1"] || "",
               phone1: data["TELEFONE1"] || "",
               phone2: data["TELEFONE2"] || "",
-              email1: data["CORREIO_ELETRONICO"] || "",
               qualifyresponsible: data["QUALIFICACAO_RESPONSAVEL"] || "",
 
               rfstatus: data["SITUACAO_CADASTRAL"] || "",
@@ -152,7 +151,6 @@ async function processBatch(batch: any[]) {
           ddd1: org.ddd1,
           phone1: org.phone1,
           phone2: org.phone2,
-          email1: org.email1,
           qualifyresponsible: org.qualifyresponsible,
 
           rfstatus: org.rfstatus,
