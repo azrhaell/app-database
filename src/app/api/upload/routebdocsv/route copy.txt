@@ -1,15 +1,17 @@
-//RESPONSÁVEL POR REALIZAR O UPLOAD DO ARQUIVO CSV BASE DE DADOS DE OPERADORAS
-
-import { NextResponse } from "next/server";
+import { pipeline } from "stream/promises";
+import { Readable } from "stream";
 import fs from "fs";
 import path from "path";
-import parse from "csv-parser";
-import prisma from "../../database/dbclient";
+import { NextResponse } from "next/server";
+import prisma from "@/app/api/database/dbclient";
 
 export const runtime = "nodejs";
+
 export const config = {
   api: {
     bodyParser: false,
+    responseLimit: false,
+    externalResolver: true,
   },
 };
 
@@ -22,65 +24,46 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400 });
     }
 
-    const uploadDir = path.join(process.cwd(), "public/uploads");
+    const uploadDir = path.join(process.cwd(), "public/uploads/BDO");
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    const filteredBDODir = path.join(process.cwd(), "public/uploads/filteredBDO");
-    if (!fs.existsSync(filteredBDODir)) {
-      fs.mkdirSync(filteredBDODir, { recursive: true });
-    }
+    const filePath = path.join(uploadDir, file.name);
+    const stream = fs.createWriteStream(filePath);
+    const reader = file.stream().getReader();
 
-    const originalFilePath = path.join(uploadDir, file.name);
-    fs.writeFileSync(originalFilePath, Buffer.from(await file.arrayBuffer()));
-    console.log(`📂 Arquivo original salvo: ${originalFilePath}`);
+    console.log("🚀 Iniciando o upload...");
+    const nodeStream = new Readable({
+      async read() {
+        const { done, value } = await reader.read();
+        if (done) return this.push(null);
+        this.push(Buffer.from(value));
+      },
+    });
 
-    const now = new Date();
-    const formattedDate = now.toISOString().replace(/[:.]/g, "-");
-    const filteredFileName = `filtered_${formattedDate}_${file.name}`;
-    const filteredFilePath = path.join(filteredBDODir, filteredFileName);
-    const writeStream = fs.createWriteStream(filteredFilePath);
+    await pipeline(nodeStream, stream);
+    console.log(`✅ Upload concluído: ${filePath}`);
 
-    writeStream.write("number,operadora,datahora\n");
+    // Contar registros (linhas) no arquivo CSV, exceto cabeçalho
+    const content = fs.readFileSync(filePath, "utf8");
+    const lines = content.trim().split("\n");
+    const qtdregisters = lines.length > 1 ? lines.length - 1 : 0;
 
-    const dddsPermitidos = ["21", "22", "24", "27", "28"];
-    const parser = fs.createReadStream(originalFilePath).pipe(parse({ columns: true } as parse.Options));
-
-    let filteredCount = 0;
-    for await (const record of parser) {
-      const { number, operadora, datahora } = record;
-      if (!number || !operadora || !datahora) continue;
-
-      const ddd = number.slice(0, 2);
-      if (dddsPermitidos.includes(ddd)) {
-        writeStream.write(`${number},${operadora},${datahora}\n`);
-        filteredCount++;
-      }
-    }
-
-    writeStream.end();
-    console.log(`✅ Processamento concluído! Linhas filtradas: ${filteredCount}`);
-    console.log(`📂 Arquivo filtrado salvo em: ${filteredFilePath}`);
-
-    // 🔹 Salvar no banco de dados
-    const savedFile = await prisma.listfiles.create({
+    // Registrar no banco de dados
+    await prisma.listfiles.create({
       data: {
-        name: filteredFileName,
-        qtdregisters: filteredCount,
-        path: `/uploads/filteredBDO/${filteredFileName}`,
-        extension: path.extname(filteredFileName),
+        name: file.name,
+        qtdregisters,
+        path: `/uploads/BDO/${file.name}`,
+        extension: path.extname(file.name),
         origin: "BDO",
       },
     });
 
-    return NextResponse.json({ 
-      message: "CSV filtrado com sucesso!", 
-      linhasFiltradas: filteredCount,
-      caminhoArquivo: savedFile.path,
-    });
+    return NextResponse.json({ message: "Upload concluído com sucesso!" });
   } catch (error) {
-    console.error("❌ Erro ao processar o CSV:", error);
+    console.error("❌ Erro no upload:", error);
     return NextResponse.json({ error: "Erro no servidor." }, { status: 500 });
   }
 }
