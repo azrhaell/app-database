@@ -36,19 +36,6 @@ export async function POST(req: Request) {
     const headerMapping: Record<string, string> = {};
     let organizationsData: {
       cnpj: string;
-
-      companyname: string;
-      businessname: string;
-      neighborhood: string;
-      city: string;
-      state: string;
-      cep: string;
-      ddd1: string;
-      phone1: string;
-      phone2: string;
-      email1: string;
-      qualifyresponsible: string;
-
       rfstatus: string;
       legalnature: string;
       companysize: string;
@@ -74,19 +61,6 @@ export async function POST(req: Request) {
           if (cnpj) {
             organizationsData.push({
               cnpj,
-
-              companyname: data["RAZAO_SOCIAL"] || "",
-              businessname: data["NOME_FANTASIA"] || "",
-              neighborhood: data["BAIRRO"] || "",
-              city: data["MUNICIPIO"] || "",
-              state: data["UF"] || "",
-              cep: data["CEP"] || "",
-              ddd1: data["DDD1"] || "",
-              phone1: data["TELEFONE1"] || "",
-              phone2: data["TELEFONE2"] || "",
-              email1: data["CORREIO_ELETRONICO"] || "",
-              qualifyresponsible: data["QUALIFICACAO_RESPONSAVEL"] || "",
-
               rfstatus: data["SITUACAO_CADASTRAL"] || "",
               legalnature: data["NATUREZA_JURIDICA"] || "",
               companysize: data["PORTE_EMPRESA"] || "",
@@ -142,19 +116,6 @@ async function processBatch(batch: any[]) {
           },
         },
         data: {
-
-          companyname: org.companyname,
-          businessname: org.businessname,
-          neighborhood: org.neighborhood,
-          city: org.city,
-          state: org.state,
-          cep: org.cep,
-          ddd1: org.ddd1,
-          phone1: org.phone1,
-          phone2: org.phone2,
-          email1: org.email1,
-          qualifyresponsible: org.qualifyresponsible,
-
           rfstatus: org.rfstatus,
           legalnature: org.legalnature,
           companysize: org.companysize,
