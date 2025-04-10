@@ -3,7 +3,6 @@ import { Readable } from "stream";
 import fs from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
-import prisma from "@/app/api/database/dbclient";
 
 export const runtime = "nodejs";
 
@@ -44,22 +43,6 @@ export async function POST(req: Request) {
 
     await pipeline(nodeStream, stream);
     console.log(`✅ Upload concluído: ${filePath}`);
-
-    // Contar registros (linhas) no arquivo CSV, exceto cabeçalho
-    const content = fs.readFileSync(filePath, "utf8");
-    const lines = content.trim().split("\n");
-    const qtdregisters = lines.length > 1 ? lines.length - 1 : 0;
-
-    // Registrar no banco de dados
-    await prisma.listfiles.create({
-      data: {
-        name: file.name,
-        qtdregisters,
-        path: `/uploads/BDO/${file.name}`,
-        extension: path.extname(file.name),
-        origin: "BDO",
-      },
-    });
 
     return NextResponse.json({ message: "Upload concluído com sucesso!" });
   } catch (error) {

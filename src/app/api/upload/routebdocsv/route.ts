@@ -2,6 +2,7 @@ import { pipeline } from "stream/promises";
 import { Readable } from "stream";
 import fs from "fs";
 import path from "path";
+import readline from "readline";
 import { NextResponse } from "next/server";
 import prisma from "@/app/api/database/dbclient";
 
@@ -45,10 +46,20 @@ export async function POST(req: Request) {
     await pipeline(nodeStream, stream);
     console.log(`✅ Upload concluído: ${filePath}`);
 
-    // Contar registros (linhas) no arquivo CSV, exceto cabeçalho
-    const content = fs.readFileSync(filePath, "utf8");
-    const lines = content.trim().split("\n");
-    const qtdregisters = lines.length > 1 ? lines.length - 1 : 0;
+    // 🔹 Contar linhas usando stream de leitura
+    const fileStream = fs.createReadStream(filePath);
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    });
+
+    let lineCount = 0;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const _ of rl) {
+      lineCount++;
+    }
+
+    const qtdregisters = lineCount > 1 ? lineCount - 1 : 0;
 
     // Registrar no banco de dados
     await prisma.listfiles.create({
