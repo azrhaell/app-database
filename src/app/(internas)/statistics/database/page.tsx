@@ -49,6 +49,8 @@ export default function Page() {
   const [maxOperatorByState, setMaxOperatorByState] = useState<OperatorByState[]>([]);
   const [maxPhonesByOperator, setMaxPhonesByOperator] = useState<OperatorCount | null>(null);
   const [maxPhonesByCNPJ, setMaxPhonesByCNPJ] = useState<CNPJCount | null>(null);
+  const [meiCNPJs, setMeiCNPJs] = useState<number | null>(null);
+  const [simpleCNPJs, setSimpleCNPJs] = useState<number | null>(null);
 
   const [loadingCNPJs, setLoadingCNPJs] = useState<boolean>(true);
   const [loadingPhones, setLoadingPhones] = useState<boolean>(true);
@@ -59,46 +61,8 @@ export default function Page() {
   const [loadingMaxOperatorByState, setLoadingMaxOperatorByState] = useState<boolean>(true);
   const [loadingMaxPhonesByOperator, setLoadingMaxPhonesByOperator] = useState<boolean>(true);
   const [loadingMaxPhonesByCNPJ, setLoadingMaxPhonesByCNPJ] = useState<boolean>(true);
-
-  /*useEffect(() => {
-    async function fetchStats() {
-      try {
-        const response = await fetch('/api/stats');
-        if (!response.ok) throw new Error('Erro ao buscar estatísticas');
-        const data = await response.json();
-
-        //setUniqueCNPJs(data.uniqueCNPJs || 0);
-        //setLoadingCNPJs(false);
-
-        //setUniquePhones(data.uniquePhones || 0);
-        //setLoadingPhones(false);
-
-        //setCnpjsByState(data.cnpjsByState || []);
-        //setLoadingCnpjsByState(false);
-
-        //setPhonesByState(data.phonesByState || []);
-        //setLoadingPhonesByState(false);
-
-        //setPhonesByOperator(data.phonesByOperator || []);
-        //setLoadingPhonesByOperator(false);
-
-        //setOperatorsByState(data.operatorsByState || []);
-        //setLoadingOperatorsByState(false);
-
-        //setMaxOperatorByState(data.maxOperatorByState || []);
-        //setLoadingMaxOperatorByState(false);
-
-        //setMaxPhonesByOperator(data.maxPhonesByOperator || null);
-        //setLoadingMaxPhonesByOperator(false);
-
-        //setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
-        //setLoadingMaxPhonesByCNPJ(false);
-      } catch (err) {
-        console.error('Erro ao buscar estatísticas:', err);
-      }
-    }
-    fetchStats(); //
-  }, []);*/
+  const [loadingMeiCNPJs, setLoadingMeiCNPJs] = useState<boolean>(true);
+  const [loadingSimpleCNPJs, setLoadingSimpleCNPJs] = useState<boolean>(true);
 
   //COUNT CNPJ
   useEffect(() => {
@@ -107,12 +71,45 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/countcnpj');
         if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs');
         const data = await response.json();
-
         setUniqueCNPJs(data.uniqueCNPJs || 0);
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
       } finally {
         setLoadingCNPJs(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //COUNT CNPJ MEI
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpjmei');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs');
+        const data = await response.json();
+        setMeiCNPJs(data.meiCNPJs || 0);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      } finally {
+        setLoadingMeiCNPJs(false);
+      }
+    }
+    fetchStats();
+  }, []);
+ 
+  //COUNT CNPJ SIMPLE
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpjsimple');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs');
+        const data = await response.json();
+        setSimpleCNPJs(data.simpleCNPJs || 0);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      } finally {
+        setLoadingSimpleCNPJs(false);
       }
     }
     fetchStats();
@@ -125,9 +122,7 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/countphones');
         if (!response.ok) throw new Error('Erro ao calcular a contagem de Telefones');
         const data = await response.json();
-
         setUniquePhones(data.uniquePhones || 0);
-
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
       } finally {
@@ -144,7 +139,6 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/cnpjbystate');
         if (!response.ok) throw new Error('Erro ao buscar estatísticas de CNPJs');
         const data = await response.json();
-
         setCnpjsByState(data.cnpjsByState || 0);
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
@@ -162,7 +156,6 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/phonesbystate');
         if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones');
         const data = await response.json();
-
         setPhonesByState(data.phonesByState || 0);
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
@@ -180,10 +173,8 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/phonesbyoperator');
         if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones');
         const data = await response.json();
-
         setPhonesByOperator(data.phonesByOperator || 0);
         setMaxPhonesByOperator(data.maxPhonesByOperator || null);
-
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
       } finally {
@@ -201,9 +192,7 @@ export default function Page() {
           const response = await fetch('/api/stats/generalstatistics/phonesbycnpj');
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones por CNPJ');
           const data = await response.json();
-  
           setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
-  
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -220,9 +209,7 @@ export default function Page() {
           const response = await fetch('/api/stats/generalstatistics/operatorbystateraw');
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Operadoras por estados');
           const data = await response.json();
-  
           setOperatorsByState(data.operatorsByState || null);
-  
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -239,9 +226,7 @@ export default function Page() {
           const response = await fetch('/api/stats/generalstatistics/maxoperatorbystatemap');
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Operadoras por estados');
           const data = await response.json();
-  
           setMaxOperatorByState(data.maxOperatorByState || null);
-
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -279,14 +264,24 @@ export default function Page() {
       <div className="flex flex-col md:flex-row gap-4 max-w-6xl mx-auto w-full">
         <div className="flex flex-col md:w-1/4 bg-gray-400 p-4 rounded-lg">
           <h2 className="text-xl font-bold mt-2">Geral</h2>
+          
           <ul className="bg-white shadow-md rounded-lg p-4">
+
             <li>
               <strong>Quantidade de CNPJs:</strong> {loadingCNPJs ? <CircleLoading /> : uniqueCNPJs}
             </li>
             <li>
               <strong>Quantidade de Linhas:</strong> {loadingPhones ? <CircleLoading /> : uniquePhones}
             </li>
+            <li>
+              <strong>Quantidade de CNPJs MEI:</strong> {loadingMeiCNPJs ? <CircleLoading /> : meiCNPJs}
+            </li>
+            <li>
+              <strong>Quantidade de CNPJs Simples:</strong> {loadingSimpleCNPJs ? <CircleLoading /> : simpleCNPJs}
+            </li>
+
           </ul>
+          
         </div>
 
         <div className="flex flex-col md:w-3/4 gap-4">
