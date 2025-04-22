@@ -51,6 +51,8 @@ export default function Page() {
   const [maxPhonesByCNPJ, setMaxPhonesByCNPJ] = useState<CNPJCount | null>(null);
   const [meiCNPJs, setMeiCNPJs] = useState<number | null>(null);
   const [simpleCNPJs, setSimpleCNPJs] = useState<number | null>(null);
+  const [microEmpresaCNPJs, setMicroEmpresaCNPJs] = useState<number | null>(null);
+  const [pequenoPorteCNPJs, setPequenoPorteCNPJs] = useState<number | null>(null);
 
   const [loadingCNPJs, setLoadingCNPJs] = useState<boolean>(true);
   const [loadingPhones, setLoadingPhones] = useState<boolean>(true);
@@ -63,6 +65,8 @@ export default function Page() {
   const [loadingMaxPhonesByCNPJ, setLoadingMaxPhonesByCNPJ] = useState<boolean>(true);
   const [loadingMeiCNPJs, setLoadingMeiCNPJs] = useState<boolean>(true);
   const [loadingSimpleCNPJs, setLoadingSimpleCNPJs] = useState<boolean>(true);
+  const [loadingMicroEmpresaCNPJs, setLoadingMicroEmpresaCNPJs] = useState<boolean>(true);
+  const [loadingPequenoPorteCNPJs, setLoadingPequenoPorteCNPJs] = useState<boolean>(true);
 
   //COUNT CNPJ
   useEffect(() => {
@@ -110,6 +114,40 @@ export default function Page() {
         console.error('Erro ao buscar estatísticas:', err);
       } finally {
         setLoadingSimpleCNPJs(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //COUNT CNPJ MICROEMPRESA
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpjmicro');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs Micro Empresa');
+        const data = await response.json();
+        setMicroEmpresaCNPJs(data.microEmpresaCNPJs || 0);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      } finally {
+        setLoadingMicroEmpresaCNPJs(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //COUNT CNPJ PEQUENO PORTE
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpjsmallsize');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs Pequeno Porte');
+        const data = await response.json();
+        setPequenoPorteCNPJs(data.pequenoPorteCNPJs || 0);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      } finally {
+        setLoadingPequenoPorteCNPJs(false);
       }
     }
     fetchStats();
@@ -266,18 +304,24 @@ export default function Page() {
           <h2 className="text-xl font-bold mt-2">Geral</h2>
           
           <ul className="bg-white shadow-md rounded-lg p-4">
-
+            <li>
+              <strong>Número de Linhas:</strong> {loadingPhones ? <CircleLoading /> : uniquePhones}
+            </li>
+            
             <li>
               <strong>Quantidade de CNPJs:</strong> {loadingCNPJs ? <CircleLoading /> : uniqueCNPJs}
             </li>
             <li>
-              <strong>Quantidade de Linhas:</strong> {loadingPhones ? <CircleLoading /> : uniquePhones}
+              <strong>MEI:</strong> {loadingMeiCNPJs ? <CircleLoading /> : meiCNPJs}
             </li>
             <li>
-              <strong>Quantidade de CNPJs MEI:</strong> {loadingMeiCNPJs ? <CircleLoading /> : meiCNPJs}
+              <strong>Simples:</strong> {loadingSimpleCNPJs ? <CircleLoading /> : simpleCNPJs}
             </li>
             <li>
-              <strong>Quantidade de CNPJs Simples:</strong> {loadingSimpleCNPJs ? <CircleLoading /> : simpleCNPJs}
+              <strong>Micro Empresa:</strong> {loadingMicroEmpresaCNPJs ? <CircleLoading /> : microEmpresaCNPJs}
+            </li>
+            <li>
+              <strong>Pequeno Porte:</strong> {loadingPequenoPorteCNPJs ? <CircleLoading /> : pequenoPorteCNPJs}
             </li>
 
           </ul>
