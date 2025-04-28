@@ -319,6 +319,7 @@ export default function Page() {
             <li>
               <strong>Simples:</strong> {loadingSimpleCNPJs ? <CircleLoading /> : simpleCNPJs}
             </li>
+            
             <h3>Porte Empresa</h3>
             <li>
               <strong>Micro Empresa:</strong> {loadingMicroEmpresaCNPJs ? <CircleLoading /> : microEmpresaCNPJs}
