@@ -312,7 +312,7 @@ export default function Page() {
               <strong>Quantidade de CNPJs:</strong> {loadingCNPJs ? <CircleLoading /> : uniqueCNPJs}
             </li>
 
-            <h3>Opção</h3>
+            <h2>Opção</h2>
             <li>
               <strong>MEI:</strong> {loadingMeiCNPJs ? <CircleLoading /> : meiCNPJs}
             </li>
@@ -320,7 +320,7 @@ export default function Page() {
               <strong>Simples:</strong> {loadingSimpleCNPJs ? <CircleLoading /> : simpleCNPJs}
             </li>
             
-            <h3>Porte Empresa</h3>
+            <h2>Porte Empresa</h2>
             <li>
               <strong>Micro Empresa:</strong> {loadingMicroEmpresaCNPJs ? <CircleLoading /> : microEmpresaCNPJs}
             </li>
