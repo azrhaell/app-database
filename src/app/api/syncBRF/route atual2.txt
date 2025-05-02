@@ -36,6 +36,19 @@ export async function POST(req: Request) {
     const headerMapping: Record<string, string> = {};
     let organizationsData: {
       cnpj: string;
+
+      companyname: string;
+      businessname: string;
+      neighborhood: string;
+      city: string;
+      state: string;
+      cep: string;
+      ddd1: string;
+      phone1: string;
+      phone2: string;
+
+      qualifyresponsible: string;
+
       rfstatus: string;
       legalnature: string;
       companysize: string;
@@ -61,6 +74,18 @@ export async function POST(req: Request) {
           if (cnpj) {
             organizationsData.push({
               cnpj,
+
+              companyname: data["RAZAO_SOCIAL"] || "",
+              businessname: data["NOME_FANTASIA"] || "",
+              neighborhood: data["BAIRRO"] || "",
+              city: data["MUNICIPIO"] || "",
+              state: data["UF"] || "",
+              cep: data["CEP"] || "",
+              ddd1: data["DDD1"] || "",
+              phone1: data["TELEFONE1"] || "",
+              phone2: data["TELEFONE2"] || "",
+              qualifyresponsible: data["QUALIFICACAO_RESPONSAVEL"] || "",
+
               rfstatus: data["SITUACAO_CADASTRAL"] || "",
               legalnature: data["NATUREZA_JURIDICA"] || "",
               companysize: data["PORTE_EMPRESA"] || "",
@@ -107,28 +132,33 @@ async function processBatch(batch: any[]) {
 
   try {
     for (const org of batch) {
-      //console.log(`🔍 Atualizando CNPJ: ${org.cnpj}...`);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const result = await prisma.organizations.updateMany({
-        where: {
-          cnpj: {
-            equals: org.cnpj.trim(), // Remove espaços em branco extras
+      try {
+        await prisma.organizations.updateMany({
+          where: {
+            cnpj: org.cnpj.trim(),
           },
-        },
-        data: {
-          rfstatus: org.rfstatus,
-          legalnature: org.legalnature,
-          companysize: org.companysize,
-          optionalsize: org.optionalsize,
-          optionmei: org.optionmei,
-        },
-      });
-
-      // 🔹 Verifica se algum registro foi atualizado
-      /*if (result.count >= 1) {
-        console.warn(`✅ Registro encontrado para CNPJ: ${org.cnpj}`);
-      }*/
-
+          data: {
+            companyname: org.companyname,
+            businessname: org.businessname,
+            neighborhood: org.neighborhood,
+            city: org.city,
+            state: org.state,
+            cep: org.cep,
+            ddd1: org.ddd1,
+            phone1: org.phone1,
+            phone2: org.phone2,
+            qualifyresponsible: org.qualifyresponsible,
+            rfstatus: org.rfstatus,
+            legalnature: org.legalnature,
+            companysize: org.companysize,
+            optionalsize: org.optionalsize,
+            optionmei: org.optionmei,
+          },
+        });
+      } catch (err) {
+        console.error(`❌ Erro ao atualizar o CNPJ ${org.cnpj}:`, err);
+        console.warn('🔍 Dados recebidos:', JSON.stringify(org, null, 2));
+      }
     }
 
     console.log(`✅ Lote de registros atualizado com sucesso.`);

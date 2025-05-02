@@ -125,47 +125,79 @@ export async function POST(req: Request) {
   }
 }
 
+
+
 // 📌 Função para processar lotes de registros de forma eficiente
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function checkFieldLengths(org: any) {
+  const fieldLimits: Record<string, number> = {
+    companyname: 255,
+    businessname: 255,
+    neighborhood: 100,
+    city: 100,
+    state: 2,
+    cep: 8,
+    ddd1: 3,
+    phone1: 13,
+    phone2: 13,
+    qualifyresponsible: 100,
+    rfstatus: 10,
+    legalnature: 255,
+    companysize: 255,
+  };
+
+  for (const [field, limit] of Object.entries(fieldLimits)) {
+    const value = org[field];
+
+    if (value === null || value === undefined) {
+      console.warn(`⚠️ Campo '${field}' está com valor nulo ou indefinido.`);
+    } else if (typeof value === "string" && value.length > limit) {
+      console.warn(`⚠️ Campo '${field}' excedeu o limite (${limit}): valor="${value}" (${value.length} caracteres)`);
+    }
+  }
+
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function safeString(value: any, maxLength: number) {
+  if (typeof value !== 'string') return '';
+  return value.length > maxLength ? value.slice(0, maxLength) : value;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function processBatch(batch: any[]) {
   console.log(`🔄 Processando lote de ${batch.length} registros...`);
 
   try {
     for (const org of batch) {
-      //console.log(`🔍 Atualizando CNPJ: ${org.cnpj}...`);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const result = await prisma.organizations.updateMany({
-        where: {
-          cnpj: {
-            equals: org.cnpj.trim(), // Remove espaços em branco extras
+      try {
+        checkFieldLengths(org); // ← Verifica antes de salvar
+        await prisma.organizations.updateMany({
+          where: {
+            cnpj: org.cnpj.trim(),
           },
-        },
-        data: {
-
-          companyname: org.companyname,
-          businessname: org.businessname,
-          neighborhood: org.neighborhood,
-          city: org.city,
-          state: org.state,
-          cep: org.cep,
-          ddd1: org.ddd1,
-          phone1: org.phone1,
-          phone2: org.phone2,
-          qualifyresponsible: org.qualifyresponsible,
-
-          rfstatus: org.rfstatus,
-          legalnature: org.legalnature,
-          companysize: org.companysize,
-          optionalsize: org.optionalsize,
-          optionmei: org.optionmei,
-        },
-      });
-
-      // 🔹 Verifica se algum registro foi atualizado
-      /*if (result.count >= 1) {
-        console.warn(`✅ Registro encontrado para CNPJ: ${org.cnpj}`);
-      }*/
-
+          data: {
+            companyname: safeString(org.companyname,255),
+            businessname: safeString(org.businessname,255),
+            neighborhood: safeString(org.neighborhood,100),
+            city: safeString(org.city,100),
+            state: safeString(org.state,2),
+            cep: safeString(org.cep,8),
+            ddd1: safeString(org.ddd1,2),
+            phone1: safeString(org.phone1,13),
+            phone2: safeString(org.phone2,13),
+            qualifyresponsible: safeString(org.qualifyresponsible,100),
+            rfstatus: safeString(org.rfstatus,10),
+            legalnature: safeString(org.legalnature,255),
+            companysize: safeString(org.companysize,255),
+            optionalsize: org.optionalsize,
+            optionmei: org.optionmei,
+          },
+        });
+      } catch (err) {
+        console.error(`❌ Erro ao atualizar o CNPJ ${org.cnpj}:`, err);
+        console.warn('🔍 Dados recebidos:', JSON.stringify(org, null, 2));
+      }
     }
 
     console.log(`✅ Lote de registros atualizado com sucesso.`);
