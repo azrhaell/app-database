@@ -134,7 +134,7 @@ model organizations {
   cnaecodesecondary             String?         @db.VarChar(255)
   cnaedescription               String?         @db.VarChar(255)
   cnaedescriptionsecondary      String?         @db.VarChar(255)
-  companysize                   String?         @db.VarChar(100)
+  companysize                   String?         @db.VarChar(255)
   datacreated_at                DateTime?
   dataupdated_at                DateTime?
   daterfstatus                  DateTime?
@@ -146,7 +146,7 @@ model organizations {
   excludedatesize               DateTime?
   fax                           String?         @db.VarChar(13)
   instalationdate               DateTime?
-  legalnature                   String?         @db.VarChar(150)
+  legalnature                   String?         @db.VarChar(255)
   mobilephone1                  String?         @db.VarChar(13) @unique
   mobilephone2                  String?         @db.VarChar(13)
   operatorname                  String?         @db.VarChar(50)
