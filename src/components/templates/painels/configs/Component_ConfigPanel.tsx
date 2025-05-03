@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import React, { useState } from 'react';
 
 const Component_ConfigPanel = () => {
@@ -25,22 +26,32 @@ const Component_ConfigPanel = () => {
   };
 
   return (
-    <div>
-      <h2>Configurações</h2>
-      <button
-        onClick={handleAdjustOperatorName}
-        disabled={loading}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        {loading ? 'Corrigindo...' : 'Operadora'}
-      </button>
+    <>
+      <div>
+        <h2>Normalização de Dados</h2>
+        <button
+          onClick={handleAdjustOperatorName}
+          disabled={loading}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          {loading ? 'Corrigindo...' : 'Operadora'}
+        </button>
 
-      {message && (
-        <p className={`mt-2 ${message.includes('sucesso') ? 'text-green-600' : 'text-red-600'}`}>
-          {message}
-        </p>
-      )}
-    </div>
+        {message && (
+          <p className={`mt-2 ${message.includes('sucesso') ? 'text-green-600' : 'text-red-600'}`}>
+            {message}
+          </p>
+        )}
+      </div>
+      <div>
+        <h2>Arquivos</h2>
+        <Link href="/files">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Listar Arquivos
+          </button>
+        </Link>
+      </div>
+    </>
   );
 };
 
