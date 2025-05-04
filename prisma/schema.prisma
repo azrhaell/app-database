@@ -149,6 +149,8 @@ model organizations {
   legalnature                   String?         @db.VarChar(255)
   mobilephone1                  String?         @db.VarChar(13) @unique
   mobilephone2                  String?         @db.VarChar(13)
+  ported                        Boolean?        @default(false)
+  previousoperator              String?         @db.VarChar(50)
   operatorname                  String?         @db.VarChar(50)
   optionalsize                  Boolean?         @default(false)
   optiondatesize                DateTime?
@@ -247,4 +249,19 @@ model companysizes {
   pendant        Boolean? @default(false)
 
   version        Int?     @default(0)
+}
+
+model portedslist {
+  idPortedList Int      @id @default(autoincrement())
+
+  cnpj             String          @db.VarChar(14)
+  mobilephone1     String          @db.VarChar(13)
+  actualoperator   String          @db.VarChar(50)
+  previousoperator String          @db.VarChar(50)
+  porteddate       DateTime?
+
+  createdat    DateTime @default(now())
+  updatedat    DateTime @updatedAt
+
+  version      Int?     @default(0)
 }

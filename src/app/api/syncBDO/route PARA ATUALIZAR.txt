@@ -98,32 +98,68 @@ export async function POST(req: Request) {
 
     console.log(`🔄 Comparando ${records.length} registros com a base de dados...`);
 
-    // 🔹 Atualiza os registros na tabela organizations
     const batchSize = 10000;
+    const datahoraDate = (dh: string) => new Date(dh);
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
 
-      await prisma.$transaction(
-        batch.map(({ number, datahora, operadora }) =>
-          prisma.organizations.updateMany({
-            where: {
-              mobilephone1: number,
-              startofcontract: { lt: new Date(datahora) }, // 🔹 Só atualiza se startofcontract for mais antigo que datahora
-            },
+      const numbers = batch.map(r => r.number);
+      const existingOrgs = await prisma.organizations.findMany({
+        where: {
+          mobilephone1: { in: numbers },
+        },
+        select: {
+          id: true,
+          cnpj: true,
+          mobilephone1: true,
+          startofcontract: true,
+          operatorname: true,
+        },
+      });
+
+      const updates = [];
+      const portedRecords = [];
+
+      for (const record of batch) {
+        const match = existingOrgs.find(org => org.mobilephone1 === record.number);
+        if (!match) continue;
+
+        const newDate = datahoraDate(record.datahora);
+        if (match.startofcontract >= newDate) continue;
+
+        updates.push(
+          prisma.organizations.update({
+            where: { id: match.id },
             data: {
-              startofcontract: new Date(datahora),
-              operatorname: operadora,
+              startofcontract: newDate,
+              operatorname: record.operadora,
               ported: true,
             },
           })
-        )
-      );
+        );
 
-      console.log(`✅ Atualizados ${batch.length} registros (${i + batch.length}/${records.length})`);
+        portedRecords.push({
+          cnpj: match.cnpj,
+          mobilephone1: match.mobilephone1,
+          porteddate: newDate,
+          actualoperator: record.operadora,
+          previousoperator: match.operatorname,
+        });
+      }
+
+      await prisma.$transaction([
+        ...updates,
+        ...portedRecords.map((pr) =>
+          prisma.portedslist.create({
+            data: pr,
+          })
+        ),
+      ]);
+
+      console.log(`✅ Atualizados ${updates.length} registros (${i + batch.length}/${records.length})`);
     }
 
-    // 🔹 Atualiza o status do arquivo na tabela listfiles
     await prisma.listfiles.update({
       where: { idFile: file.idFile },
       data: { sincronized: true },
