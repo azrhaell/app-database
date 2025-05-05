@@ -47,8 +47,6 @@ export async function POST(req: Request) {
 
     // 🔹 Filtragem dos registros pelos DDDs permitidos
     const dddsPermitidos = ["21", "22", "24", "27", "28"];
-
-    // 🔹 Criando novo arquivo apenas com os DDDs permitidos
     const filteredFilePath = absolutePath.replace(".csv", "_filtered.csv");
     const writeStream = fs.createWriteStream(filteredFilePath);
     writeStream.write("number,operadora,datahora\n");
@@ -104,12 +102,12 @@ export async function POST(req: Request) {
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
 
-      await prisma.$transaction(
+      const results = await Promise.allSettled(
         batch.map(({ number, datahora, operadora }) =>
           prisma.organizations.updateMany({
             where: {
               mobilephone1: number,
-              startofcontract: { lt: new Date(datahora) }, // 🔹 Só atualiza se startofcontract for mais antigo que datahora
+              startofcontract: { lt: new Date(datahora) },
             },
             data: {
               startofcontract: new Date(datahora),
@@ -120,10 +118,24 @@ export async function POST(req: Request) {
         )
       );
 
-      console.log(`✅ Atualizados ${batch.length} registros (${i + batch.length}/${records.length})`);
+      let successCount = 0;
+      let failureCount = 0;
+
+      results.forEach((result, idx) => {
+        const record = batch[idx];
+        if (result.status === "fulfilled") {
+          successCount++;
+        } else {
+          failureCount++;
+          console.error(`❌ Erro ao atualizar número ${record.number} (operadora: ${record.operadora}, data: ${record.datahora}):`);
+          console.error(result.reason);
+        }
+      });
+
+      console.log(`✅ Batch concluído: ${successCount} atualizados com sucesso, ${failureCount} com erro (${i + batch.length}/${records.length})`);
     }
 
-    // 🔹 Atualiza o status do arquivo na tabela listfiles
+    // 🔹 Atualiza o status do arquivo
     await prisma.listfiles.update({
       where: { idFile: file.idFile },
       data: { sincronized: true },
@@ -133,6 +145,7 @@ export async function POST(req: Request) {
       message: `Sincronização concluída. ${records.length} registros processados.`,
       filteredFilePath,
     });
+
   } catch (error) {
     console.error("❌ Erro na sincronização:", error);
     return NextResponse.json({ error: "Erro ao processar a sincronização." }, { status: 500 });

@@ -116,7 +116,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     const created = await prisma.$transaction([
       prisma.organizations.createMany({
         data: normalizedData.map((item) => ({
-          cnpj: typeof item.CNPJ === 'string' ? item.CNPJ.slice(0, 14) : '',
+          cnpj: typeof item.CNPJ === 'string' ? item.CNPJ.slice(0, 14) : typeof item.CNPJ_CLIENTE === 'string' ? item.CNPJ_CLIENTE.slice(0, 14) : '',
           companyname: typeof item.RAZAO_SOCIAL === 'string' ? item.RAZAO_SOCIAL.slice(0, 254) : 
                        typeof item.DSNOMERAZAO === 'string' ? item.DSNOMERAZAO.slice(0, 254) : '',
           startofcontract: typeof item.FIDELIDADE === 'string' || typeof item.FIDELIDADE === 'number' ? 
@@ -124,7 +124,7 @@ export async function POST(req: Request): Promise<NextResponse> {
           typeof item['INICIO CONTRATO'] === 'string' || typeof item['INICIO CONTRATO'] === 'number' ?
           parseDate(item['INICIO CONTRATO']) : 
           new Date('1901-01-01 00:00:00'),
-          mobilephone1: typeof item.N_LINHAS === 'string' ? item.N_LINHAS.slice(0, 12) : typeof item.NUMERO === 'string' ? item.NUMERO.slice(0, 12) : '',
+          mobilephone1: typeof item.N_LINHAS === 'string' ? item.N_LINHAS.slice(0, 12) : typeof item.NUMERO === 'string' ? item.NUMERO.slice(0, 12) : typeof item.NR_TELEFONE === 'string' ? item.NR_TELEFONE.slice(0, 12) : '',
           operatorname: typeof item.OPERADORA === 'string' ? item.OPERADORA.slice(0, 49) : typeof item.NOMEOPERADORA === 'string' ? item.NOMEOPERADORA.slice(0, 49) : '',
           state: typeof item.UF === 'string' ? item.UF.slice(0, 2) : typeof item.DSUF === 'string' ? item.DSUF.slice(0, 2) : '',
           cnaecode: typeof item.CNAE === 'string' ? item.CNAE.slice(0, 10) : '',
