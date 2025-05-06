@@ -59,6 +59,8 @@ model users {
   version           Int?            @default(0)
   companycreated    organizations[] @relation("createdcompany")
   companyupdated    organizations[] @relation("updatedcompany")
+  brfcreated        federalrevenue[] @relation("createdbrf")
+  brfupdated        federalrevenue[] @relation("updatedbrf")  
   creator           users?          @relation("CreatedBy", fields: [creatorId], references: [idUser])
   created           users[]         @relation("CreatedBy")
   inactivator       users?          @relation("InactivatedBy", fields: [inactivatorId], references: [idUser])
@@ -87,118 +89,205 @@ model persons {
 }
 
 model organizations {
-  idCompany                     Int             @id @default(autoincrement())
-  cnpj                          String          @db.VarChar(14)
-  statenumber                   String?         @db.VarChar(14)
-  municipalnumber               String?         @db.VarChar(14)
-  duns                          String?         @db.VarChar(9)
-  companyname                   String?          @default("Razão Social") @db.VarChar(255)
-  businessname                  String?         @default("Nome Fantasia") @db.VarChar(255)
-  branchoffice                  Boolean?         @default(false)
-  isclient                      Boolean?         @default(false)
-  idClient                      String?         @db.VarChar(20)
-  address                       String?          @default("Rua A") @db.VarChar(100)
-  number                        String?         @db.VarChar(20)
-  complement                    String?         @db.VarChar(50)
-  neighborhood                  String?          @db.VarChar(100)
-  city                          String?          @default("Rio de Janeiro") @db.VarChar(100)
-  state                         String?          @default("RJ") @db.VarChar(2)
-  country                       String?          @default("Brasil") @db.VarChar(30)
-  cep                           String?         @db.VarChar(8)
-  email1                        String?         @unique @db.VarChar(60)
-  numberlines                   Int?            @default(0)
-  fidelity                      DateTime?
-  blcoverage                    String?         @default("0") @db.VarChar(10)
-  actualactivelineoperator      String?         @default("0") @db.VarChar(10)
-  linepropensitywithcompetition String?         @default("0") @db.VarChar(10)
-  monthbilling                  Float?          @default(0)
-  mobilecredits                 Int?            @default(0)
-  tower                         String?         @db.VarChar(10)
-  businessarea                  String?         @db.VarChar(20)
-  rfstatus                      String?         @db.VarChar(10)
-  semaphore                     String?         @db.VarChar(10)
-  serasamessage                 String?         @db.VarChar(10)
-  idrelatedorganizations        Int?
-  openingdate                   DateTime?
-  creatorId                     Int
-  updaterId                     Int?
-  disabled                      Boolean?         @default(true)
-  pendant                       Boolean?        @default(false)
-  version                       Int?            @default(0)
-  createdat                     DateTime?        @default(now())
-  updatedat                     DateTime?        @updatedAt
-  QT                            Int?            @default(0)
-  base                          Int?            @default(0)
-  capital                       Float?          @default(0)
-  cnaecode                      String?         @db.VarChar(10)
-  cnaecodesecondary             String?         @db.VarChar(255)
-  cnaedescription               String?         @db.VarChar(255)
-  cnaedescriptionsecondary      String?         @db.VarChar(255)
-  companysize                   String?         @db.VarChar(255)
-  datacreated_at                DateTime?
-  dataupdated_at                DateTime?
-  daterfstatus                  DateTime?
-  ddd1                          String?          @db.VarChar(2)
-  ddd2                          String?         @db.VarChar(2)
-  ddd_fax                       String?         @db.VarChar(2)
-  doctype                       String?         @db.VarChar(10)
-  dstitle                       String?         @db.VarChar(20)
-  excludedatesize               DateTime?
-  fax                           String?         @db.VarChar(13)
-  instalationdate               DateTime?
-  legalnature                   String?         @db.VarChar(255)
-  mobilephone1                  String?         @db.VarChar(13) @unique
-  mobilephone2                  String?         @db.VarChar(13)
-  ported                        Boolean?        @default(false)
-  previousoperator              String?         @db.VarChar(50)
-  operatorname                  String?         @db.VarChar(50)
-  optionalsize                  Boolean?         @default(false)
-  optiondatesize                DateTime?
-  optionmei                     Boolean?         @default(false)
-  partners                      String?         @db.VarChar(255)
-  phone1                        String?         @db.VarChar(13)
-  phone2                        String?         @db.VarChar(13)
-  qualifyresponsible            String?         @db.VarChar(100)
-  reasonrfstatus                String?         @db.VarChar(10)
-  specialsituation              String?         @db.VarChar(50)
-  specialsituationdate          DateTime?
-  startofcontract               DateTime?
-  status                        String?         @db.VarChar(20)
-  typestreet                    String?         @db.VarChar(10)
-  creator                       users           @relation("createdcompany", fields: [creatorId], references: [idUser])
-  relatedsorganization          organizations?  @relation("relatedorganizations", fields: [idrelatedorganizations], references: [idCompany])
-  relatedsorganizations         organizations[] @relation("relatedorganizations")
-  updater                       users?          @relation("updatedcompany", fields: [updaterId], references: [idUser])
+  idCompany      Int       @id @default(autoincrement())
+  cnpj           String    @db.VarChar(14)
+  statenumber    String?   @db.VarChar(14)
+  municipalnumber String?  @db.VarChar(14)
+  duns           String?   @db.VarChar(9)
+  companyname    String?   @default("Razão Social") @db.VarChar(255)
+  businessname   String?   @default("Nome Fantasia") @db.VarChar(255)
+  branchoffice   Boolean?  @default(false)
+  isclient       Boolean?  @default(false)
+  idClient       String?   @db.VarChar(20)
+  address        String?   @default("Rua A") @db.VarChar(255)
+  number         String?   @db.VarChar(20)
+  complement     String?   @db.VarChar(50)
+  neighborhood   String?   @db.VarChar(100)
+  city           String?   @default("Rio de Janeiro") @db.VarChar(100)
+  state          String?   @default("RJ") @db.VarChar(2)
+  country        String?   @default("Brasil") @db.VarChar(30)
+  cep            String?   @db.VarChar(8)
+  email1         String?   @db.VarChar(60)
+  numberlines    Int?      @default(0)
+  fidelity       DateTime?
+  blcoverage     String?   @default("0") @db.VarChar(10)
+  actualactivelineoperator String? @default("0") @db.VarChar(10)
+  linepropensitywithcompetition String? @default("0") @db.VarChar(10)
+  monthbilling   Float?    @default(0)
+  mobilecredits  Int?      @default(0)
+  tower          String?   @db.VarChar(10)
+  businessarea   String?   @db.VarChar(20)
+  rfstatus       String?   @db.VarChar(10)
+  semaphore      String?   @db.VarChar(10)
+  serasamessage  String?   @db.VarChar(10)
+  openingdate    DateTime?
+  creatorId      Int
+  updaterId      Int?
+  disabled       Boolean?  @default(true)
+  pendant        Boolean?  @default(false)
+  version        Int?      @default(0)
+  createdat      DateTime? @default(now())
+  updatedat      DateTime? @updatedAt
+  QT             Int?      @default(0)
+  base           Int?      @default(0)
+  capital        Float?    @default(0)
+  cnaecode       String?   @db.VarChar(10)
+  cnaecodesecondary String? @db.VarChar(255)
+  cnaedescription String?  @db.VarChar(255)
+  cnaedescriptionsecondary String? @db.VarChar(255)
+  companysize    String?   @db.VarChar(255)
+  datacreated_at DateTime?
+  dataupdated_at DateTime?
+  daterfstatus   DateTime?
+  ddd1           String?   @db.VarChar(2)
+  ddd2           String?   @db.VarChar(2)
+  ddd_fax        String?   @db.VarChar(2)
+  doctype        String?   @db.VarChar(10)
+  dstitle        String?   @db.VarChar(20)
+  excludedatesize DateTime?
+  fax            String?   @db.VarChar(13)
+  instalationdate DateTime?
+  legalnature    String?   @db.VarChar(255)
+  optionalsize   Boolean?  @default(false)
+  optiondatesize DateTime?
+  optionmei      Boolean?  @default(false)
+  partners       String?   @db.VarChar(255)
+  phone1         String?   @db.VarChar(13)
+  phone2         String?   @db.VarChar(13)
+  qualifyresponsible String? @db.VarChar(100)
+  reasonrfstatus String?   @db.VarChar(10)
+  specialsituation String? @db.VarChar(50)
+  specialsituationdate DateTime?
+  status         String?   @db.VarChar(20)
+  typestreet     String?   @db.VarChar(10)
+
+  creator        users      @relation("createdcompany", fields: [creatorId], references: [idUser])
+  updater        users?     @relation("updatedcompany", fields: [updaterId], references: [idUser])
+
+  relatednumbers numbers[]  @relation("relatednumber")
 
   @@index([cnpj, companyname, email1, phone1])
 }
 
-model listfiles {
-  idFile  Int      @id @default(autoincrement())
-  name    String   @db.VarChar(255)
-  path    String?   @db.VarChar(255)
-  qtdregisters Int? @default(0)
-  extension    String?   @default("") @db.VarChar(10)
-  origin      String?   @default("") @db.VarChar(10)
-  created DateTime @default(now())
-  updated DateTime? @updatedAt
-  sincronized Boolean  @default(false)
-  version     Int?     @default(0)
+model federalrevenue {
+  idCompany      Int       @id @default(autoincrement())
+  cnpj           String    @db.VarChar(14)
+
+  branchoffice   Boolean?  @default(false)
+  companyname    String?   @default("Razão Social") @db.VarChar(255)
+  businessname   String?   @default("Nome Fantasia") @db.VarChar(255)
+
+  rfstatus       String?   @db.VarChar(10)
+  daterfstatus   DateTime?
+  reasonrfstatus String?   @db.VarChar(10)
+  excludedatesize DateTime?
+  semaphore      String?   @db.VarChar(10)
+  serasamessage  String?   @db.VarChar(10)
+  legalnature    String?   @db.VarChar(255)
+  openingdate    DateTime?
+  creatorId      Int
+  updaterId      Int?
+  disabled       Boolean?  @default(true)
+  pendant        Boolean?  @default(false)
+  version        Int?      @default(0)
+  createdat      DateTime? @default(now())
+  updatedat      DateTime? @updatedAt
+  cnaecode       String?   @db.VarChar(10)
+  cnaedescription String?  @db.VarChar(255)
+  cnaedescriptionsecondary String? @db.VarChar(255)
+
+  typestreet     String?   @db.VarChar(10)
+  address        String?   @default("Rua A") @db.VarChar(100)
+  number         String?   @db.VarChar(20)
+  complement     String?   @db.VarChar(50)
+  neighborhood   String?   @db.VarChar(100)
+  cep            String?   @db.VarChar(8)
+  city           String?   @default("Rio de Janeiro") @db.VarChar(100)
+  state          String?   @default("RJ") @db.VarChar(2)
+  country        String?   @default("Brasil") @db.VarChar(30)
+  ddd1           String?   @db.VarChar(2)
+  phone1         String?   @db.VarChar(13)
+  ddd2           String?   @db.VarChar(2)
+  phone2         String?   @db.VarChar(13)
+  ddd_fax        String?   @db.VarChar(2)
+  fax            String?   @db.VarChar(13)
+  email1         String?   @db.VarChar(60)
+
+  qualifyresponsible String? @db.VarChar(100)
+  capital        Float?    @default(0)
+  companysize    String?   @db.VarChar(255)
+
+  optionalsize   Boolean?  @default(false)
+  optiondatesize DateTime?
+  optionmei      Boolean?  @default(false)
+  partners       String?   @db.VarChar(255)
+
+  specialsituation String? @db.VarChar(50)
+  specialsituationdate DateTime?
+
+  creator        users      @relation("createdbrf", fields: [creatorId], references: [idUser])
+  updater        users?     @relation("updatedbrf", fields: [updaterId], references: [idUser])
+
+  @@index([cnpj, companyname, email1, phone1])
+}
+
+model numbers {
+  idNumber        Int        @id @default(autoincrement())
+  mobilephone1    String?    @db.VarChar(13) @unique
+  mobilephone2    String?    @db.VarChar(13)
+  startofcontract DateTime?
+  ported          Boolean?   @default(false)
+  previousoperator String?   @db.VarChar(50)
+  operatorname    String?    @db.VarChar(50)
+
+  idCompany       Int
+  idOperator      Int?
+  idBdo           Int?       @unique
+
+  createdat       DateTime   @default(now())
+  updatedat       DateTime   @updatedAt
+  disabled        Boolean    @default(true)
+  pendant         Boolean?   @default(false)
+  version         Int?       @default(0)
+
+  relatedcompany  organizations @relation("relatednumber", fields: [idCompany], references: [idCompany])
+  relatedoperator operators?    @relation("relatedoperator", fields: [idOperator], references: [idOperator])
+  relatedBdo      bdo?          @relation(fields: [idBdo], references: [idRegister])
+}
+
+model bdo {
+  idRegister     Int      @id @default(autoincrement())
+  number         String?  @db.VarChar(13) @unique
+  codeoperador   String?  @db.VarChar(2)
+  date           DateTime?
+
+  idOperator     Int?
+
+  createdat      DateTime @default(now())
+  updatedat      DateTime @updatedAt
+  disabled       Boolean  @default(true)
+  pendant        Boolean? @default(false)
+  version        Int?     @default(0)
+
+  relatedoperator     operators? @relation("relatedbdo", fields: [idOperator], references: [idOperator])
+  referencedByNumber  numbers?   @relation()
 }
 
 model operators {
-  idOperator   Int      @id @default(autoincrement())
-  name         String   @default("Nome") @db.VarChar(50) @unique
-  description  String?  @db.VarChar(255)
-  codeoperador String?  @db.VarChar(2)
-  codeantel    String?  @db.VarChar(2)
+  idOperator     Int      @id @default(autoincrement())
+  name           String   @default("Nome") @db.VarChar(50) @unique
+  description    String?  @db.VarChar(255)
+  codeoperador   String?  @db.VarChar(2)
+  codeantel      String?  @db.VarChar(2)
 
-  createdat    DateTime @default(now())
-  updatedat    DateTime @updatedAt
-  disabled     Boolean  @default(true)
-  pendant      Boolean? @default(false)
+  createdat      DateTime @default(now())
+  updatedat      DateTime @updatedAt
+  disabled       Boolean  @default(true)
+  pendant        Boolean? @default(false)
+  version        Int?     @default(0)
 
-  version      Int?     @default(0)
+  relatednumbers numbers[] @relation("relatedoperator")
+  relatedbdo     bdo[]     @relation("relatedbdo")
 }
 
 model codeddd {
@@ -251,6 +340,18 @@ model companysizes {
   version        Int?     @default(0)
 }
 
+model listfiles {
+  idFile  Int      @id @default(autoincrement())
+  name    String   @db.VarChar(255)
+  path    String?   @db.VarChar(255)
+  qtdregisters Int? @default(0)
+  extension    String?   @default("") @db.VarChar(10)
+  origin      String?   @default("") @db.VarChar(10)
+  created DateTime @default(now())
+  updated DateTime? @updatedAt
+  sincronized Boolean  @default(false)
+  version     Int?     @default(0)
+}
 model portedslist {
   idPortedList Int      @id @default(autoincrement())
 

@@ -28,7 +28,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Arquivo já sincronizado ou não cadastrado." }, { status: 404 });
     }
 
-    // 🔹 Detecta o delimitador do CSV
     const detectDelimiter = async (filePath: string): Promise<string> => {
       const fileStream = fs.createReadStream(filePath);
       const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
@@ -45,7 +44,6 @@ export async function POST(req: Request) {
     const delimiter = await detectDelimiter(absolutePath);
     console.log(`📌 Delimitador detectado: "${delimiter}"`);
 
-    // 🔹 Filtragem dos registros pelos DDDs permitidos
     const dddsPermitidos = ["21", "22", "24", "27", "28"];
     const filteredFilePath = absolutePath.replace(".csv", "_filtered.csv");
     const writeStream = fs.createWriteStream(filteredFilePath);
@@ -94,9 +92,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Nenhum dado válido encontrado no arquivo." }, { status: 400 });
     }
 
-    console.log(`🔄 Comparando ${records.length} registros com a base de dados...`);
+    console.log(`📌 Inserindo ${records.length} registros na tabela BDO...`);
 
-    // 🔹 Atualiza os registros na tabela organizations
     const batchSize = 10000;
 
     for (let i = 0; i < records.length; i += batchSize) {
@@ -104,15 +101,12 @@ export async function POST(req: Request) {
 
       const results = await Promise.allSettled(
         batch.map(({ number, datahora, operadora }) =>
-          prisma.organizations.updateMany({
-            where: {
-              mobilephone1: number,
-              startofcontract: { lt: new Date(datahora) },
-            },
+          prisma.bdo.create({
             data: {
-              startofcontract: new Date(datahora),
-              operatorname: operadora,
-              ported: true,
+              number,
+              date: new Date(datahora),
+              codeoperador: operadora,
+              disabled: false,
             },
           })
         )
@@ -127,15 +121,14 @@ export async function POST(req: Request) {
           successCount++;
         } else {
           failureCount++;
-          console.error(`❌ Erro ao atualizar número ${record.number} (operadora: ${record.operadora}, data: ${record.datahora}):`);
+          console.error(`❌ Erro ao inserir número ${record.number} (operadora: ${record.operadora}, data: ${record.datahora}):`);
           console.error(result.reason);
         }
       });
 
-      console.log(`✅ Batch concluído: ${successCount} atualizados com sucesso, ${failureCount} com erro (${i + batch.length}/${records.length})`);
+      console.log(`✅ Batch concluído: ${successCount} inseridos com sucesso, ${failureCount} com erro (${i + batch.length}/${records.length})`);
     }
 
-    // 🔹 Atualiza o status do arquivo
     await prisma.listfiles.update({
       where: { idFile: file.idFile },
       data: { sincronized: true },

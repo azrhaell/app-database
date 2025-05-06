@@ -34,8 +34,25 @@ export async function POST(req: Request) {
     console.log(`🔍 Delimitador detectado: '${delimiter}'`);
 
     const headerMapping: Record<string, string> = {};
-    let organizationsData: {
+    let federalrevenueData: {
       cnpj: string;
+      branchoffice: boolean;
+
+      //daterfstatus: Date;
+      reasonrfstatus: string;
+      //openingdate: Date;
+      cnaecode: string;
+      cnaedescription: string;
+      cnaedescriptionsecondary: string;
+      typestreet: string;
+      address: string;
+      number: string;
+      complement: string;
+      ddd_fax: string;
+      fax: string;
+      email1: string;
+      capital: string;
+      partners: string;
 
       companyname: string;
       businessname: string;
@@ -45,10 +62,9 @@ export async function POST(req: Request) {
       cep: string;
       ddd1: string;
       phone1: string;
+      ddd2: string;
       phone2: string;
-
       qualifyresponsible: string;
-
       rfstatus: string;
       legalnature: string;
       companysize: string;
@@ -72,8 +88,24 @@ export async function POST(req: Request) {
         .on("data", (data) => {
           const cnpj = data["CNPJ"] ? data["CNPJ"].replace(/\D/g, "") : "";
           if (cnpj) {
-            organizationsData.push({
+            federalrevenueData.push({
               cnpj,
+              branchoffice:  (data["MATRIZ_FILIAL"] || "").toUpperCase() === "filial" ? true : false,
+
+              reasonrfstatus: data["MOTIVO_SITUACAO_CADASTRAL"] || "",
+              cnaecode: data["CNAE_CODIGO"] || "",
+              cnaedescription: data["CNAE_FISCAL"] || "",
+              cnaedescriptionsecondary: data["CNAE_FISCAL_SECUNDARIA"] || "",
+              typestreet: data["TIPO_LOGRADOURO"] || "",
+              address: data["LOGRADOURO"] || "",
+              number: data["NUMERO"] || "",
+              complement: data["COMPLEMENTO"] || "",
+              ddd2: data["DDD2"] || "",
+              ddd_fax: data["DDD_FAX"] || "",
+              fax: data["FAX"] || "",
+              email1: data["CORREIO_ELETRONICO"] || "",
+              capital:  data["CAPITAL_SOCIAL"] || "",
+              partners: data["SOCIOS"] || "",
 
               companyname: data["RAZAO_SOCIAL"] || "",
               businessname: data["NOME_FANTASIA"] || "",
@@ -85,7 +117,6 @@ export async function POST(req: Request) {
               phone1: data["TELEFONE1"] || "",
               phone2: data["TELEFONE2"] || "",
               qualifyresponsible: data["QUALIFICACAO_RESPONSAVEL"] || "",
-
               rfstatus: data["SITUACAO_CADASTRAL"] || "",
               legalnature: data["NATUREZA_JURIDICA"] || "",
               companysize: data["PORTE_EMPRESA"] || "",
@@ -94,16 +125,16 @@ export async function POST(req: Request) {
             });
 
             // 🔹 Processa em lotes de 10.000 registros para evitar sobrecarga
-            if (organizationsData.length >= 10000) {
-              processBatch(organizationsData);
-              organizationsData = [];
+            if (federalrevenueData.length >= 10000) {
+              processBatch(federalrevenueData);
+              federalrevenueData = [];
             }
           }
         })
         .on("headers", (headers) => console.log("🔍 Cabeçalhos detectados:", headers))
         .on("end", async () => {
-          console.log(`✅ Leitura finalizada. Total de registros lidos: ${organizationsData.length}`);
-          if (organizationsData.length > 0) await processBatch(organizationsData);
+          console.log(`✅ Leitura finalizada. Total de registros lidos: ${federalrevenueData.length}`);
+          if (federalrevenueData.length > 0) await processBatch(federalrevenueData);
           resolve();
         })
         .on("error", (error) => {
@@ -131,6 +162,21 @@ function checkFieldLengths(org: any) {
   const fieldLimits: Record<string, number> = {
     companyname: 255,
     businessname: 255,
+
+    reasonrfstatus: 10,
+    cnaecode: 10,
+    cnaedescription: 255,
+    cnaedescriptionsecondary: 255,
+    typestreet: 10,
+    address: 255,
+    number: 20,
+    complement: 50,
+    ddd2: 2,
+    ddd_fax: 2,
+    fax: 13,
+    email1: 60,
+    partners: 255,
+
     neighborhood: 100,
     city: 100,
     state: 2,
@@ -170,13 +216,30 @@ async function processBatch(batch: any[]) {
     for (const org of batch) {
       try {
         checkFieldLengths(org); // ← Verifica antes de salvar
-        await prisma.organizations.updateMany({
+        await prisma.federalrevenue.updateMany({
           where: {
             cnpj: org.cnpj.trim(),
           },
           data: {
             companyname: safeString(org.companyname,255),
+            branchoffice: org.branchoffice,
             businessname: safeString(org.businessname,255),
+
+            reasonrfstatus: safeString(org.reasonrfstatus,10),
+            cnaecode: safeString(org.cnaecode, 10),
+            cnaedescription: safeString(org.cnaedescription, 255),
+            cnaedescriptionsecondary: safeString(org.cnaedescriptionsecondary, 255),
+            typestreet: safeString(org.typestreet, 10),
+            address: safeString(org.address, 255),
+            number: safeString(org.address, 20),
+            complement: safeString(org.complement, 50),
+            ddd2: safeString(org.ddd2, 2),
+            ddd_fax: safeString(org.ddd_fax, 2),
+            fax: safeString(org.fax, 13),
+            email1: safeString(org.email1, 60),
+            partners: safeString(org.partners, 255),
+            capital: org.capital,
+
             neighborhood: safeString(org.neighborhood,100),
             city: safeString(org.city,100),
             state: safeString(org.state,2),

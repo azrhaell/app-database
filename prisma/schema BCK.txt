@@ -1,0 +1,282 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model tenants {
+  idTenant    Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(30)
+  description String?  @db.VarChar(255)
+  version     Int?     @default(0)
+  disabled    Boolean  @default(true)
+  pendant     Boolean? @default(false)
+}
+
+model users {
+  idUser            Int             @id @default(autoincrement())
+  cpf               String          @unique @db.VarChar(11)
+  name              String          @default("Nome") @db.VarChar(50) @unique
+  surname           String?         @db.VarChar(50)
+  completename      String?         @db.VarChar(150)
+  password          String          @db.VarChar(64)
+  comments          String?         @db.VarChar(255)
+  superiorId        Int?
+  address           String          @default("Rua A") @db.VarChar(100)
+  number            String?         @db.VarChar(20)
+  complement        String?         @db.VarChar(50)
+  neighborhood      String          @db.VarChar(50)
+  city              String          @default("Rio de Janeiro") @db.VarChar(30)
+  state             String          @default("RJ") @db.VarChar(2)
+  country           String          @default("Brasil") @db.VarChar(20)
+  cep               String?         @db.VarChar(8)
+  email1            String          @unique @db.VarChar(60)
+  mobile_phone1     String          @unique @db.VarChar(13)
+  mobile_phone2     String?         @db.VarChar(13)
+  createdat         DateTime        @default(now())
+  creatorId         Int?
+  updatedat         DateTime        @updatedAt
+  updaterId         Int?
+  suspendedat       DateTime?
+  suspenderId       Int?
+  inactivatedat     DateTime?
+  inactivatorId     Int?
+  disabled          Boolean         @default(true)
+  pendant           Boolean?        @default(false)
+  pathphoto         String?
+  validated         Boolean         @default(false)
+  validatedat       DateTime?
+  validationexpires DateTime?
+  wordkey           String          @default("Paravra-Secreta")
+  birthdate         DateTime?
+  hiringdate        DateTime?
+  email2            String?         @db.VarChar(60)
+  email3            String?         @db.VarChar(60)
+  mobile_phone3     String?         @db.VarChar(13)
+  version           Int?            @default(0)
+  companycreated    organizations[] @relation("createdcompany")
+  companyupdated    organizations[] @relation("updatedcompany")
+  creator           users?          @relation("CreatedBy", fields: [creatorId], references: [idUser])
+  created           users[]         @relation("CreatedBy")
+  inactivator       users?          @relation("InactivatedBy", fields: [inactivatorId], references: [idUser])
+  inactivate        users[]         @relation("InactivatedBy")
+  superior          users?          @relation("ImmediateSuperior", fields: [superiorId], references: [idUser])
+  subordinate       users[]         @relation("ImmediateSuperior")
+  suspender         users?          @relation("SuspendedBy", fields: [suspenderId], references: [idUser])
+  suspended         users[]         @relation("SuspendedBy")
+  updater           users?          @relation("UpdatedBy", fields: [updaterId], references: [idUser])
+  updated           users[]         @relation("UpdatedBy")
+
+  @@index([cpf, name, email1, mobile_phone1])
+}
+
+model persons {
+  idPerson  Int      @id @default(autoincrement())
+  cpf       String   @unique @db.VarChar(11)
+  name      String   @default("Nome") @db.VarChar(100)
+  createdat DateTime @default(now())
+  updatedat DateTime @updatedAt
+  disabled  Boolean  @default(true)
+  pendant   Boolean? @default(false)
+  version   Int?     @default(0)
+
+  @@index([cpf, name])
+}
+
+model organizations {
+  idCompany                     Int             @id @default(autoincrement())
+  cnpj                          String          @db.VarChar(14)
+  statenumber                   String?         @db.VarChar(14)
+  municipalnumber               String?         @db.VarChar(14)
+  duns                          String?         @db.VarChar(9)
+  companyname                   String?          @default("Razão Social") @db.VarChar(255)
+  businessname                  String?         @default("Nome Fantasia") @db.VarChar(255)
+  branchoffice                  Boolean?         @default(false)
+  isclient                      Boolean?         @default(false)
+  idClient                      String?         @db.VarChar(20)
+  address                       String?          @default("Rua A") @db.VarChar(100)
+  number                        String?         @db.VarChar(20)
+  complement                    String?         @db.VarChar(50)
+  neighborhood                  String?          @db.VarChar(100)
+  city                          String?          @default("Rio de Janeiro") @db.VarChar(100)
+  state                         String?          @default("RJ") @db.VarChar(2)
+  country                       String?          @default("Brasil") @db.VarChar(30)
+  cep                           String?         @db.VarChar(8)
+  email1                        String?         @unique @db.VarChar(60)
+  numberlines                   Int?            @default(0)
+  fidelity                      DateTime?
+  blcoverage                    String?         @default("0") @db.VarChar(10)
+  actualactivelineoperator      String?         @default("0") @db.VarChar(10)
+  linepropensitywithcompetition String?         @default("0") @db.VarChar(10)
+  monthbilling                  Float?          @default(0)
+  mobilecredits                 Int?            @default(0)
+  tower                         String?         @db.VarChar(10)
+  businessarea                  String?         @db.VarChar(20)
+  rfstatus                      String?         @db.VarChar(10)
+  semaphore                     String?         @db.VarChar(10)
+  serasamessage                 String?         @db.VarChar(10)
+
+  openingdate                   DateTime?
+  creatorId                     Int
+  updaterId                     Int?
+  disabled                      Boolean?         @default(true)
+  pendant                       Boolean?        @default(false)
+  version                       Int?            @default(0)
+  createdat                     DateTime?        @default(now())
+  updatedat                     DateTime?        @updatedAt
+  QT                            Int?            @default(0)
+  base                          Int?            @default(0)
+  capital                       Float?          @default(0)
+  cnaecode                      String?         @db.VarChar(10)
+  cnaecodesecondary             String?         @db.VarChar(255)
+  cnaedescription               String?         @db.VarChar(255)
+  cnaedescriptionsecondary      String?         @db.VarChar(255)
+  companysize                   String?         @db.VarChar(255)
+  datacreated_at                DateTime?
+  dataupdated_at                DateTime?
+  daterfstatus                  DateTime?
+  ddd1                          String?          @db.VarChar(2)
+  ddd2                          String?         @db.VarChar(2)
+  ddd_fax                       String?         @db.VarChar(2)
+  doctype                       String?         @db.VarChar(10)
+  dstitle                       String?         @db.VarChar(20)
+  excludedatesize               DateTime?
+  fax                           String?         @db.VarChar(13)
+  instalationdate               DateTime?
+  legalnature                   String?         @db.VarChar(255)
+  
+  startofcontract               DateTime?
+  mobilephone1                  String?         @db.VarChar(13) @unique
+  mobilephone2                  String?         @db.VarChar(13)
+  ported                        Boolean?        @default(false)
+  previousoperator              String?         @db.VarChar(50)
+  operatorname                  String?         @db.VarChar(50)
+  
+  optionalsize                  Boolean?         @default(false)
+  optiondatesize                DateTime?
+  optionmei                     Boolean?         @default(false)
+  partners                      String?         @db.VarChar(255)
+  phone1                        String?         @db.VarChar(13)
+  phone2                        String?         @db.VarChar(13)
+  qualifyresponsible            String?         @db.VarChar(100)
+  reasonrfstatus                String?         @db.VarChar(10)
+  specialsituation              String?         @db.VarChar(50)
+  specialsituationdate          DateTime?
+  status                        String?         @db.VarChar(20)
+  typestreet                    String?         @db.VarChar(10)
+
+  creator                       users           @relation("createdcompany", fields: [creatorId], references: [idUser])
+  updater                       users?          @relation("updatedcompany", fields: [updaterId], references: [idUser])
+
+  @@index([cnpj, companyname, email1, phone1])
+}
+
+model bdo {
+  idRegister              Int             @id @default(autoincrement())
+  number                  String?         @db.VarChar(13) @unique
+  codeoperador            String?         @db.VarChar(2)
+  date                    DateTime?
+
+  createdat    DateTime @default(now())
+  updatedat    DateTime @updatedAt
+  disabled     Boolean  @default(true)
+  pendant      Boolean? @default(false)
+
+  version      Int?     @default(0)
+}
+
+model operators {
+  idOperator   Int      @id @default(autoincrement())
+  name         String   @default("Nome") @db.VarChar(50) @unique
+  description  String?  @db.VarChar(255)
+  codeoperador String?  @db.VarChar(2)
+  codeantel    String?  @db.VarChar(2)
+
+  createdat    DateTime @default(now())
+  updatedat    DateTime @updatedAt
+  disabled     Boolean  @default(true)
+  pendant      Boolean? @default(false)
+
+  version      Int?     @default(0)
+}
+
+
+model codeddd {
+  idDDD        Int      @id @default(autoincrement())
+  ddd          String   @default("00") @db.VarChar(2) @unique
+
+  createdat    DateTime @default(now())
+  updatedat    DateTime @updatedAt
+  disabled     Boolean  @default(true)
+  pendant      Boolean? @default(false)
+
+  version      Int?     @default(0)
+}
+
+model legalnatures {
+  idLegalNature  Int      @id @default(autoincrement())
+  name           String   @default("Nome") @db.VarChar(100) @unique
+  description    String?  @db.VarChar(255)
+
+  createdat      DateTime @default(now())
+  updatedat      DateTime @updatedAt
+  disabled       Boolean  @default(true)
+  pendant        Boolean? @default(false)
+
+  version        Int?     @default(0)
+}
+
+model states {
+  idState     Int      @id @default(autoincrement())
+  name        String   @default("XX") @db.VarChar(2) @unique
+
+  createdat   DateTime @default(now())
+  updatedat   DateTime @updatedAt
+  disabled    Boolean  @default(true)
+  pendant     Boolean? @default(false)
+
+  version     Int?     @default(0)
+}
+
+model companysizes {
+  idCompanySize  Int      @id @default(autoincrement())
+  name           String   @default("Nome") @db.VarChar(50) @unique
+  description    String?  @db.VarChar(255)
+
+  createdat      DateTime @default(now())
+  updatedat      DateTime @updatedAt
+  disabled       Boolean  @default(true)
+  pendant        Boolean? @default(false)
+
+  version        Int?     @default(0)
+}
+
+model listfiles {
+  idFile  Int      @id @default(autoincrement())
+  name    String   @db.VarChar(255)
+  path    String?   @db.VarChar(255)
+  qtdregisters Int? @default(0)
+  extension    String?   @default("") @db.VarChar(10)
+  origin      String?   @default("") @db.VarChar(10)
+  created DateTime @default(now())
+  updated DateTime? @updatedAt
+  sincronized Boolean  @default(false)
+  version     Int?     @default(0)
+}
+model portedslist {
+  idPortedList Int      @id @default(autoincrement())
+
+  cnpj             String          @db.VarChar(14)
+  mobilephone1     String          @db.VarChar(13)
+  actualoperator   String          @db.VarChar(50)
+  previousoperator String          @db.VarChar(50)
+  porteddate       DateTime?
+
+  createdat    DateTime @default(now())
+  updatedat    DateTime @updatedAt
+
+  version      Int?     @default(0)
+}
