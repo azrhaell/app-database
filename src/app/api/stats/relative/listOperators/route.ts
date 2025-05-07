@@ -5,6 +5,7 @@ export async function GET() {
   try {
     const operators = await prisma.operators.findMany({
       select: {
+        idOperator: true,
         name: true,
         description: true,
         codeoperador: true,

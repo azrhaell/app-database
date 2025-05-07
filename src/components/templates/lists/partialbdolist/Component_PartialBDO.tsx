@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 interface BDOData {
   number: string | null;
   date: string | null;
+  name: string | null;
   relatedoperator: {
     name: string;
   } | null;
@@ -56,7 +57,7 @@ export default function BDOList() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Amostra de Registros BDO (até 100)</h1>
+        <h1 className="text-2xl font-bold">Amostra de Registros BDO (até 1000)</h1>
         <button
           onClick={() => setShowModal(true)}
           disabled={total === 0}
@@ -86,7 +87,7 @@ export default function BDOList() {
         {data.map((item, index) => (
             <tr key={index}>
               <td className="px-4 py-2 border">{item.number ?? '-'}</td>
-              <td className="px-4 py-2 border">{item.relatedoperator?.name ?? '-'}</td>
+              <td className="px-4 py-2 border">{item.name ?? '-'}</td>
               <td className="px-4 py-2 border">
                 {item.date ? new Date(item.date).toLocaleString() : '-'}
               </td>

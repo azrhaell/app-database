@@ -24,6 +24,7 @@ interface Registro {
   CNPJ_CLIENTE: string;
   RAZAO_SOCIAL?: string;
   DSNOMERAZAO?: string;
+  
   FIDELIDADE?: string;
   'INICIO CONTRATO'?: string;
   N_LINHAS?: string;
@@ -31,6 +32,7 @@ interface Registro {
   NR_TELEFONE?: string;
   OPERADORA?: string;
   NOMEOPERADORA?: string;
+
   UF?: string;
   DSUF?: string;
   CNAE?: string;
@@ -85,9 +87,11 @@ export async function POST(req: Request): Promise<NextResponse> {
     const registrosFinal: {
       cnpj: string;
       companyname: string;
+
       startofcontract: Date;
       mobilephone1: string;
       operatorname: string;
+
       state: string;
       cnaecode: string;
       cnaedescription: string;
@@ -121,9 +125,11 @@ export async function POST(req: Request): Promise<NextResponse> {
         registrosFinal.push({
           cnpj: (item.CNPJ || item.CNPJ_CLIENTE || '').slice(0, 14),
           companyname: (item.RAZAO_SOCIAL || item.DSNOMERAZAO || '').slice(0, 254),
+
           startofcontract: newStart,
           mobilephone1: cleanedMobile,
           operatorname: (item.OPERADORA || item.NOMEOPERADORA || '').slice(0, 49),
+
           state: (item.UF || item.DSUF || '').slice(0, 2),
           cnaecode: (item.CNAE || '').slice(0, 10),
           cnaedescription: (item.DESCRICAO_CNAE || '').slice(0, 255),
