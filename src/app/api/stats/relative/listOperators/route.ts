@@ -3,26 +3,24 @@ import prisma from '@/app/api/database/dbclient';
 
 export async function GET() {
   try {
-    const operatorsWithCount = await prisma.organizations.groupBy({
-      by: ['operatorname'],
-      _count: {
-        mobilephone1: true,
+    const operators = await prisma.operators.findMany({
+      select: {
+        name: true,
+        description: true,
+        codeoperador: true,
+        codeantel: true,
       },
-      where: {
-        operatorname: {
-          not: '',
-        },
+      orderBy: {
+        name: 'asc',
       },
     });
 
-    return NextResponse.json(
-      operatorsWithCount.map(({ operatorname, _count }) => ({
-        operatorname,
-        count: _count.mobilephone1,
-      }))
-    );
+    return NextResponse.json(operators);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'Erro ao buscar operadoras' }, { status: 500 });
+    return NextResponse.json(
+      { message: 'Erro ao buscar operadoras' },
+      { status: 500 }
+    );
   }
 }

@@ -92,6 +92,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Nenhum dado válido encontrado no arquivo." }, { status: 400 });
     }
 
+    // 🧹 Limpa todos os registros existentes na tabela BDO antes da inserção
+    await prisma.bdo.deleteMany();
+    console.log("📌 Todos os registros da tabela BDO foram removidos.");
+        
     console.log(`📌 Inserindo ${records.length} registros na tabela BDO...`);
 
     const batchSize = 10000;

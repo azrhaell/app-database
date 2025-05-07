@@ -275,9 +275,9 @@ model bdo {
 
 model operators {
   idOperator     Int      @id @default(autoincrement())
-  name           String   @default("Nome") @db.VarChar(50) @unique
+  name           String   @default("Nome") @db.VarChar(50)
   description    String?  @db.VarChar(255)
-  codeoperador   String?  @db.VarChar(2)
+  codeoperador   String?  @db.VarChar(2) @unique
   codeantel      String?  @db.VarChar(2)
 
   createdat      DateTime @default(now())
