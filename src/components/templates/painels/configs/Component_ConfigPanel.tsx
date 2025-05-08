@@ -51,6 +51,14 @@ const Component_ConfigPanel = () => {
           </button>
         </Link>
       </div>
+      <div>
+        <h2>Gerenciar </h2>
+        <Link href="/configs/create/operators">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Incluir Operadora
+          </button>
+        </Link>
+      </div>
     </>
   );
 };

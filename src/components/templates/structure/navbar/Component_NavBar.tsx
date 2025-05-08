@@ -14,17 +14,12 @@ const NavBar = () => {
                     </li>
                     <li className="hover:bg-green-400">
                         <Link href="/upload/selectmainbdpage" className="hover:underline">
-                            Base de Dados
+                            Upload CSV p/ Cadastro
                         </Link>
                     </li>
                     <li className="hover:bg-blue-400">
                         <Link href="/upload/selectbdpage" className="hover:underline">
-                            Upload CSV p/ Atualização
-                        </Link>
-                    </li>
-                    <li className="hover:bg-yellow-400">
-                        <Link href="/listinput" className="hover:underline">
-                            INPUTAR Registros p/ BD
+                            Upload CSV Bases Externas
                         </Link>
                     </li>
                     <li className="hover:bg-gray-400">
@@ -44,7 +39,7 @@ const NavBar = () => {
                     </li>
                     <li className="hover:bg-gray-400">
                         <Link href="/configs" className="hover:underline">
-                            Configurações
+                            Administração
                         </Link>
                     </li>
                 </ul>
