@@ -14,7 +14,7 @@ const NavBar = () => {
                     </li>
                     <li className="hover:bg-green-400">
                         <Link href="/upload/selectmainbdpage" className="hover:underline">
-                            Upload CSV p/ Base de Dados
+                            Base de Dados
                         </Link>
                     </li>
                     <li className="hover:bg-blue-400">

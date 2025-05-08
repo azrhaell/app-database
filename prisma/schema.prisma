@@ -89,8 +89,8 @@ model persons {
 }
 
 model organizations {
-  idCompany      Int       @id @default(autoincrement())
-  cnpj           String    @db.VarChar(14)
+  idCompany      Int       @id @default(autoincrement()) 
+  cnpj           String    @db.VarChar(14) @unique
   statenumber    String?   @db.VarChar(14)
   municipalnumber String?  @db.VarChar(14)
   duns           String?   @db.VarChar(9)
@@ -170,8 +170,8 @@ model organizations {
 }
 
 model federalrevenue {
-  idCompany      Int       @id @default(autoincrement())
-  cnpj           String    @db.VarChar(14)
+  idCompany      Int       @id @default(autoincrement()) 
+  cnpj           String    @db.VarChar(14) @unique
 
   branchoffice   Boolean?  @default(false)
   companyname    String?   @default("Razão Social") @db.VarChar(255)
@@ -232,7 +232,7 @@ model federalrevenue {
 }
 
 model numbers {
-  idNumber        Int        @id @default(autoincrement())
+  idNumber        Int        @id @default(autoincrement()) 
   mobilephone1    String?    @db.VarChar(13) @unique
   mobilephone2    String?    @db.VarChar(13)
   startofcontract DateTime?
@@ -240,9 +240,9 @@ model numbers {
   previousoperator String?   @db.VarChar(50)
   operatorname    String?    @db.VarChar(50)
 
-  idCompany       Int
+  idCompany       Int   
   idOperator      Int?
-  idBdo           Int?       @unique
+  idBdo           Int?       @unique  
 
   createdat       DateTime   @default(now())
   updatedat       DateTime   @updatedAt
@@ -256,7 +256,7 @@ model numbers {
 }
 
 model bdo {
-  idRegister     Int      @id @default(autoincrement())
+  idRegister     Int      @id @default(autoincrement()) 
   number         String?  @db.VarChar(13) @unique
   codeoperador   String?  @db.VarChar(2)
   date           DateTime?
@@ -277,7 +277,7 @@ model operators {
   idOperator     Int      @id @default(autoincrement())
   name           String   @default("Nome") @db.VarChar(50)
   description    String?  @db.VarChar(255)
-  codeoperador   String?  @db.VarChar(2) @unique
+  codeoperador   String?  @db.VarChar(2)
   codeantel      String?  @db.VarChar(2)
 
   createdat      DateTime @default(now())
