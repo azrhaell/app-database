@@ -22,6 +22,11 @@ const NavBar = () => {
                             Upload CSV Bases Externas
                         </Link>
                     </li>
+                    <li className="hover:bg-blue-400">
+                        <Link href="/statistics/database/selectintegrations" className="hover:underline">
+                            Integração de Bases
+                        </Link>
+                    </li>
                     <li className="hover:bg-gray-400">
                         <Link href="/reports" className="hover:underline">
                             Relatórios

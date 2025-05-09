@@ -1,4 +1,3 @@
-// /api/config/create/operators/create/route.ts
 import { NextResponse } from 'next/server';
 import prisma from '@/app/api/database/dbclient';
 

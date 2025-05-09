@@ -58,6 +58,18 @@ const Component_ConfigPanel = () => {
             Incluir Operadora
           </button>
         </Link>
+      </div>  
+      <div className='flex flex-col gap-2 mt-4'>
+          <Link href="/configs/delete/numbers">
+            <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+              Excluir Tabela Números
+            </button>
+          </Link>
+          <Link href="/configs/delete/organizations">
+            <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+              Excluir Tabela Organizations
+            </button>
+          </Link>
       </div>
     </>
   );
