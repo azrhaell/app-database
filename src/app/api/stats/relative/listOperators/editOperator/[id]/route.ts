@@ -1,4 +1,4 @@
-/*import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/api/database/dbclient';
 
 export async function PUT(
@@ -27,5 +27,5 @@ export async function PUT(
       { status: 500 }
     );
   }
-}*/
+}
 
