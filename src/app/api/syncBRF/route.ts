@@ -70,7 +70,6 @@ export async function POST(req: Request) {
     const BATCH_SIZE = 10000;
     const pendingBatches: (() => Promise<void>)[] = [];
 
-    // Concurrency limit (5 batches at a time)
     function pLimit(concurrency: number) {
       const queue: (() => Promise<void>)[] = [];
       let activeCount = 0;
@@ -100,6 +99,12 @@ export async function POST(req: Request) {
 
     const limit = pLimit(5);
 
+    const validStates = new Set([
+      "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO",
+      "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI",
+      "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+    ]);
+
     function checkFieldLengths(org: Partial<FederalRevenueData>) {
       const fieldLimits: Record<string, number> = {
         companyname: 255, businessname: 255, reasonrfstatus: 10,
@@ -119,9 +124,28 @@ export async function POST(req: Request) {
       }
     }
 
-    function safeString(value: unknown, maxLength: number) {
+    function isValidDDD(value: string): boolean {
+      const num = parseInt(value, 10);
+      return /^\d{2}$/.test(value) && num >= 10 && num <= 99;
+    }
+
+    function isValidState(value: string): boolean {
+      return validStates.has(value.toUpperCase());
+    }
+
+    function safeString(value: unknown, maxLength: number, field?: string): string {
       if (typeof value !== "string") return "";
-      return value.length > maxLength ? value.slice(0, maxLength) : value;
+
+      const trimmed = value.trim();
+      if (field === "ddd1" || field === "ddd2" || field === "ddd_fax") {
+        return isValidDDD(trimmed) ? trimmed : "";
+      }
+
+      if (field === "state") {
+        return isValidState(trimmed) ? trimmed.toUpperCase() : "";
+      }
+
+      return trimmed.length > maxLength ? trimmed.slice(0, maxLength) : trimmed;
     }
 
     async function processBatch(batch: FederalRevenueData[]) {
@@ -143,17 +167,17 @@ export async function POST(req: Request) {
             address: safeString(org.address, 255),
             number: safeString(org.number, 20),
             complement: safeString(org.complement, 50),
-            ddd2: safeString(org.ddd2, 2),
-            ddd_fax: safeString(org.ddd_fax, 2),
+            ddd2: safeString(org.ddd2, 2, "ddd2"),
+            ddd_fax: safeString(org.ddd_fax, 2, "ddd_fax"),
             fax: safeString(org.fax, 13),
             email1: safeString(org.email1, 60),
             partners: safeString(org.partners, 255),
             capital: org.capital ? parseFloat(org.capital.replace(/[^\d.-]/g, "")) || 0 : 0,
             neighborhood: safeString(org.neighborhood, 100),
             city: safeString(org.city, 100),
-            state: safeString(org.state, 2),
+            state: safeString(org.state, 2, "state"),
             cep: safeString(org.cep, 8),
-            ddd1: safeString(org.ddd1, 2),
+            ddd1: safeString(org.ddd1, 2, "ddd1"),
             phone1: safeString(org.phone1, 13),
             phone2: safeString(org.phone2, 13),
             qualifyresponsible: safeString(org.qualifyresponsible, 100),
