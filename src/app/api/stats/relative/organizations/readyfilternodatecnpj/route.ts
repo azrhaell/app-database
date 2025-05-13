@@ -7,8 +7,8 @@ export async function GET() {
   try {
     const targetOperators = ["21", "36", "20", "41", "CLARO", "Tim"];
 
-    const PAGE_SIZE = 32000;
-    const MAX_RESULTS = 1000000; // Limite de segurança opcional
+    const PAGE_SIZE = 10000;
+    const MAX_RESULTS = 750000; // Limite de segurança opcional
 
     let allFiltered: Awaited<ReturnType<typeof prisma.organizations.findMany>> = [];
     let skip = 0;
