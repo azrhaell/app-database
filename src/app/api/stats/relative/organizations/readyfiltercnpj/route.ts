@@ -12,7 +12,7 @@ export async function GET() {
     const targetOperators = ["21", "36", "20", "CLARO", "41", "Tim"]; //CLARO
 
     const PAGE_SIZE = 10000;
-    const MAX_RESULTS = 1000000;
+    const MAX_RESULTS = 5000000;
 
     const allOrganizations: Array<{
       id: number;
@@ -47,13 +47,13 @@ export async function GET() {
               id: org.idCompany, // Corrected property name
               name: org.companyname || "Unknown", // Provide a default value for null
               cnpj: org.cnpj,
-              companyname: org.companyname || "Razão Social",
-              businessname: org.businessname || "Nome Fantasia",
-              city: org.city || "Cidade desconhecida",
-              state: org.state || "UF",
-              rfstatus: org.rfstatus || "Situação Cadastral",
-              legalnature: org.legalnature || "Natureza Jurídica",
-              companysize: org.companysize || "Porte Empresa",
+              companyname: org.companyname || "",
+              businessname: org.businessname || "",
+              city: org.city || "",
+              state: org.state || "",
+              rfstatus: org.rfstatus || "",
+              legalnature: org.legalnature || "",
+              companysize: org.companysize || "",
               optionalsize: org.optionalsize || false,
               optionmei: org.optionmei || false,
               updatedat: org.updatedat || new Date("1900-01-01"), // Default value for null
