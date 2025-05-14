@@ -46,6 +46,18 @@ export async function GET() {
       allOrganizations.push(...batch.map(org => ({
               id: org.idCompany, // Corrected property name
               name: org.companyname || "Unknown", // Provide a default value for null
+              cnpj: org.cnpj,
+              companyname: org.companyname || "Razão Social",
+              businessname: org.businessname || "Nome Fantasia",
+              city: org.city || "Cidade desconhecida",
+              state: org.state || "UF",
+              rfstatus: org.rfstatus || "Situação Cadastral",
+              legalnature: org.legalnature || "Natureza Jurídica",
+              companysize: org.companysize || "Porte Empresa",
+              optionalsize: org.optionalsize || false,
+              optionmei: org.optionmei || false,
+              numberlines: org.numberlines || 0,
+              email1: org.email1 || "",
               relatednumbers: org.relatednumbers.map(num => ({
                 id: num.idNumber, // Corrected property name
                 operatorname: num.operatorname,
