@@ -6,17 +6,15 @@ import prisma from "@/app/api/database/dbclient";
 export async function GET() {
   try {
     const targetOperators = ["21", "36", "20", "41", "CLARO", "Tim"];
-
     const PAGE_SIZE = 10000;
-    const MAX_RESULTS = 750000; // Limite de segurança opcional
+    const MAX_RESULTS = 750000;
 
-    let allFiltered: Awaited<ReturnType<typeof prisma.organizations.findMany>> = [];
-    let skip = 0;
-    let hasMore = true;
+    const allOrganizations: Array<{ id: number; relatednumbers: Array<{idNumber: number; mobilephone1: string | null; operatorname: string | null }> }> = [];
+    let page = 0;
 
-    while (hasMore && allFiltered.length < MAX_RESULTS) {
-      const organizations = await prisma.organizations.findMany({
-        skip,
+    while (true) {
+      const batch = await prisma.organizations.findMany({
+        skip: page * PAGE_SIZE,
         take: PAGE_SIZE,
         where: {
           relatednumbers: {
@@ -28,37 +26,65 @@ export async function GET() {
           },
         },
         include: {
-          relatednumbers: true, // Inclui todos os números, sem filtrar por data
+          relatednumbers: true, // sem filtro por data
         },
       });
 
-      if (organizations.length === 0) {
-        hasMore = false;
-        break;
-      }
+      if (batch.length === 0) break;
 
-      const filtered = organizations.filter((org) => {
+      const filtered = batch.filter((org) => {
         const numbers = org.relatednumbers;
-        if (numbers.length === 0 || numbers.length > 150) return false;
+        if (!numbers || numbers.length === 0 || numbers.length > 150) return false;
 
-        const countTargetOperators = numbers.filter((n) =>
+        const countTarget = numbers.filter((n) =>
           n.operatorname && targetOperators.includes(n.operatorname)
         ).length;
 
-        const percentage = (countTargetOperators / numbers.length) * 100;
+        const percentage = (countTarget / numbers.length) * 100;
         return percentage >= 60;
       });
 
-      allFiltered = [...allFiltered, ...filtered];
-      skip += PAGE_SIZE;
+      allOrganizations.push(...filtered.map(org => ({
+              id: org.idCompany, // Ensure the 'id' property is included
+              relatednumbers: org.relatednumbers.map(num => ({
+                idNumber: num.idNumber, // Include the 'idNumber' property
+                mobilephone1: num.mobilephone1,
+                operatorname: num.operatorname,
+              })),
+            })));
+      page++;
+
+      if (allOrganizations.length >= MAX_RESULTS) break;
     }
 
-    return NextResponse.json(allFiltered);
-  } catch (error) {
-    console.error("Erro ao filtrar CNPJs:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor." },
-      { status: 500 }
-    );
+    if (allOrganizations.length === 0) {
+      return NextResponse.json({ message: "Nenhuma organização encontrada." }, { status: 404 });
+    }
+
+    return NextResponse.json(allOrganizations, { status: 200 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Erro ao filtrar CNPJs:", error.message);
+    } else {
+      console.error("Erro ao filtrar CNPJs:", error);
+    }
+    if (error instanceof Error) {
+      return NextResponse.json(
+        {
+          message: "Erro interno do servidor.",
+          error: error.message,
+          stack: error.stack,
+        },
+        { status: 500 }
+      );
+    } else {
+      return NextResponse.json(
+        {
+          message: "Erro interno do servidor.",
+          error: String(error),
+        },
+        { status: 500 }
+      );
+    }
   }
 }
