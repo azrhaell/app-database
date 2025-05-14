@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const targetOperators = ["21", "36", "20", "41", "CLARO", "Tim"];
     const PAGE_SIZE = 10000;
-    const MAX_RESULTS = 750000;
+    const MAX_RESULTS = 1000000;
 
     const allOrganizations: Array<{ id: number; relatednumbers: Array<{idNumber: number; mobilephone1: string | null; operatorname: string | null }> }> = [];
     let page = 0;
@@ -57,6 +57,7 @@ export async function GET() {
               companysize: org.companysize || "Porte Empresa",
               optionalsize: org.optionalsize || false,
               optionmei: org.optionmei || false,
+              updatedat: org.updatedat || new Date("1900-01-01"), // Default value for null
               numberlines: org.numberlines || 0,
               email1: org.email1 || "",
               relatednumbers: org.relatednumbers.map(num => ({
