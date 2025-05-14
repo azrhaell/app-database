@@ -9,7 +9,29 @@ export async function GET() {
     const PAGE_SIZE = 10000;
     const MAX_RESULTS = 1000000;
 
-    const allOrganizations: Array<{ id: number; relatednumbers: Array<{idNumber: number; mobilephone1: string | null; operatorname: string | null }> }> = [];
+    const result: Array<{
+      id: number;
+      name: string;
+      cnpj: string;
+      companyname: string;
+      businessname: string;
+      city: string;
+      state: string;
+      rfstatus: string;
+      legalnature: string;
+      companysize: string;
+      optionalsize: boolean;
+      optionmei: boolean;
+      updatedat: Date;
+      numberlines: number;
+      email1: string;
+      relatednumbers: Array<{
+        idNumber: number;
+        mobilephone1: string | null;
+        operatorname: string | null;
+      }>;
+    }> = [];
+
     let page = 0;
 
     while (true) {
@@ -32,57 +54,58 @@ export async function GET() {
 
       if (batch.length === 0) break;
 
-      const filtered = batch.filter((org) => {
+      for (const org of batch) {
         const numbers = org.relatednumbers;
-        if (!numbers || numbers.length === 0 || numbers.length > 150) return false;
 
-        const countTarget = numbers.filter((n) =>
+        if (!numbers || numbers.length === 0 || numbers.length > 150) continue;
+
+        const countTarget = numbers.filter(n =>
           n.operatorname && targetOperators.includes(n.operatorname)
         ).length;
 
         const percentage = (countTarget / numbers.length) * 100;
-        return percentage >= 60;
-      });
 
-      allOrganizations.push(...filtered.map(org => ({
-              id: org.idCompany, // Corrected property name
-              name: org.companyname || "Unknown", // Provide a default value for null
-              cnpj: org.cnpj,
-              companyname: org.companyname || "",
-              businessname: org.businessname || "",
-              city: org.city || "",
-              state: org.state || "",
-              rfstatus: org.rfstatus || "",
-              legalnature: org.legalnature || "",
-              companysize: org.companysize || "",
-              optionalsize: org.optionalsize || false,
-              optionmei: org.optionmei || false,
-              updatedat: org.updatedat || new Date("1900-01-01"), // Default value for null
-              numberlines: org.numberlines || 0,
-              email1: org.email1 || "",
-              relatednumbers: org.relatednumbers.map(num => ({
-                idNumber: num.idNumber, // Include the 'idNumber' property
-                mobilephone1: num.mobilephone1,
-                operatorname: num.operatorname,
-              })),
-            })));
+        if (percentage >= 60) {
+          result.push({
+            id: org.idCompany,
+            name: org.companyname || "Unknown",
+            cnpj: org.cnpj,
+            companyname: org.companyname || "",
+            businessname: org.businessname || "",
+            city: org.city || "",
+            state: org.state || "",
+            rfstatus: org.rfstatus || "",
+            legalnature: org.legalnature || "",
+            companysize: org.companysize || "",
+            optionalsize: org.optionalsize || false,
+            optionmei: org.optionmei || false,
+            updatedat: org.updatedat || new Date("1900-01-01"),
+            numberlines: org.numberlines || 0,
+            email1: org.email1 || "",
+            relatednumbers: numbers.map(num => ({
+              idNumber: num.idNumber,
+              mobilephone1: num.mobilephone1,
+              operatorname: num.operatorname,
+            })),
+          });
+        }
+
+        if (result.length >= MAX_RESULTS) break;
+      }
+
+      if (result.length >= MAX_RESULTS) break;
+
       page++;
-
-      if (allOrganizations.length >= MAX_RESULTS) break;
     }
 
-    if (allOrganizations.length === 0) {
+    if (result.length === 0) {
       return NextResponse.json({ message: "Nenhuma organização encontrada." }, { status: 404 });
     }
 
-    return NextResponse.json(allOrganizations, { status: 200 });
+    return NextResponse.json(result, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error("Erro ao filtrar CNPJs:", error.message);
-    } else {
-      console.error("Erro ao filtrar CNPJs:", error);
-    }
-    if (error instanceof Error) {
       return NextResponse.json(
         {
           message: "Erro interno do servidor.",
@@ -92,6 +115,7 @@ export async function GET() {
         { status: 500 }
       );
     } else {
+      console.error("Erro ao filtrar CNPJs:", error);
       return NextResponse.json(
         {
           message: "Erro interno do servidor.",
