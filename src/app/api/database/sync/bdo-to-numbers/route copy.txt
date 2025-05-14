@@ -1,5 +1,4 @@
-// app/api/database/sync/bdo-to-numbers/route.ts
-
+// app/api//database/sync/bdo-to-numbers/route.ts
 import { NextResponse } from 'next/server';
 import prisma from '@/app/api/database/dbclient';
 
@@ -34,7 +33,7 @@ export async function POST() {
               mobilephone1: {
                 in: numeros,
               },
-              // Removido: startofcontract: { not: null }
+              startofcontract: { not: null },
             },
             select: {
               idNumber: true,
@@ -52,10 +51,7 @@ export async function POST() {
         if (
           numberRecord &&
           bdo.date &&
-          (
-            !numberRecord.startofcontract || // Atualiza se for nulo
-            bdo.date > numberRecord.startofcontract
-          )
+          bdo.date > numberRecord.startofcontract!
         ) {
           await prisma.numbers.update({
             where: { idNumber: numberRecord.idNumber },
