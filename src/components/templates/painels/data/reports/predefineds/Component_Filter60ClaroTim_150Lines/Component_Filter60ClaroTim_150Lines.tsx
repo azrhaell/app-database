@@ -16,10 +16,13 @@ export default function CnpjsPage() {
     optionalsize?: boolean;
     optionmei?: boolean;
     updatedat?: string;
+    numberlines?: number;
     relatednumbers: {
       operatorname?: string;
+      previousoperator?: string;
       startofcontract?: string;
       mobilephone1?: string;
+      ported?: boolean;
     }[];
   }
 
@@ -45,6 +48,8 @@ export default function CnpjsPage() {
       CNPJ: string;
       DSNOMERAZAO: string;
       OPERADORA: string;
+      PORTOU: string;
+      "OPERADORA ANTERIOR": string;
       ATIVAÇÃO: string;
       LINHA: string;
       CIDADE: string;
@@ -66,6 +71,8 @@ export default function CnpjsPage() {
           "CNPJ": org.cnpj,
           "DSNOMERAZAO": org.companyname,
           "OPERADORA": num.operatorname || "",
+          "PORTOU": num.ported ? "Sim" : "Não",
+          "OPERADORA ANTERIOR": num.previousoperator || "",
           "ATIVAÇÃO": num.startofcontract
             ? new Date(num.startofcontract).toLocaleDateString("pt-BR")
             : "",
@@ -127,6 +134,9 @@ export default function CnpjsPage() {
                 <th className="border px-2 py-1">CNPJ</th>
                 <th className="border px-2 py-1">Razão Social</th>
                 <th className="border px-2 py-1">Qtd. Linhas</th>
+                <th className="border px-2 py-1">Operadora</th>
+                <th className="border px-2 py-1">Portou</th>
+                <th className="border px-2 py-1">Operadora Anterior</th>
               </tr>
             </thead>
             <tbody>
@@ -135,6 +145,9 @@ export default function CnpjsPage() {
                   <td className="border px-2 py-1">{org.cnpj}</td>
                   <td className="border px-2 py-1">{org.companyname}</td>
                   <td className="border px-2 py-1">{org.relatednumbers.length}</td>
+                  <td className="border px-2 py-1">{org.relatednumbers[0]?.operatorname || 'N/A'}</td>
+                  <td className="border px-2 py-1">{org.relatednumbers[0]?.ported ? 'Sim' : 'Não'}</td>
+                  <td className="border px-2 py-1">{org.relatednumbers[0]?.previousoperator || 'N/A'}</td>
                 </tr>
               ))}
             </tbody>

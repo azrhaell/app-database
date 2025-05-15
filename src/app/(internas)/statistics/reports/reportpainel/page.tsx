@@ -1,4 +1,4 @@
-import Component_ReportsPainel from '@/components/templates/painels/reports/Component_ReportsPainel'
+import Component_ReportsPainel from '@/components/templates/painels/data/reports/Component_ReportsPainel'
 import React from 'react'
 
 const page = () => {

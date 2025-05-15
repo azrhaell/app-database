@@ -26,9 +26,11 @@ export async function GET() {
       numberlines: number;
       email1: string;
       relatednumbers: Array<{
-        idNumber: number;
+        id: number;
         mobilephone1: string | null;
         operatorname: string | null;
+        previousoperator: string | null;
+        ported: boolean;
       }>;
     }> = [];
 
@@ -83,9 +85,11 @@ export async function GET() {
             numberlines: org.numberlines || 0,
             email1: org.email1 || "",
             relatednumbers: numbers.map(num => ({
-              idNumber: num.idNumber,
+              id: num.idNumber,
               mobilephone1: num.mobilephone1,
               operatorname: num.operatorname,
+              previousoperator: num.previousoperator || null,
+              ported: num.ported || false,
             })),
           });
         }

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-const Component_ReportsPainel = () => {
+const Component_ListsPainel = () => {
 
   return (
 
@@ -69,29 +69,8 @@ const Component_ReportsPainel = () => {
             </button>
         </Link>
 
-        <Link href={'/statistics/relative/listorganization/listpercentorganization'} className="hover:underline">
-            <button type="button" className="text-white
-                                                bg-yellow-700 
-                                                hover:bg-yellow-800 
-                                                focus:ring-4
-                                                focus:ring-yellow-300
-                                                font-medium
-                                                rounded-lg
-                                                text-sm 
-                                                px-5 
-                                                py-2.5 
-                                                me-2 
-                                                mb-2 
-                                                dark:bg-yellow-600 
-                                                dark:hover:bg-yellow-700 
-                                                focus:outline-none 
-                                                dark:focus:ring-yellow-800">
-                Gerar Relatório
-            </button>
-        </Link>
-
     </div>
   )
 }
 
-export default Component_ReportsPainel
+export default Component_ListsPainel

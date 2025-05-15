@@ -32,8 +32,11 @@ export async function GET() {
       email1: string;
       relatednumbers: Array<{
         id: number;
+        mobilephone1: string | null;
         operatorname: string | null;
+        previousoperator: string | null;
         startofcontract: Date;
+        ported: boolean;
       }>;
     }> = [];
 
@@ -87,8 +90,11 @@ export async function GET() {
             email1: org.email1 || "",
             relatednumbers: numbers.map(num => ({
               id: num.idNumber,
+              mobilephone1: num.mobilephone1,
               operatorname: num.operatorname,
+              previousoperator: num.previousoperator,
               startofcontract: num.startofcontract || new Date("1900-01-01"),
+              ported: num.ported || false,
             })),
           });
         }

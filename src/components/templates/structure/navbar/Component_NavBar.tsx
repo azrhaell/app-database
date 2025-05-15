@@ -28,13 +28,8 @@ const NavBar = () => {
                         </Link>
                     </li>
                     <li className="hover:bg-gray-400">
-                        <Link href="/reports" className="hover:underline">
-                            Relatórios
-                        </Link>
-                    </li>
-                    <li className="hover:bg-gray-400">
                         <Link href="/statistics" className="hover:underline">
-                            Gráficos
+                            Dados
                         </Link>
                     </li>
                     <li className="hover:bg-red-400">
