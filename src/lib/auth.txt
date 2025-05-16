@@ -1,10 +1,11 @@
-// lib/auth.ts
-import { AuthOptions } from "next-auth";
+// src/lib/auth.ts
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/app/api/database/dbclient";
 import bcrypt from "bcryptjs";
+import prisma from "@/app/api/database/dbclient";
+import type { NextAuthOptions } from "@auth/core/types"; // <- CORRETO para v4
 
-export const authOptions: AuthOptions = {
+
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -13,26 +14,19 @@ export const authOptions: AuthOptions = {
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.cpf || !credentials?.password) {
-          throw new Error("CPF ou senha inválidos");
-        }
+        if (!credentials?.cpf || !credentials?.password) return null;
 
         const user = await prisma.users.findUnique({
           where: { cpf: credentials.cpf },
         });
 
-        if (!user || !user.password) {
-          throw new Error("CPF ou senha inválidos");
-        }
+        if (!user || !user.password) return null;
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isValid) {
-          throw new Error("CPF ou senha inválidos");
-        }
+        if (!isValid) return null;
 
         return {
-          id: user.idUser.toString(),  // id deve ser string
+          id: user.idUser.toString(),
           name: user.name,
           email: user.email1,
           cpf: user.cpf,
@@ -40,11 +34,11 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
+  pages: {
+    signIn: "/login",
+  },
   session: {
     strategy: "jwt",
-  },
-  pages: {
-    signIn: "/login", // redireciona para sua rota de login
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -57,8 +51,8 @@ export const authOptions: AuthOptions = {
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id as string;
-        session.user.cpf = token.cpf as string;
+        session.user.id = token.id;
+        session.user.cpf = token.cpf;
       }
       return session;
     },

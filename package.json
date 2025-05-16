@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/core": "^0.39.1",
     "@auth/prisma-adapter": "^2.9.1",
     "@hookform/resolvers": "^4.1.2",
     "@prisma/client": "^6.3.1",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/bcryptjs": "^2.4.6",
     "@types/exceljs": "^0.5.3",
     "@types/jsonstream": "^0.8.33",
     "@types/node": "^20.17.19",
