@@ -9,7 +9,7 @@ export async function GET() {
     const END_DATE = new Date("2024-03-31T23:59:59.999Z");
 
     // Operadoras-alvo
-    const targetOperators = ["21", "36", "20", "CLARO", "41", "Tim"];
+    const targetOperators = ["21", "36", "CLARO", "41", "Tim"];
 
     const PAGE_SIZE = 10000;
     const MAX_RESULTS = 1000000;
