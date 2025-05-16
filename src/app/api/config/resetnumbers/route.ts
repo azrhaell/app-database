@@ -7,8 +7,8 @@ export async function POST() {
     await prisma.numbers.updateMany({
       data: {
         ported: false,
-        startofcontract: null,
-        previousoperator: '',
+        //startofcontract: null,
+        //previousoperator: '',
       },
     });
 
