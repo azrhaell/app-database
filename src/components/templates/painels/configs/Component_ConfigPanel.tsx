@@ -25,6 +25,27 @@ const Component_ConfigPanel = () => {
     }
   };
 
+  const handleResetNumbers = async () => {
+  setLoading(true);
+  setMessage(null);
+  try {
+    const response = await fetch('/api/config/resetnumbers', {
+      method: 'POST',
+    });
+
+    if (!response.ok) throw new Error('Erro ao redefinir dados.');
+
+    setMessage('Campos redefinidos com sucesso!');
+  } catch (error) {
+    console.error(error);
+    setMessage('Erro ao redefinir dados.');
+  } finally {
+    setLoading(false);
+  }
+  };
+
+  
+
   return (
     <>
       <div>
@@ -35,6 +56,14 @@ const Component_ConfigPanel = () => {
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           {loading ? 'Corrigindo...' : 'Operadora'}
+        </button>
+
+        <button
+          onClick={handleResetNumbers}
+          disabled={loading}
+          className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
+        >
+          {loading ? 'Redefinindo...' : 'Resetar Números'}
         </button>
 
         {message && (

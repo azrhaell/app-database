@@ -54,7 +54,7 @@ export async function POST() {
           bdo.date &&
           (
             !numberRecord.startofcontract || // Atualiza se for nulo
-            bdo.date >= numberRecord.startofcontract // ALTERAR SOMENTE PARA 'MAIOR'
+            bdo.date > numberRecord.startofcontract
           )
         ) {
           await prisma.numbers.update({

@@ -46,6 +46,9 @@ export async function GET() {
       const batch = await prisma.organizations.findMany({
         skip: page * PAGE_SIZE,
         take: PAGE_SIZE,
+        where: {
+          rfstatus: 'ATIVA',
+        },
         include: {
           relatednumbers: {
             where: {
@@ -53,10 +56,12 @@ export async function GET() {
                 gte: START_DATE,
                 lte: END_DATE,
               },
+              ported: true,
             },
           },
         },
       });
+
 
       if (batch.length === 0) break;
 

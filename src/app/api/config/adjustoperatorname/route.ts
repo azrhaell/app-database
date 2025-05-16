@@ -10,15 +10,15 @@ export async function POST() {
         data: { operatorname: 'Algar' },
       }),
       prisma.numbers.updateMany({
-        where: { operatorname: { in: ['15', 'Telefonica'] } },
+        where: { operatorname: { in: ['15', '20', '23', 'Telefonica'] } },
         data: { operatorname: 'Vivo' },
       }),
       prisma.numbers.updateMany({
-        where: { operatorname: { in: ['20', '21', '36'] } },
+        where: { operatorname: { in: ['21', '36'] } },
         data: { operatorname: 'CLARO' },
       }),
       prisma.numbers.updateMany({
-        where: { operatorname: '31' },
+        where: { operatorname: { in: ['14', '31', '35'] } },
         data: { operatorname: 'OI' },
       }),
       prisma.numbers.updateMany({
