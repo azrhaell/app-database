@@ -3,7 +3,7 @@ import prisma from '@/app/api/database/dbclient';
 
 export const runtime = 'nodejs'; // explícito para Next.js 15.1.6
 
-const AUTHORIZED_TOKEN = 'TCTelecom2025TC@';
+const AUTHORIZED_TOKEN = 'TCTelecom2025TC';
 
 export async function DELETE(req: Request) {
   try {

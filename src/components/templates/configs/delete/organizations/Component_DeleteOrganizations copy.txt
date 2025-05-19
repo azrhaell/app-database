@@ -13,18 +13,12 @@ export default function ClearOrganizationsButton() {
     );
     if (!confirmed) return;
 
-    const token = prompt('Digite o token de autenticação:');
-    if (!token) {
-      alert('Operação cancelada. Token não informado.');
-      return;
-    }
-
     setLoading(true);
     setResponseMessage(null);
     setErrorMessage(null);
 
     try {
-      const res = await fetch(`/api/config/delete/organizations?token=${encodeURIComponent(token)}`, {
+      const res = await fetch('/api/config/delete/organizations?token=TCTelecom2025TC@', {
         method: 'DELETE',
       });
 

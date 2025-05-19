@@ -3,7 +3,7 @@ import prisma from '@/app/api/database/dbclient';
 
 export async function POST() {
   try {
-    // Atualizar os valores conforme as especificações
+    // Primeira transação: atualiza operatorname
     await prisma.$transaction([
       prisma.numbers.updateMany({
         where: { operatorname: '12' },
@@ -31,12 +31,40 @@ export async function POST() {
       }),
     ]);
 
+    // Segunda transação: atualiza previousoperator
+    await prisma.$transaction([
+      prisma.numbers.updateMany({
+        where: { previousoperator: '12' },
+        data: { previousoperator: 'Algar' },
+      }),
+      prisma.numbers.updateMany({
+        where: { previousoperator: { in: ['15', '20', '23', 'Telefonica'] } },
+        data: { previousoperator: 'Vivo' },
+      }),
+      prisma.numbers.updateMany({
+        where: { previousoperator: { in: ['21', '36'] } },
+        data: { previousoperator: 'CLARO' },
+      }),
+      prisma.numbers.updateMany({
+        where: { previousoperator: { in: ['14', '31', '35'] } },
+        data: { previousoperator: 'OI' },
+      }),
+      prisma.numbers.updateMany({
+        where: { previousoperator: '41' },
+        data: { previousoperator: 'Tim' },
+      }),
+      prisma.numbers.updateMany({
+        where: { previousoperator: '43' },
+        data: { previousoperator: 'Sercomtel' },
+      }),
+    ]);
+
     await prisma.$disconnect();
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Erro ao corrigir operatorname:', error);
+    console.error('Erro ao corrigir dados:', error);
     await prisma.$disconnect();
-    return NextResponse.json({ error: 'Erro ao corrigir operatorname' }, { status: 500 });
+    return NextResponse.json({ error: 'Erro ao corrigir operatorname ou previousoperator' }, { status: 500 });
   }
 }
