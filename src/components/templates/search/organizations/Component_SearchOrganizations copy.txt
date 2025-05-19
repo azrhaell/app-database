@@ -5,10 +5,6 @@ interface OrganizationResult {
   idCompany: string;
   cnpj: string;
   companyname: string;
-  legalnature: string;
-  companysize: string;
-  optionalsize: string;
-  optionmei: string;
   relatednumbers: { mobilephone1: string }[];
 }
 
@@ -53,7 +49,7 @@ const SearchOrganizations = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Pesquisar Empresas e Linhas</h2>
-      <div className="flex flex-row flex-wrap gap-2 max-w-full">
+      <div className="flex flex-row gap-2 max-w-md">
         <input
           type="text"
           value={cnpj}
@@ -93,20 +89,16 @@ const SearchOrganizations = () => {
 
       {results.length > 0 && (
         <div className="mt-6 overflow-x-auto">
-          <h3 className="font-semibold mb-2">
-            Resultados (Página {page} de {totalPages}):
-          </h3>
-          <ul className="divide-y divide-gray-300 border rounded mb-4 min-w-[700px]">
+          <h3 className="font-semibold mb-2">Resultados (Página {page} de {totalPages}):</h3>
+          <ul className="divide-y divide-gray-300 border rounded mb-4 max-w-full">
             {results.map((org) => (
               <li key={org.idCompany} className="p-2 break-words">
                 <p><strong>CNPJ:</strong> {org.cnpj}</p>
                 <p><strong>Nome:</strong> {org.companyname}</p>
-                <p><strong>Telefones ({org.relatednumbers.length}):</strong>{' '}
-                  {org.relatednumbers.map(n => n.mobilephone1).join(', ')}</p>
-                <p><strong>Natureza Jurídica:</strong> {org.legalnature}</p>
-                <p><strong>Porte da Empresa:</strong> {org.companysize}</p>
-                <p><strong>Porte Opcional:</strong> {org.optionalsize}</p>
-                <p><strong>Optante MEI:</strong> {org.optionmei}</p>
+                <p>
+                  <strong>Telefones:</strong>{' '}
+                  {org.relatednumbers.map((n: { mobilephone1: string }) => n.mobilephone1).join(', ')}
+                </p>
               </li>
             ))}
           </ul>
