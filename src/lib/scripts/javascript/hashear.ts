@@ -1,6 +1,6 @@
 //import bcrypt from 'bcryptjs';
 import * as bcrypt from 'bcryptjs';
-import prisma from "../app/api/database/dbclient";
+import prisma from "../../../app/api/database/dbclient";
 
 
 async function hashAndUpdatePassword(plainPassword: string, userId: number) {

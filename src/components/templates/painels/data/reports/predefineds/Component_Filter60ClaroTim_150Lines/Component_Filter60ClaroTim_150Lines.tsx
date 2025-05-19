@@ -17,6 +17,7 @@ export default function CnpjsPage() {
     optionmei?: boolean;
     updatedat?: string;
     numberlines?: number;
+    base: string | null;
     relatednumbers: {
       operatorname?: string;
       previousoperator?: string;
@@ -61,6 +62,7 @@ export default function CnpjsPage() {
       "OPCAO MEI": string;
       "ATUALIZADO EM": string;
       "QTD. LINHAS": number;
+      BASE: string | null;
     }
 
     const rows: Row[] = []
@@ -88,6 +90,7 @@ export default function CnpjsPage() {
             ? new Date(org.updatedat).toLocaleDateString("pt-BR")
             : "",
           "QTD. LINHAS": org.relatednumbers.length,
+          "BASE": org.base,
         })
       })
     })
@@ -133,10 +136,11 @@ export default function CnpjsPage() {
               <tr className="bg-gray-100">
                 <th className="border px-2 py-1">CNPJ</th>
                 <th className="border px-2 py-1">Razão Social</th>
-                <th className="border px-2 py-1">Qtd. Linhas</th>
                 <th className="border px-2 py-1">Operadora</th>
                 <th className="border px-2 py-1">Portou</th>
                 <th className="border px-2 py-1">Operadora Anterior</th>
+                <th className="border px-2 py-1">Qtd. Linhas</th>
+                <th className="border px-2 py-1">Base</th>
               </tr>
             </thead>
             <tbody>
@@ -144,10 +148,11 @@ export default function CnpjsPage() {
                 <tr key={org.idCompany}>
                   <td className="border px-2 py-1">{org.cnpj}</td>
                   <td className="border px-2 py-1">{org.companyname}</td>
-                  <td className="border px-2 py-1">{org.relatednumbers.length}</td>
                   <td className="border px-2 py-1">{org.relatednumbers[0]?.operatorname || 'N/A'}</td>
                   <td className="border px-2 py-1">{org.relatednumbers[0]?.ported ? 'Sim' : 'Não'}</td>
                   <td className="border px-2 py-1">{org.relatednumbers[0]?.previousoperator || 'N/A'}</td>
+                  <td className="border px-2 py-1">{org.relatednumbers.length}</td>                  
+                  <td className="border px-2 py-1">{org.base || 'N/A'}</td>
                 </tr>
               ))}
             </tbody>

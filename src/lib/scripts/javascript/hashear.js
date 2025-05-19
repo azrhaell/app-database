@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 //import bcrypt from 'bcryptjs';
 var bcrypt = require("bcryptjs");
-var dbclient_1 = require("../app/api/database/dbclient");
+var dbclient_1 = require("../../../app/api/database/dbclient");
 function hashAndUpdatePassword(plainPassword, userId) {
     return __awaiter(this, void 0, void 0, function () {
         var hashedPassword;
