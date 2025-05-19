@@ -7,8 +7,8 @@ interface OrganizationResult {
   companyname: string;
   legalnature: string;
   companysize: string;
-  optionalsize: string;
-  optionmei: string;
+  optionalsize: boolean;
+  optionmei: boolean;
   relatednumbers: { mobilephone1: string }[];
 }
 
@@ -105,8 +105,8 @@ const SearchOrganizations = () => {
                   {org.relatednumbers.map(n => n.mobilephone1).join(', ')}</p>
                 <p><strong>Natureza Jurídica:</strong> {org.legalnature}</p>
                 <p><strong>Porte da Empresa:</strong> {org.companysize}</p>
-                <p><strong>Porte Opcional:</strong> {org.optionalsize}</p>
-                <p><strong>Optante MEI:</strong> {org.optionmei}</p>
+                <p><strong>Porte Opcional:</strong> {org.optionalsize ? 'Sim' : 'Não'}</p>
+                <p><strong>Optante MEI:</strong> {org.optionmei ? 'Sim' : 'Não'}</p>
               </li>
             ))}
           </ul>
