@@ -3,14 +3,13 @@ import prisma from '@/app/api/database/dbclient';
 
 export async function GET() {
   try {
-    // Busca todos os números com o estado da organização associada
+    // Traz apenas números ativos com operadora e empresa associada
     const numbersWithState = await prisma.numbers.findMany({
       where: {
-        disabled: false,
-        operatorname: {
-          not: null,
+        operatorname: { not: null },
+        relatedcompany: {
+          state: { not: null },
         },
-        // Removido o filtro por estado aqui — faremos isso manualmente
       },
       select: {
         operatorname: true,
@@ -22,36 +21,26 @@ export async function GET() {
       },
     });
 
-    // Agrupamento em memória: { [state]: { [operatorname]: count } }
-    const stateOperatorCount: Record<string, Record<string, number>> = {};
+    // Agrupa por estado > operadora
+    const counts: Record<string, Record<string, number>> = {};
 
     for (const record of numbersWithState) {
-      const state = record.relatedcompany?.state?.trim() || 'n/d';
+      const state = record.relatedcompany?.state?.trim().toUpperCase() || 'n/d';
       const operator = record.operatorname?.trim() || 'Desconhecida';
 
-      if (!stateOperatorCount[state]) {
-        stateOperatorCount[state] = {};
-      }
-
-      stateOperatorCount[state][operator] = (stateOperatorCount[state][operator] || 0) + 1;
+      if (!counts[state]) counts[state] = {};
+      counts[state][operator] = (counts[state][operator] || 0) + 1;
     }
 
-    // Determinar a operadora com maior número por estado
-    const maxOperatorByState = Object.entries(stateOperatorCount).map(([state, operatorCounts]) => {
-      const [topOperator] = Object.entries(operatorCounts).reduce(
-        (maxEntry, currentEntry) =>
-          currentEntry[1] > maxEntry[1] ? currentEntry : maxEntry
-      );
-
-      return {
-        state,
-        operatorname: topOperator,
-      };
+    // Seleciona a operadora com maior número por estado
+    const maxOperatorByState = Object.entries(counts).map(([state, ops]) => {
+      const [topOperator] = Object.entries(ops).reduce((a, b) => (b[1] > a[1] ? b : a));
+      return { state, operatorname: topOperator };
     });
 
     return NextResponse.json({ maxOperatorByState });
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao buscar operadoras por estado:', error);
     return NextResponse.json({ error: 'Erro ao buscar estatísticas' }, { status: 500 });
   }
 }
