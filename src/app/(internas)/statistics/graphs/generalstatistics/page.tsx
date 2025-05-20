@@ -237,7 +237,7 @@ export default function Page() {
     fetchStats();
   }, []);
 
-    //PHONE BY CNPJ
+    //MAX PHONE BY CNPJ
     useEffect(() => {
       async function fetchStats() {
         try {
@@ -245,8 +245,7 @@ export default function Page() {
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones por CNPJ');
           const data = await response.json();
 
-          //setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
-          setMaxPhonesByCNPJ(data.statePhoneCounts || null);
+          setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -532,6 +531,7 @@ export default function Page() {
 
             <div className="flex-1 bg-gray-400 p-4 rounded-lg">
               <h2 className="text-xl font-bold mt-2">CNPJ com mais Linhas</h2>
+
               {loadingMaxPhonesByCNPJ ? (
                 <CircleLoading />
               ) : maxPhonesByCNPJ ? (
@@ -545,6 +545,7 @@ export default function Page() {
               ) : (
                 <p className="bg-white shadow-md rounded-lg p-4">Nenhuma informação disponível</p>
               )}
+
             </div>
             
           </div>
