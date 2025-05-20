@@ -46,7 +46,7 @@ const Component_DataPainel = () => {
                                 Relatórios
                             </button>
         </Link>
-        <Link href="/statistics/reports/reportpainel/" className="hover:underline">
+        <Link href="/statistics/graphs" className="hover:underline">
                         <button type="button" className="text-white
                                                             bg-red-700
                                                             hover:bg-red-800

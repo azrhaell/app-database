@@ -11,10 +11,10 @@ interface StateCount {
   count: number;
 }
 
-interface OperatorCount {
+/*interface OperatorCount {
   operatorname: string;
   count: number;
-}
+}*/
 
 interface CNPJCount {
   cnpj: string;
@@ -43,11 +43,13 @@ export default function Page() {
   const [uniqueCNPJs, setUniqueCNPJs] = useState<number | null>(null);
   const [uniquePhones, setUniquePhones] = useState<number | null>(null);
   const [cnpjsByState, setCnpjsByState] = useState<StateCount[]>([]);
-  const [phonesByState, setPhonesByState] = useState<StateCount[]>([]);
-  const [phonesByOperator, setPhonesByOperator] = useState<OperatorCount[]>([]);
+  const [phonesByState, setPhonesByState] = useState<{ state: string; count: number }[]>([]);
+  //const [phonesByOperator, setPhonesByOperator] = useState<OperatorCount[]>([]);
+  const [phonesByOperator, setPhonesByOperator] = useState<{ operatorname: string; count: number }[]>([]);
   const [operatorsByState, setOperatorsByState] = useState<StateCount[]>([]);
   const [maxOperatorByState, setMaxOperatorByState] = useState<OperatorByState[]>([]);
-  const [maxPhonesByOperator, setMaxPhonesByOperator] = useState<OperatorCount | null>(null);
+  //const [maxPhonesByOperator, setMaxPhonesByOperator] = useState<OperatorCount | null>(null);
+  const [maxPhonesByOperator, setMaxPhonesByOperator] = useState<{operatorname: string;count: number;} | null>(null);
   const [maxPhonesByCNPJ, setMaxPhonesByCNPJ] = useState<CNPJCount | null>(null);
   const [meiCNPJs, setMeiCNPJs] = useState<number | null>(null);
   const [simpleCNPJs, setSimpleCNPJs] = useState<number | null>(null);
@@ -57,11 +59,13 @@ export default function Page() {
   const [loadingCNPJs, setLoadingCNPJs] = useState<boolean>(true);
   const [loadingPhones, setLoadingPhones] = useState<boolean>(true);
   const [loadingCnpjsByState, setLoadingCnpjsByState] = useState<boolean>(true);
-  const [loadingPhonesByState, setLoadingPhonesByState] = useState<boolean>(true);
-  const [loadingPhonesByOperator, setLoadingPhonesByOperator] = useState<boolean>(true);
+  const [loadingPhonesByState, setLoadingPhonesByState] = useState(true);
+  //const [loadingPhonesByOperator, setLoadingPhonesByOperator] = useState<boolean>(true);
+  const [loadingPhonesByOperator, setLoadingPhonesByOperator] = useState(true);
   const [loadingOperatorsByState, setLoadingOperatorsByState] = useState<boolean>(true);
   const [loadingMaxOperatorByState, setLoadingMaxOperatorByState] = useState<boolean>(true);
-  const [loadingMaxPhonesByOperator, setLoadingMaxPhonesByOperator] = useState<boolean>(true);
+  //const [loadingMaxPhonesByOperator, setLoadingMaxPhonesByOperator] = useState<boolean>(true);
+  const [loadingMaxPhonesByOperator, setLoadingMaxPhonesByOperator] = useState(true);
   const [loadingMaxPhonesByCNPJ, setLoadingMaxPhonesByCNPJ] = useState<boolean>(true);
   const [loadingMeiCNPJs, setLoadingMeiCNPJs] = useState<boolean>(true);
   const [loadingSimpleCNPJs, setLoadingSimpleCNPJs] = useState<boolean>(true);
@@ -192,11 +196,19 @@ export default function Page() {
     async function fetchStats() {
       try {
         const response = await fetch('/api/stats/generalstatistics/phonesbystate');
-        if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones');
+        if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones por estado.');
         const data = await response.json();
-        setPhonesByState(data.phonesByState || 0);
+        //setPhonesByState(data.phonesByState || 0);
+        const arrayData = Object.entries(
+        data.statePhoneCounts ?? data /* fallback */
+        ).map(([state, count]) => ({
+          state: state || 'n/d',
+          count: Number(count),
+        }));
+
+        setPhonesByState(arrayData);
       } catch (err) {
-        console.error('Erro ao buscar estatísticas:', err);
+        console.error('Erro ao buscar estatísticas de Telefones por estado:', err);
       } finally {
         setLoadingPhonesByState(false);
       }
@@ -209,9 +221,11 @@ export default function Page() {
     async function fetchStats() {
       try {
         const response = await fetch('/api/stats/generalstatistics/phonesbyoperator');
-        if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones');
+        if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones por Operadora');
         const data = await response.json();
-        setPhonesByOperator(data.phonesByOperator || 0);
+
+        // Define os dados
+        setPhonesByOperator(data.phonesByOperator || []);
         setMaxPhonesByOperator(data.maxPhonesByOperator || null);
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
@@ -230,7 +244,9 @@ export default function Page() {
           const response = await fetch('/api/stats/generalstatistics/phonesbycnpj');
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones por CNPJ');
           const data = await response.json();
-          setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
+
+          //setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
+          setMaxPhonesByCNPJ(data.statePhoneCounts || null);
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -264,7 +280,7 @@ export default function Page() {
           const response = await fetch('/api/stats/generalstatistics/maxoperatorbystatemap');
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Operadoras por estados');
           const data = await response.json();
-          setMaxOperatorByState(data.maxOperatorByState || null);
+          setMaxOperatorByState(data.maxOperatorByState || []);
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -375,31 +391,38 @@ export default function Page() {
                   <CardTitle>Nº de Linhas por Estado</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {loadingPhonesByState ? (
-                    <CircleLoading />
-                  ) : phonesByState && phonesByState.length > 0 ? (
-                    <PieChart width={400} height={400} className="mx-auto">
-                      <Pie
-                        data={phonesByState.map(entry => ({ ...entry, state: entry.state || 'n/d' }))}
-                        dataKey="count"
-                        nameKey="state"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={150}
-                        fill="#82ca9d"
-                        labelLine={false}
-                        label={renderCustomizedLabel}
-                      >
-                        {phonesByState.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={colorList[index % colorList.length]} />
-                        ))}
-                      </Pie>
-                      <Legend />
-                      <Tooltip />
-                    </PieChart>
-                  ) : (
-                    <p>Nenhuma informação disponível</p>
-                  )}
+
+                  {
+                    loadingPhonesByState ? (
+                      <CircleLoading />
+                    ) : phonesByState.length > 0 ? (
+                      <PieChart width={400} height={400} className="mx-auto">
+                        <Pie
+                          data={phonesByState}
+                          dataKey="count"
+                          nameKey="state"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={150}
+                          fill="#82ca9d"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                        >
+                          {phonesByState.map((_entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colorList[index % colorList.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Legend />
+                        <Tooltip />
+                      </PieChart>
+                    ) : (
+                      <p>Nenhuma informação disponível</p>
+                    )
+                  }
+
                 </CardContent>
               </Card>
             </div>
@@ -412,35 +435,51 @@ export default function Page() {
                     <CardTitle>Nº de Linhas por Operadora</CardTitle>
                   </CardHeader>
                   <CardContent>
+
                     {loadingPhonesByOperator ? (
                       <CircleLoading />
-                    ) : phonesByOperator && phonesByOperator.length > 0 ? (
+                    ) : phonesByOperator.length > 0 ? (
                       <BarChart
                         width={500}
                         height={300}
-                        data={phonesByOperator.sort((a, b) => b.count - a.count).slice(0, 5)} // Apenas os 5 maiores
+                        data={phonesByOperator
+                          .sort((a, b) => b.count - a.count)
+                          .slice(0, 5)} // Top 5
                         layout="vertical"
                         className="mx-auto"
                       >
                         <XAxis type="number" />
-                        <YAxis type="category" dataKey="operatorname" width={150} />
+                        <YAxis
+                          type="category"
+                          dataKey="operatorname"
+                          width={150}
+                        />
                         <Tooltip />
                         <Legend />
                         <Bar dataKey="count" barSize={30}>
-                          {phonesByOperator.slice(0, 5).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={colorList[index % colorList.length]} />
-                          ))}
+                          {phonesByOperator
+                            .sort((a, b) => b.count - a.count)
+                            .slice(0, 5)
+                            .map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={colorList[index % colorList.length]}
+                              />
+                            ))}
                         </Bar>
                       </BarChart>
                     ) : (
                       <p>Nenhuma informação disponível</p>
                     )}
+
+
                   </CardContent>
                 </Card>
             </div>
 
             <div className="flex-1 bg-gray-400 p-4 rounded-lg">
               <h2 className="text-xl font-bold mt-2">Operadoras por Estado</h2>
+
               {loadingOperatorsByState ? (
                 <CircleLoading />
               ) : operatorsByState && operatorsByState.length > 0 ? (
@@ -454,23 +493,26 @@ export default function Page() {
               ) : (
                 <p>Nenhuma informação disponível</p>
               )}
+
             </div>
 
             <div className="flex-1 bg-gray-400 p-4 rounded-lg">
               <h2 className="text-xl font-bold mt-2">Maior Operadora por Estado</h2>
-              {loadingMaxOperatorByState ? (
-                <CircleLoading />
-              ) : maxOperatorByState && maxOperatorByState.length > 0 ? (
-                <ul className="bg-white shadow-md rounded-lg p-4">
-                  {maxOperatorByState.map(({ state, operatorname }) => (
-                    <li key={`${state || 'n/d'}`}>
-                      <strong>{state || 'n/d'}:</strong> {operatorname}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>Nenhuma informação disponível</p>
-              )}
+
+            {loadingMaxOperatorByState ? (
+              <CircleLoading />
+            ) : maxOperatorByState && maxOperatorByState.length > 0 ? (
+              <ul className="bg-white shadow-md rounded-lg p-4">
+                {maxOperatorByState.map(({ state, operatorname }) => (
+                  <li key={state || 'n/d'}>
+                    <strong>{state || 'n/d'}:</strong> {operatorname}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Nenhuma informação disponível</p>
+            )}
+
             </div>
           </div>
 

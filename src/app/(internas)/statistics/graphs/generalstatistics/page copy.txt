@@ -43,12 +43,17 @@ export default function Page() {
   const [uniqueCNPJs, setUniqueCNPJs] = useState<number | null>(null);
   const [uniquePhones, setUniquePhones] = useState<number | null>(null);
   const [cnpjsByState, setCnpjsByState] = useState<StateCount[]>([]);
-  const [phonesByState, setPhonesByState] = useState<StateCount[]>([]);
+  //const [phonesByState, setPhonesByState] = useState<StateCount[]>([]);
+  const [phonesByState, setPhonesByState] = useState<Record<string, number>>({});
   const [phonesByOperator, setPhonesByOperator] = useState<OperatorCount[]>([]);
   const [operatorsByState, setOperatorsByState] = useState<StateCount[]>([]);
   const [maxOperatorByState, setMaxOperatorByState] = useState<OperatorByState[]>([]);
   const [maxPhonesByOperator, setMaxPhonesByOperator] = useState<OperatorCount | null>(null);
   const [maxPhonesByCNPJ, setMaxPhonesByCNPJ] = useState<CNPJCount | null>(null);
+  const [meiCNPJs, setMeiCNPJs] = useState<number | null>(null);
+  const [simpleCNPJs, setSimpleCNPJs] = useState<number | null>(null);
+  const [microEmpresaCNPJs, setMicroEmpresaCNPJs] = useState<number | null>(null);
+  const [pequenoPorteCNPJs, setPequenoPorteCNPJs] = useState<number | null>(null);
 
   const [loadingCNPJs, setLoadingCNPJs] = useState<boolean>(true);
   const [loadingPhones, setLoadingPhones] = useState<boolean>(true);
@@ -59,46 +64,10 @@ export default function Page() {
   const [loadingMaxOperatorByState, setLoadingMaxOperatorByState] = useState<boolean>(true);
   const [loadingMaxPhonesByOperator, setLoadingMaxPhonesByOperator] = useState<boolean>(true);
   const [loadingMaxPhonesByCNPJ, setLoadingMaxPhonesByCNPJ] = useState<boolean>(true);
-
-  /*useEffect(() => {
-    async function fetchStats() {
-      try {
-        const response = await fetch('/api/stats');
-        if (!response.ok) throw new Error('Erro ao buscar estatísticas');
-        const data = await response.json();
-
-        //setUniqueCNPJs(data.uniqueCNPJs || 0);
-        //setLoadingCNPJs(false);
-
-        //setUniquePhones(data.uniquePhones || 0);
-        //setLoadingPhones(false);
-
-        //setCnpjsByState(data.cnpjsByState || []);
-        //setLoadingCnpjsByState(false);
-
-        //setPhonesByState(data.phonesByState || []);
-        //setLoadingPhonesByState(false);
-
-        //setPhonesByOperator(data.phonesByOperator || []);
-        //setLoadingPhonesByOperator(false);
-
-        //setOperatorsByState(data.operatorsByState || []);
-        //setLoadingOperatorsByState(false);
-
-        //setMaxOperatorByState(data.maxOperatorByState || []);
-        //setLoadingMaxOperatorByState(false);
-
-        //setMaxPhonesByOperator(data.maxPhonesByOperator || null);
-        //setLoadingMaxPhonesByOperator(false);
-
-        //setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
-        //setLoadingMaxPhonesByCNPJ(false);
-      } catch (err) {
-        console.error('Erro ao buscar estatísticas:', err);
-      }
-    }
-    fetchStats();
-  }, []);*/
+  const [loadingMeiCNPJs, setLoadingMeiCNPJs] = useState<boolean>(true);
+  const [loadingSimpleCNPJs, setLoadingSimpleCNPJs] = useState<boolean>(true);
+  const [loadingMicroEmpresaCNPJs, setLoadingMicroEmpresaCNPJs] = useState<boolean>(true);
+  const [loadingPequenoPorteCNPJs, setLoadingPequenoPorteCNPJs] = useState<boolean>(true);
 
   //COUNT CNPJ
   useEffect(() => {
@@ -107,12 +76,79 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/countcnpj');
         if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs');
         const data = await response.json();
-
         setUniqueCNPJs(data.uniqueCNPJs || 0);
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
       } finally {
         setLoadingCNPJs(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //COUNT CNPJ MEI
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpjmei');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs');
+        const data = await response.json();
+        setMeiCNPJs(data.meiCNPJs || 0);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      } finally {
+        setLoadingMeiCNPJs(false);
+      }
+    }
+    fetchStats();
+  }, []);
+ 
+  //COUNT CNPJ SIMPLE
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpjsimple');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs');
+        const data = await response.json();
+        setSimpleCNPJs(data.simpleCNPJs || 0);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      } finally {
+        setLoadingSimpleCNPJs(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //COUNT CNPJ MICROEMPRESA
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpjmicro');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs Micro Empresa');
+        const data = await response.json();
+        setMicroEmpresaCNPJs(data.microEmpresaCNPJs || 0);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      } finally {
+        setLoadingMicroEmpresaCNPJs(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  //COUNT CNPJ PEQUENO PORTE
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats/generalstatistics/countcnpjsmallsize');
+        if (!response.ok) throw new Error('Erro ao calcular a contagem de CNPJs Pequeno Porte');
+        const data = await response.json();
+        setPequenoPorteCNPJs(data.pequenoPorteCNPJs || 0);
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+      } finally {
+        setLoadingPequenoPorteCNPJs(false);
       }
     }
     fetchStats();
@@ -125,9 +161,7 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/countphones');
         if (!response.ok) throw new Error('Erro ao calcular a contagem de Telefones');
         const data = await response.json();
-
         setUniquePhones(data.uniquePhones || 0);
-
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
       } finally {
@@ -144,7 +178,6 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/cnpjbystate');
         if (!response.ok) throw new Error('Erro ao buscar estatísticas de CNPJs');
         const data = await response.json();
-
         setCnpjsByState(data.cnpjsByState || 0);
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
@@ -162,8 +195,8 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/phonesbystate');
         if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones');
         const data = await response.json();
-
-        setPhonesByState(data.phonesByState || 0);
+        //setPhonesByState(data.phonesByState || 0);
+        setPhonesByState(data);
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
       } finally {
@@ -180,10 +213,8 @@ export default function Page() {
         const response = await fetch('/api/stats/generalstatistics/phonesbyoperator');
         if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones');
         const data = await response.json();
-
         setPhonesByOperator(data.phonesByOperator || 0);
         setMaxPhonesByOperator(data.maxPhonesByOperator || null);
-
       } catch (err) {
         console.error('Erro ao buscar estatísticas:', err);
       } finally {
@@ -201,9 +232,9 @@ export default function Page() {
           const response = await fetch('/api/stats/generalstatistics/phonesbycnpj');
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Telefones por CNPJ');
           const data = await response.json();
-  
-          setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
-  
+
+          //setMaxPhonesByCNPJ(data.maxPhonesByCNPJ || null);
+          setMaxPhonesByCNPJ(data.statePhoneCounts || null);
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -220,9 +251,7 @@ export default function Page() {
           const response = await fetch('/api/stats/generalstatistics/operatorbystateraw');
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Operadoras por estados');
           const data = await response.json();
-  
           setOperatorsByState(data.operatorsByState || null);
-  
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -239,9 +268,7 @@ export default function Page() {
           const response = await fetch('/api/stats/generalstatistics/maxoperatorbystatemap');
           if (!response.ok) throw new Error('Erro ao buscar estatísticas de Operadoras por estados');
           const data = await response.json();
-  
           setMaxOperatorByState(data.maxOperatorByState || null);
-
         } catch (err) {
           console.error('Erro ao buscar estatísticas:', err);
         } finally {
@@ -251,7 +278,16 @@ export default function Page() {
       fetchStats();
     }, []);
 
-  const renderCustomizedLabel = (props: { cx: number; cy: number; midAngle: number; innerRadius: number; outerRadius: number; percent: number; }) => {
+  interface CustomizedLabelProps {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percent: number;
+  }
+
+  const renderCustomizedLabel = (props: CustomizedLabelProps) => {
     const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
@@ -270,14 +306,34 @@ export default function Page() {
       <div className="flex flex-col md:flex-row gap-4 max-w-6xl mx-auto w-full">
         <div className="flex flex-col md:w-1/4 bg-gray-400 p-4 rounded-lg">
           <h2 className="text-xl font-bold mt-2">Geral</h2>
+          
           <ul className="bg-white shadow-md rounded-lg p-4">
+            <li>
+              <strong>Número de Linhas:</strong> {loadingPhones ? <CircleLoading /> : uniquePhones}
+            </li>
+            
             <li>
               <strong>Quantidade de CNPJs:</strong> {loadingCNPJs ? <CircleLoading /> : uniqueCNPJs}
             </li>
+
+            <h2>Opção</h2>
             <li>
-              <strong>Quantidade de Linhas:</strong> {loadingPhones ? <CircleLoading /> : uniquePhones}
+              <strong>MEI:</strong> {loadingMeiCNPJs ? <CircleLoading /> : meiCNPJs}
             </li>
+            <li>
+              <strong>Simples:</strong> {loadingSimpleCNPJs ? <CircleLoading /> : simpleCNPJs}
+            </li>
+            
+            <h2>Porte Empresa</h2>
+            <li>
+              <strong>Micro Empresa:</strong> {loadingMicroEmpresaCNPJs ? <CircleLoading /> : microEmpresaCNPJs}
+            </li>
+            <li>
+              <strong>Pequeno Porte:</strong> {loadingPequenoPorteCNPJs ? <CircleLoading /> : pequenoPorteCNPJs}
+            </li>
+
           </ul>
+          
         </div>
 
         <div className="flex flex-col md:w-3/4 gap-4">
@@ -323,6 +379,7 @@ export default function Page() {
                   <CardTitle>Nº de Linhas por Estado</CardTitle>
                 </CardHeader>
                 <CardContent>
+
                   {loadingPhonesByState ? (
                     <CircleLoading />
                   ) : phonesByState && phonesByState.length > 0 ? (
@@ -348,6 +405,7 @@ export default function Page() {
                   ) : (
                     <p>Nenhuma informação disponível</p>
                   )}
+                  
                 </CardContent>
               </Card>
             </div>

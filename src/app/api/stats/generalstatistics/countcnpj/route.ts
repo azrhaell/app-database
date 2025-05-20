@@ -5,12 +5,13 @@ export async function GET() {
   try {
     // Executando as queries separadamente para evitar estouro do pool de conexões
     const uniqueCNPJs = await 
-      prisma.organizations.groupBy({ by: ['cnpj'] });
+      //prisma.organizations.groupBy({ by: ['cnpj'] });
+      prisma.organizations.count()
 
     await prisma.$disconnect(); // Fecha a conexão após executar as consultas
 
     return NextResponse.json({
-      uniqueCNPJs: uniqueCNPJs.length,
+      uniqueCNPJs: uniqueCNPJs
           });
   } catch (error) {
     console.error(error);
