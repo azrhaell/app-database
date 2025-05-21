@@ -4,7 +4,6 @@ import Link from 'next/link';
 import {  useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import * as XLSX from 'xlsx';
-//import { toZonedTime, format } from 'date-fns-tz';
 
 interface FormInputs {
   percentage: number;
@@ -348,7 +347,9 @@ export default function Component_ListPercentOrganization() {
               <label className="block text-sm font-medium text-gray-700">Operadoras</label>
               <select multiple {...register('operatorname')} className="border p-2 rounded h-32" defaultValue={[""]}>
                 <option value="">Todas</option>
-                {listoperators.map(op => <option key={op} value={op}>{op}</option>)}
+                {[...new Set(listoperators)].map(op => (
+                  <option key={op} value={op}>{op}</option>
+                ))}
               </select>
             </div>
             
