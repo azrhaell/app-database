@@ -4,7 +4,6 @@ import Link from 'next/link';
 import {  useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import * as XLSX from 'xlsx';
-//import { toZonedTime, format } from 'date-fns-tz';
 
 interface FormInputs {
   percentage: number;
@@ -16,15 +15,12 @@ interface FormInputs {
   operatorname?: string[];
   ddd?: string[];
   state?: string[];
-  
+  rfstatus?: string;
   legalnature?: string[];
   companysize?: string[];
-
-  rfstatus?: boolean;
-  optionalsize?: boolean;
-  optionsize?: boolean;
+  optionalsize?: string;
+  optionmei?: string;
 }
-
 interface OrganizationDetails {
   cnpj: string;
   companyname: string;
@@ -38,52 +34,131 @@ interface OrganizationDetails {
   legalnature: string; //NATUREZA_JURIDICA
   companysize: string; //PORTE_EMPRESA
   optionalsize: boolean; //OPCAO_SIMPLES
-  optionsize: boolean; //OPCAO_MEI
+  optionmei: boolean; //OPCAO_MEI
+
+  updatedat: string;
+  occurrences: number;
 }
-
-const operators = ['Vivo', 'Tim', 'CLARO', 'Oi', 'America Net', 'Surf Telecom', '15', '21', '41']; //DEVE SER AUTOMÁTICO
-const ddds = ['21', '22','24','27','28']; //DEVE SER AUTOMÁTICO
-const states = ['RJ', 'ES'];
-const companysizes = ['MICRO EMPRESA', 'EMPRESA DE PEQUENO PORTE', 'DEMAIS'];
-
 
 export default function Component_ListPercentOrganization() {
   const { register, handleSubmit } = useForm<FormInputs>();
   const [results, setResults] = useState<OrganizationDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [legalnatures, setLegalnatures] = useState<string[]>([]);
+  const [listoperators, setListOperators] = useState<string[]>([]);
+  const [liststates, setListStates] = useState<string[]>([]);
+  const [listcompanysizes, setListCompanySizes] = useState<string[]>([]);
+  const [listddds, setListDDDs] = useState<string[]>([]);
+  const [isFetchingData, setIsFetchingData] = useState(false);
 
-  const fetchLegalNatures = async () => {
+  const fetchData = async () => {
+    //CARREGA LEGAL NATURES (NATUREZA JURIDICA)
     try {
       const response = await fetch('/api/database/getbdlegalnature');
+
       if (!response.ok) {
         throw new Error('Erro ao buscar naturezas jurídicas');
       }
+
       const data = await response.json();
       setLegalnatures(data);
+
     } catch (error) {
       console.error('Erro ao buscar naturezas jurídicas:', error);
+    } finally {
+      setIsFetchingData(false);
     }
+
+    //CARREGA OPERATORS (OPERADORA)
+    try {
+      const response = await fetch('/api/database/getbdoperator');
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar operadoras');
+      }
+
+      const data = await response.json();
+      setListOperators(data);//
+
+    } catch (error) {
+      console.error('Erro ao buscar operadoras:', error);
+    } finally {
+      setIsFetchingData(false);
+    }
+
+    //CARREGA STATES (UF)
+    try {
+      const response = await fetch('/api/database/getbdstate');
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar UFs');
+      }
+
+      const data = await response.json();
+      setListStates(data);//
+
+    } catch (error) {
+      console.error('Erro ao buscar UFs:', error);
+    } finally {
+      setIsFetchingData(false);
+    }
+
+    //CARREGA COMPANY SIZE (PORTE EMPRESA) 
+    try {
+      const response = await fetch('/api/database/getbdcompanysize');
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar Porte da Empresa');
+      }
+
+      const data = await response.json();
+      setListCompanySizes(data);//
+
+    } catch (error) {
+      console.error('Erro ao buscar Porte da Empresa:', error);
+    } finally {
+      setIsFetchingData(false);
+    }
+
+    //CARREGA DDD
+    try {
+      const response = await fetch('/api/database/getbdmobilephone1');
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar DDD');
+      }
+
+      const data = await response.json();
+      setListDDDs(data);//
+
+    } catch (error) {
+      console.error('Erro ao buscar DDD:', error);
+    } finally {
+      setIsFetchingData(false);
+    }      
+
   };
 
   useEffect(() => {
-    fetchLegalNatures();
+    fetchData();
   }, []);
 
-  const updateLegalNatures = async () => {
+  // Função para atualizar os campos do formulário
+  // (Exemplo: Natureza Jurídica, Operadora, etc.)
+  const updateDataForm = async () => {
+    setIsFetchingData(true)
     try {
-      const response = await fetch('/api/database/updatelegalnatures', {
+      const response = await fetch('/api/database/updatedataform', {
         method: 'POST',
       });
       if (!response.ok) {
-        throw new Error('Erro ao atualizar naturezas jurídicas');
+        throw new Error('Erro ao atualizar os campos do formulário');
       }
       const data = await response.json();
       console.log(data.message);
-      // Atualizar a lista de naturezas jurídicas após a atualização
-      fetchLegalNatures();
+      fetchData();
     } catch (error) {
-      console.error('Erro ao atualizar naturezas jurídicas:', error);
+      console.error('Erro ao atualizar os campos do formulário:', error);
     }
   };
   
@@ -119,18 +194,47 @@ export default function Component_ListPercentOrganization() {
     }
   };
 
+  // Função para formatar data no formato "dd/mm/aaaa"
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Função para contar ocorrências de CNPJ
+  const countOccurrences = (data: OrganizationDetails[]) => {
+    const occurrencesMap: Record<string, number> = {};
+    
+    data.forEach(org => {
+      occurrencesMap[org.cnpj] = (occurrencesMap[org.cnpj] || 0) + 1;
+    });
+  
+    return occurrencesMap;
+  };
+
   // Função para exportar CSV
   const exportCSV = () => {
+    const occurrencesMap = countOccurrences(results);
+    
     const csvContent = [
-      ['CNPJ', 'DSNOMERAZAO', 'OPERADORA', 'FIDELIDADE', 'LINHA', 'CIDADE', 'UF'], // Cabeçalho
+      ['CNPJ', 'DSNOMERAZAO', 'OPERADORA', 'FIDELIDADE', 'LINHA', 'CIDADE', 'UF', 'SITUAÇÃO CADASTRAL', 'NATUREZA JURIDICA', 'PORTE EMPRESA', 'OPCAO SIMPLES', 'OPCAO MEI', 'ATUALIZADO EM', 'N_LINHAS'], // Cabeçalho
       ...results.map(org => [
         org.cnpj,
         org.companyname,
         org.operatorname,
-        org.startofcontract,
+        formatDate(org.startofcontract),
         org.mobilephone1,
         org.city,
-        org.state
+        org.state,
+        org.rfstatus,
+        org.legalnature,
+        org.companysize,
+        org.optionalsize,
+        org.optionmei,
+        formatDate(org.updatedat),
+        occurrencesMap[org.cnpj]
       ]),
     ]
       .map(row => row.join(';'))
@@ -148,8 +252,25 @@ export default function Component_ListPercentOrganization() {
 
   // Função para exportar XLSX
   const exportXLSX = () => {
-      const worksheet = XLSX.utils.json_to_sheet(results, {
-      header: ['cnpj', 'companyname', 'operatorname', 'startofcontract', 'mobilephone1', 'city', 'state'],
+    const occurrencesMap = countOccurrences(results);
+
+    const worksheet = XLSX.utils.json_to_sheet(results.map(org => ({
+      cnpj: org.cnpj,
+      companyname: org.companyname,
+      operatorname: org.operatorname,
+      startofcontract: formatDate(org.startofcontract),
+      mobilephone1: org.mobilephone1,
+      city: org.city,
+      state: org.state,
+      rfstatus: org.rfstatus,
+      legalnature: org.legalnature,
+      companysize: org.companysize,
+      optionalsize: org.optionalsize,
+      optionmei: org.optionmei,
+      updatedat: formatDate(org.updatedat),
+      occurrences: occurrencesMap[org.cnpj]
+    })), {
+      header: ['cnpj', 'companyname', 'operatorname', 'startofcontract', 'mobilephone1', 'city', 'state', 'rfstatus', 'legalnature', 'companysize', 'optionalsize', 'optionmei', 'updatedat', 'occurrences'],
     });
 
     // Renomeando as colunas para os títulos desejados
@@ -160,7 +281,14 @@ export default function Component_ListPercentOrganization() {
       startofcontract: 'FIDELIDADE',
       mobilephone1: 'LINHA',
       city: 'CIDADE',
-      state: 'UF'
+      state: 'UF',
+      rfstatus: 'SITUAÇÃO CADASTRAL',
+      legalnature: 'NATUREZA JURIDICA',
+      companysize: 'PORTE EMPRESA',
+      optionalsize: 'OPCAO SIMPLES',
+      optionmei: 'OPCAO MEI',
+      updatedat: 'ATUALIZADO EM',
+      occurrences: 'OCORRÊNCIAS'
     };
 
     Object.keys(headerMap).forEach((key, index) => {
@@ -219,38 +347,64 @@ export default function Component_ListPercentOrganization() {
               <label className="block text-sm font-medium text-gray-700">Operadoras</label>
               <select multiple {...register('operatorname')} className="border p-2 rounded h-32" defaultValue={[""]}>
                 <option value="">Todas</option>
-                {operators.map(op => <option key={op} value={op}>{op}</option>)}
+                {[...new Set(listoperators)].map(op => (
+                  <option key={op} value={op}>{op}</option>
+                ))}
               </select>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700">DDDs</label>
+              <label className="block text-sm font-medium text-gray-700">
+                <span>DDDs</span>
+                <Link href={"/statistics/relative/listorganization/listpercentorganization"}>
+                  <span> U </span>
+                </Link>
+              </label>
               <select multiple {...register('ddd')} className="border p-2 rounded h-32" defaultValue={[""]}>
                 <option value="">Todos</option>
-                {ddds.map(ddd => <option key={ddd} value={ddd}>{ddd}</option>)}
+                {listddds.map(ddd => <option key={ddd} value={ddd}>{ddd}</option>)}
               </select>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700">Estados</label>
+              <label className="block text-sm font-medium text-gray-700">
+                <span>
+                  Estados
+                </span>
+                <Link href={"/statistics/relative/listorganization/listpercentorganization"}>
+                  <span> U </span>
+                </Link>
+              </label>
               <select multiple {...register('state')} className="border p-2 rounded h-32" defaultValue={[""]}>
                 <option value="">Todos</option>
-                {states.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                {liststates.map(uf => <option key={uf} value={uf}>{uf}</option>)}
               </select>
             </div>
           </div>
 
           <div className='flex flex-col gap-4 md:flex-row md:gap-8'>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Porte da Empresa</label>
+              <label className="block text-sm font-medium text-gray-700">
+                <span>
+                  Porte da Empresa
+                </span>
+                <Link href={"/statistics/relative/listorganization/listpercentorganization"}>
+                  <span> U </span>
+                </Link>
+              </label>
               <select multiple {...register('companysize')} className="border p-2 rounded h-32" defaultValue={[""]}>
                 <option value="" >Qualquer porte</option>
-                {companysizes.map(company => <option key={company} value={company}>{company}</option>)}
+                {listcompanysizes.map(company => <option key={company} value={company}>{company}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Natureza Jurídica</label>
+              <label className="block text-sm font-medium text-gray-700">
+                <span>Natureza Jurídica</span>
+                <Link href={"/statistics/relative/listorganization/listpercentorganization"}>
+                  <span> U </span>
+                </Link>
+              </label>
               <select multiple {...register('legalnature')} className="border p-2 rounded h-32" defaultValue={[""]}>
                 <option value="">Qualquer natureza</option>
                 {legalnatures.map(nature => <option key={nature} value={nature}>{nature}</option>)}
@@ -261,17 +415,17 @@ export default function Component_ListPercentOrganization() {
               <label className="block text-sm font-medium text-gray-700" defaultValue="">Opção Simples</label>
               <select {...register('optionalsize')} className="border p-2 rounded" >
                 <option value="">Qualquer opção</option>
-                <option value="true">Sim</option>
-                <option value="false">Não</option>
+                <option value="SIM">Sim</option>
+                <option value="NÃO">Não</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700" defaultValue="">Opção MEI</label>
-              <select {...register('optionsize')} className="border p-2 rounded" >
+              <select {...register('optionmei')} className="border p-2 rounded" >
                 <option value="">Qualquer opção</option>
-                <option value="true">Sim</option>
-                <option value="false">Não</option>
+                <option value="SIM">Sim</option>
+                <option value="NÃO">Não</option>
               </select>
             </div>
 
@@ -279,8 +433,8 @@ export default function Component_ListPercentOrganization() {
               <label className="block text-sm font-medium text-gray-700" defaultValue="">Situação Cadastral</label>
               <select {...register('rfstatus')} className="border p-2 rounded" >
                 <option value="">Ativa/Inativa</option>
-                <option value="true">Ativa</option>
-                <option value="false">Inativa</option>
+                <option value="ATIVA">Ativa</option>
+                <option value="INATIVA">Inativa</option>
               </select>
             </div>
 
@@ -292,9 +446,16 @@ export default function Component_ListPercentOrganization() {
         </div>
       </form>
 
-      <button onClick={updateLegalNatures} className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">
-        Atualizar Naturezas Jurídicas
-      </button>
+      {isFetchingData ? (
+        <button className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition">
+          Atualizando Formulário ...
+        </button>
+        ) : (
+        <button onClick={updateDataForm} className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">
+          Atualizar Formulário
+        </button>
+        )
+      }
 
       {isLoading ? (
         <p className="text-blue-500 font-semibold">Carregando resultados...</p>

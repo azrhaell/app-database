@@ -307,10 +307,11 @@ export async function POST(request: NextRequest) {
 
     console.log("Dados considerados na Segunda Consulta: ", whereClauseFinal);
     const finalBatchSize = 5000;
-    const resultDetails = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const resultDetails: any[] = [];
     //let pagefinal = 0;
 
-    const MAX_RESULTS = 1_000_000; // Limite de 1 milhão de registros
+    const MAX_RESULTS = 750000; // Limite de 1 milhão de registros
     let totalRecords = 0; // Contador de registros processados
 
     for (let i = 0; i < resultCnpj.length; i += finalBatchSize) {
@@ -352,6 +353,7 @@ export async function POST(request: NextRequest) {
     console.log("Total de resultDetails encontrados:", resultDetails.length);
 
     return NextResponse.json(resultDetails, { status: 200 });
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Erro na busca:", error);
