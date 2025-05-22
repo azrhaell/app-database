@@ -20,7 +20,8 @@ export type FilterFormData = {
 export default function Component_ListPercentOrganization() {
   const { register, handleSubmit } = useForm<FilterFormData>()
   const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<any[]>([])
+  type ResultRow = Record<string, string | number | boolean | null>;
+  const [results, setResults] = useState<ResultRow[]>([])
 
   const onSubmit = async (data: FilterFormData) => {
     setLoading(true)
