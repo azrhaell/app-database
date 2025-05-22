@@ -7,9 +7,9 @@ export async function POST(req: NextRequest) {
       limit,
       startDate,
       endDate,
-      operator,
+      operatorname,
       ddd,
-      uf,
+      state,
       companySize,
       legalNature,
       optionalsize,
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
 
     const filters: OrganizationsFilters = {};
 
-    if (uf && uf.length > 0 && !uf.includes("")) {
-      filters.state = { in: uf };
+    if (state && state.length > 0 && !state.includes("")) {
+      filters.state = { in: state };
     }
 
     if (legalNature && legalNature.length > 0 && !legalNature.includes("")) {
@@ -59,13 +59,13 @@ export async function POST(req: NextRequest) {
       filters.optionmei = optionmei === 'true';
     }
 
-    if ((operator && operator.length > 0 && !operator.includes("")) ||
+    if ((operatorname && operatorname.length > 0 && !operatorname.includes("")) ||
         (ddd && ddd.length > 0 && !ddd.includes("")) ||
         startDate || endDate) {
       const relatedFilter: RelatedNumbersFilter = {};
 
-      if (operator && operator.length > 0 && !operator.includes("")) {
-        relatedFilter.operatorname = { in: operator };
+      if (operatorname && operatorname.length > 0 && !operatorname.includes("")) {
+        relatedFilter.operatorname = { in: operatorname };
       }
 
       if (ddd && ddd.length > 0 && !ddd.includes("")) {
@@ -85,6 +85,8 @@ export async function POST(req: NextRequest) {
 
       filters.relatednumbers = { some: relatedFilter };
     }
+
+    console.log('Filters:', filters);
 
     const result = await prisma.organizations.findMany({
       where: filters,

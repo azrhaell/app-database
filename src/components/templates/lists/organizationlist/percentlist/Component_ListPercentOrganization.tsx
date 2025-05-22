@@ -8,9 +8,9 @@ export type FilterFormData = {
   limit?: number
   startDate?: string
   endDate?: string
-  operator?: string
+  operatorname?: string
   ddd?: string
-  uf?: string
+  state?: string
   companySize?: string
   legalNature?: string
   optionalsize?: 'true' | 'false'
@@ -168,6 +168,7 @@ export default function Component_ListPercentOrganization() {
             <option value="10">10</option>
             <option value="50">50</option>
             <option value="100">100</option>
+            <option value="100">150</option>
             <option value="1000">1000</option>
           </select>
         </div>
@@ -184,7 +185,7 @@ export default function Component_ListPercentOrganization() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Operadoras</label>
-          <select multiple {...register('operator')} className="border p-2 rounded h-32" defaultValue={[""]}>
+          <select multiple {...register('operatorname')} className="border p-2 rounded h-32" defaultValue={[""]}>
             <option value="">Todas</option>
             {[...new Set(listoperators)].map(op => (
               <option key={op} value={op}>{op}</option>
@@ -214,7 +215,7 @@ export default function Component_ListPercentOrganization() {
               <span> U </span>
             </Link>
           </label>
-          <select multiple {...register('uf')} className="border p-2 rounded h-32" defaultValue={[""]}>
+          <select multiple {...register('state')} className="border p-2 rounded h-32" defaultValue={[""]}>
             <option value="">Todos</option>
             {liststates.map(uf => <option key={uf} value={uf}>{uf}</option>)}
           </select>
@@ -235,18 +236,18 @@ export default function Component_ListPercentOrganization() {
           </select>
         </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                <span>Natureza Jurídica</span>
-                <Link href={"/statistics/relative/listorganization/listpercentorganization"}>
-                  <span> U </span>
-                </Link>
-              </label>
-              <select multiple {...register('legalNature')} className="border p-2 rounded h-32" defaultValue={[""]}>
-                <option value="">Qualquer natureza</option>
-                {legalnatures.map(nature => <option key={nature} value={nature}>{nature}</option>)}
-              </select>
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            <span>Natureza Jurídica</span>
+            <Link href={"/statistics/relative/listorganization/listpercentorganization"}>
+              <span> U </span>
+            </Link>
+          </label>
+          <select multiple {...register('legalNature')} className="border p-2 rounded h-32" defaultValue={[""]}>
+            <option value="">Qualquer natureza</option>
+            {legalnatures.map(nature => <option key={nature} value={nature}>{nature}</option>)}
+          </select>
+        </div>
 
         <div>
           <label className="block mb-1">Simples Nacional</label>
@@ -266,14 +267,14 @@ export default function Component_ListPercentOrganization() {
           </select>
         </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700" defaultValue="">Situação Cadastral</label>
-              <select {...register('rfstatus')} className="border p-2 rounded" >
-                <option value="">Ativa/Inativa</option>
-                <option value="ATIVA">Ativa</option>
-                <option value="INATIVA">Inativa</option>
-              </select>
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700" defaultValue="">Situação Cadastral</label>
+          <select {...register('rfstatus')} className="border p-2 rounded" >
+            <option value="">Ativa/Inativa</option>
+            <option value="ATIVA">Ativa</option>
+            <option value="INATIVA">Inativa</option>
+          </select>
+        </div>
 
         <div className="md:col-span-3 text-right">
           <button
@@ -304,21 +305,27 @@ export default function Component_ListPercentOrganization() {
             <table className="min-w-full table-auto">
               <thead>
                 <tr className="bg-gray-100">
-                  {Object.keys(results[0]).map((key) => (
-                    <th key={key} className="px-4 py-2 border text-left text-sm font-medium text-gray-700">
-                      {key}
-                    </th>
-                  ))}
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">CNPJ</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Nome</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">UF</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Porte Empresa</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Natureza Jurídica</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Simples</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">MEI</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Ativa</th>
                 </tr>
               </thead>
               <tbody>
                 {results.map((row, idx) => (
                   <tr key={idx} className="border-t">
-                    {Object.values(row).map((value, index) => (
-                      <td key={index} className="px-4 py-2 text-sm text-gray-800">
-                        {String(value)}
-                      </td>
-                    ))}
+                    <td className="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">{row.cnpj || '—'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.companyname || '—'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.state || '—'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.companysize || '—'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.legalnature || '—'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.optionalsize ? 'Sim' : 'Não'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.optionmei ? 'Sim' : 'Não'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.rfstatus ? 'Sim' : 'Não'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -328,6 +335,8 @@ export default function Component_ListPercentOrganization() {
           !loading && <p className="text-white mt-4">Nenhum resultado encontrado.</p>
         )}
       </div>
+
+
     </div>
   )
 }
