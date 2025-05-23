@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
       optionalsize,
       optionmei,
       rfstatus,
+      numberlines, // Novo campo para filtrar quantidade mínima de telefones
     } = await req.json();
 
     interface RelatedNumbersFilter {
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     const result = await prisma.organizations.findMany({
       where: filters,
-      take: limit ? parseInt(limit) : 10,
+      take: limit ? parseInt(limit) : 1000,
       include: {
         relatednumbers: {
           select: {
@@ -99,10 +100,40 @@ export async function POST(req: NextRequest) {
             startofcontract: true,
           },
         },
+        _count: {
+          select: {
+            relatednumbers: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json(result);
+    // Filtro por quantidade mínima de telefones
+    const filteredResult = result.filter(
+      (org) => (org._count?.relatednumbers ?? 0) <= (numberlines ? parseInt(numberlines) : 0)
+    );
+
+    const mappedResult = filteredResult.map((org) => {
+      const operatorCount: Record<string, number> = {};
+
+      org.relatednumbers.forEach((num) => {
+        const op = num.operatorname || 'Desconhecido';
+        operatorCount[op] = (operatorCount[op] || 0) + 1;
+      });
+
+      const mostFrequentOperator = Object.entries(operatorCount).reduce(
+        (a, b) => (b[1] > a[1] ? b : a),
+        ['', 0]
+      )[0];
+
+      return {
+        ...org,
+        relatednumberscount: org._count?.relatednumbers ?? 0,
+        mostfrequentoperator: mostFrequentOperator,
+      };
+    });
+
+    return NextResponse.json(mappedResult);
   } catch (error: unknown) {
     console.error('Erro na API listOrganizationsPercent:', error);
     return NextResponse.json(

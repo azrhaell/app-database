@@ -6,6 +6,8 @@ import Link from 'next/link'
 
 export type FilterFormData = {
   limit?: number
+  percoperator?: number
+  numberlines?: string
   startDate?: string
   endDate?: string
   operatorname?: string
@@ -162,14 +164,37 @@ export default function Component_ListPercentOrganization() {
   return (
     <div className="p-4">
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white shadow rounded-2xl p-4">
+
         <div>
-          <label className="block mb-1">Quantidade</label>
+          <label className="block mb-1">Nº de Resultados</label>
           <select {...register('limit')} className="w-full border rounded p-2">
             <option value="10">10</option>
             <option value="50">50</option>
             <option value="100">100</option>
-            <option value="100">150</option>
+            <option value="150">150</option>
+            <option value="300">300</option>
+            <option value="500">500</option>
+            <option value="750">750</option>
             <option value="1000">1000</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block mb-1">Núm. Máx. Linhas por CNPJ</label>
+          <input type="number" min='2' {...register('numberlines')} className="w-full border rounded p-2" />
+        </div>
+
+        <div>
+          <label className="block mb-1">% de Base por CNPJ</label>
+          <select {...register('percoperator')} className="w-full border rounded p-2">
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="60">60</option>
+            <option value="70">70</option>
+            <option value="75">75</option>
+            <option value="80">80</option>
+            <option value="90">90</option>
+            <option value="100">100</option>
           </select>
         </div>
 
@@ -187,9 +212,11 @@ export default function Component_ListPercentOrganization() {
           <label className="block text-sm font-medium text-gray-700">Operadoras</label>
           <select multiple {...register('operatorname')} className="border p-2 rounded h-32" defaultValue={[""]}>
             <option value="">Todas</option>
-            {[...new Set(listoperators)].map(op => (
-              <option key={op} value={op}>{op}</option>
-            ))}
+            {[...new Set(listoperators)]
+              .filter(op => isNaN(Number(op.trim()))) // Remove strings que são só números
+              .map(op => (
+                <option key={op} value={op}>{op}</option>
+              ))}
           </select>
         </div>
 
@@ -202,22 +229,29 @@ export default function Component_ListPercentOrganization() {
           </label>
           <select multiple {...register('ddd')} className="border p-2 rounded h-32" defaultValue={[""]}>
             <option value="">Todos</option>
-            {listddds.map(ddd => <option key={ddd} value={ddd}>{ddd}</option>)}
+            {listddds
+              .filter(ddd => [21, 22, 24, 27, 28].includes(Number(ddd)))
+              .map(ddd => (
+                <option key={ddd} value={ddd}>{ddd}</option>
+              ))}
           </select>
         </div>
 
+
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            <span>
-              Estados
-            </span>
+            <span>Estados</span>
             <Link href={"/statistics/relative/listorganization/listpercentorganization"}>
               <span> U </span>
             </Link>
           </label>
           <select multiple {...register('state')} className="border p-2 rounded h-32" defaultValue={[""]}>
             <option value="">Todos</option>
-            {liststates.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+            {liststates
+              .filter(uf => ['RJ', 'ES'].includes(uf.toUpperCase()))
+              .map(uf => (
+                <option key={uf} value={uf}>{uf.toUpperCase()}</option>
+              ))}
           </select>
         </div>
 
@@ -285,6 +319,7 @@ export default function Component_ListPercentOrganization() {
             {loading ? 'Pesquisando...' : 'Pesquisar'}
           </button>
         </div>
+
       </form>
 
       {isFetchingData ? (
@@ -313,6 +348,8 @@ export default function Component_ListPercentOrganization() {
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Simples</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">MEI</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Ativa</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Nº Linhas</th>
+                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Base</th>
                 </tr>
               </thead>
               <tbody>
@@ -326,6 +363,8 @@ export default function Component_ListPercentOrganization() {
                     <td className="px-4 py-2 text-sm text-gray-800">{row.optionalsize ? 'Sim' : 'Não'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{row.optionmei ? 'Sim' : 'Não'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{row.rfstatus ? 'Sim' : 'Não'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.relatednumberscount  || '0'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.mostfrequentoperator  || '0'}</td>
                   </tr>
                 ))}
               </tbody>
