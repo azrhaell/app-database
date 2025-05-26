@@ -91,13 +91,21 @@ export async function POST(req: NextRequest) {
 
     const result = await prisma.organizations.findMany({
       where: filters,
-      take: limit ? parseInt(limit) : 1000,
+      take: limit ? parseInt(limit) : 1000000,
       include: {
         relatednumbers: {
           select: {
+            idNumber: true,
             mobilephone1: true,
+            mobilephone2: true,
             operatorname: true,
+            previousoperator: true,
             startofcontract: true,
+            createdat: true,
+            updatedat: true,
+            disabled: true,
+            pendant: true,
+            ported: true,
           },
         },
         _count: {
@@ -130,6 +138,7 @@ export async function POST(req: NextRequest) {
         ...org,
         relatednumberscount: org._count?.relatednumbers ?? 0,
         mostfrequentoperator: mostFrequentOperator,
+        relatednumbers: org.relatednumbers,
       };
     });
 

@@ -50,120 +50,116 @@ export default function Component_ListPercentOrganization() {
     }
   }
 
-  const fetchData = async () => {
-    const endpoints = [
-      { url: '/api/database/getbdlegalnature', setter: setLegalnatures },
-      { url: '/api/database/getbdoperator', setter: setListOperators },
-      { url: '/api/database/getbdstate', setter: setListStates },
-      { url: '/api/database/getbdcompanysize', setter: setListCompanySizes },
-      { url: '/api/database/getbdmobilephone1', setter: setListDDDs },
-    ]
+    const fetchData = async () => {
+      //CARREGA LEGAL NATURES (NATUREZA JURIDICA)
+      try {
+        const response = await fetch('/api/database/getbdlegalnature');
 
-    setIsFetchingData(true)
-    try {
-      for (const { url, setter } of endpoints) {
-        const res = await fetch(url)
-        if (!res.ok) throw new Error(`Erro ao buscar dados de ${url}`)
-        const data = await res.json()
-        setter(data)
-      }
-    } catch (error) {
-      console.error('Erro ao buscar dados do formulário:', error)
-    } finally {
-      setIsFetchingData(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const updateDataForm = async () => {
-    setIsFetchingData(true)
-    try {
-      const response = await fetch('/api/database/updatedataform', {
-        method: 'POST',
-      })
-      if (!response.ok) throw new Error('Erro ao atualizar os campos do formulário')
-      const data = await response.json()
-      console.log(data.message)
-      fetchData()
-    } catch (error) {
-      console.error('Erro ao atualizar os campos do formulário:', error)
-    }
-  }
-  
-const exportToCSV = () => {
-  if (!results || results.length === 0) return;
-
-  const headers = [
-    'NUMERO',
-    'OPERADORA',
-    'OPERADORA_ANTERIOR',
-    'INICIO_DO_CONTRATO',
-    'PORTOU',
-    'CNPJ',
-    'RAZAO_SOCIAL',
-    'CIDADE',
-    'UF',
-    'PORTE_EMPRESA',
-    'NATUREZA_JURIDICA',
-    'SIMPLES_NACIONAL',
-    'MEI',
-    'SITUACAO_CADASTRAL',
-    'ULTIMA_ATUALIZACAO',
-    'NUMERO_LINHAS',
-    'BASE',    
-  ];
-
-  const csvRows = [headers.join(';')];
-
-  results.forEach(org => {
-    if (!Array.isArray(org.relatednumbers) || org.relatednumbers.length === 0) return;
-
-    org.relatednumbers.forEach(num => {
-      const row = [
-        num.mobilephone1 ?? '',
-        num.operatorname ?? '',
-        num.previousoperator ?? '',
-        num.startofcontract ?? '',
-        num.ported ? 'Sim' : 'Não',
-        org.cnpj ?? '',
-        org.companyname ?? '',
-        org.city ?? '',
-        org.state ?? '',
-        org.companysize ?? '',
-        org.legalnature ?? '',
-        org.optionalsize ? 'Sim' : 'Não',
-        org.optionmei ? 'Sim' : 'Não',
-        org.rfstatus ? 'Sim' : 'Não',
-        org.updatedat ?? '',
-        org.relatednumberscount ?? 0,
-        org.mostfrequentoperator ?? '-',
-      ];
-
-      // Escape valores com ";" ou quebra de linha
-      const escaped = row.map(value => {
-        if (typeof value === 'string' && (value.includes(';') || value.includes('\n'))) {
-          return `"${value.replace(/"/g, '""')}"`;
+        if (!response.ok) {
+          throw new Error('Erro ao buscar naturezas jurídicas');
         }
-        return value;
-      });
 
-      csvRows.push(escaped.join(';'));
-    });
-  });
+        const data = await response.json();
+        setLegalnatures(data);
 
-  const blob = new Blob([`\uFEFF${csvRows.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', 'resultado-consulta.csv');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+      } catch (error) {
+        console.error('Erro ao buscar naturezas jurídicas:', error);
+      } finally {
+        setIsFetchingData(false);
+      }
 
+      //CARREGA OPERATORS (OPERADORA)
+      try {
+        const response = await fetch('/api/database/getbdoperator');
+
+        if (!response.ok) {
+          throw new Error('Erro ao buscar operadoras');
+        }
+
+        const data = await response.json();
+        setListOperators(data);//
+
+      } catch (error) {
+        console.error('Erro ao buscar operadoras:', error);
+      } finally {
+        setIsFetchingData(false);
+      }
+
+      //CARREGA STATES (UF)
+      try {
+        const response = await fetch('/api/database/getbdstate');
+
+        if (!response.ok) {
+          throw new Error('Erro ao buscar UFs');
+        }
+
+        const data = await response.json();
+        setListStates(data);//
+
+      } catch (error) {
+        console.error('Erro ao buscar UFs:', error);
+      } finally {
+        setIsFetchingData(false);
+      }
+
+      //CARREGA COMPANY SIZE (PORTE EMPRESA) 
+      try {
+        const response = await fetch('/api/database/getbdcompanysize');
+
+        if (!response.ok) {
+          throw new Error('Erro ao buscar Porte da Empresa');
+        }
+
+        const data = await response.json();
+        setListCompanySizes(data);//
+
+      } catch (error) {
+        console.error('Erro ao buscar Porte da Empresa:', error);
+      } finally {
+        setIsFetchingData(false);
+      }
+
+      //CARREGA DDD
+      try {
+        const response = await fetch('/api/database/getbdmobilephone1');
+
+        if (!response.ok) {
+          throw new Error('Erro ao buscar DDD');
+        }
+
+        const data = await response.json();
+        setListDDDs(data);//
+
+      } catch (error) {
+        console.error('Erro ao buscar DDD:', error);
+      } finally {
+        setIsFetchingData(false);
+      }      
+
+    };
+
+    useEffect(() => {
+      fetchData();
+    }, []);
+
+    // Função para atualizar os campos do formulário
+    // (Exemplo: Natureza Jurídica, Operadora, etc.)
+    const updateDataForm = async () => {
+      setIsFetchingData(true)
+      try {
+        const response = await fetch('/api/database/updatedataform', {
+          method: 'POST',
+        });
+        if (!response.ok) {
+          throw new Error('Erro ao atualizar os campos do formulário');
+        }
+        const data = await response.json();
+        console.log(data.message);
+        fetchData();
+      } catch (error) {
+        console.error('Erro ao atualizar os campos do formulário:', error);
+      }
+    };
 
   return (
     <div className="p-4">
@@ -340,22 +336,12 @@ const exportToCSV = () => {
       {/* Resultados */}
       <div className="mt-6">
         {results.length > 0 ? (
-          <>
-          <div className="mt-4 text-right">
-          <button
-          onClick={exportToCSV}
-          className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition"
-          >
-          Exportar CSV
-          </button>
-          </div>
           <div className="bg-white rounded shadow p-4 overflow-x-auto">
             <table className="min-w-full table-auto">
               <thead>
                 <tr className="bg-gray-100">
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">CNPJ</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Nome</th>
-                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Cidade</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">UF</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Porte Empresa</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Natureza Jurídica</th>
@@ -363,7 +349,6 @@ const exportToCSV = () => {
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">MEI</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Ativa</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Nº Linhas</th>
-                  <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Numeros</th>
                   <th className="px-4 py-2 border text-left text-sm font-medium text-gray-700">Base</th>
                 </tr>
               </thead>
@@ -372,7 +357,6 @@ const exportToCSV = () => {
                   <tr key={idx} className="border-t">
                     <td className="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">{row.cnpj || '—'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{row.companyname || '—'}</td>
-                    <td className="px-4 py-2 text-sm text-gray-800">{row.city || '—'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{row.state || '—'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{row.companysize || '—'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{row.legalnature || '—'}</td>
@@ -380,22 +364,12 @@ const exportToCSV = () => {
                     <td className="px-4 py-2 text-sm text-gray-800">{row.optionmei ? 'Sim' : 'Não'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{row.rfstatus ? 'Sim' : 'Não'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{row.relatednumberscount  || '0'}</td>
-                    <td className="px-4 py-2 text-sm text-gray-800">
-                      {Array.isArray(row.relatednumbers) && row.relatednumbers.length > 0
-                        ? row.relatednumbers.map((item: { idNumber: string | number; mobilephone1: string; operatorname: string }) => (
-                            <div key={item.idNumber}>
-                              {item.mobilephone1} - {item.operatorname}
-                            </div>
-                          ))
-                        : '0'}
-                    </td>
-                    <td className="px-4 py-2 text-sm text-gray-800">{row.mostfrequentoperator  || '-'}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{row.mostfrequentoperator  || '0'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          </>
         ) : (
           !loading && <p className="text-white mt-4">Nenhum resultado encontrado.</p>
         )}
