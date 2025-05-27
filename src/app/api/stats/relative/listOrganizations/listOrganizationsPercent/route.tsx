@@ -143,11 +143,25 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    const filteredByPercent = percoperator && operatorname && operatorname.length === 1
+    /*const filteredByPercent = percoperator && operatorname && operatorname.length === 1
       ? mappedResult.filter((org) => {
           const total = org.relatednumberscount;
           const target = operatorname[0];
           const countTarget = org.relatednumbers.filter(num => num.operatorname === target).length;
+          const percentage = (countTarget / total) * 100;
+          return percentage >= parseFloat(percoperator);
+        })
+      : mappedResult;*/
+    const filteredByPercent =
+      percoperator && operatorname && operatorname.length > 0
+      ? mappedResult.filter((org) => {
+          const total = org.relatednumberscount;
+
+          // Soma as linhas que pertencem a qualquer uma das operadoras selecionadas
+          const countTarget = org.relatednumbers.filter((num) =>
+            operatorname.includes(num.operatorname)
+          ).length;
+
           const percentage = (countTarget / total) * 100;
           return percentage >= parseFloat(percoperator);
         })

@@ -122,11 +122,22 @@ const exportToCSV = () => {
     if (!Array.isArray(org.relatednumbers) || org.relatednumbers.length === 0) return;
 
     org.relatednumbers.forEach(num => {
+
+      // Formatar data no padrão dd/mm/aaaa
+      const formatDate = (dateStr: string | Date | undefined | null) => {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      };
+
       const row = [
         num.mobilephone1 ?? '',
         num.operatorname ?? '',
         num.previousoperator ?? '',
-        num.startofcontract ?? '',
+        formatDate(num.startofcontract ?? ''),
         num.ported ? 'Sim' : 'Não',
         org.cnpj ?? '',
         org.companyname ?? '',
@@ -163,7 +174,6 @@ const exportToCSV = () => {
   link.click();
   document.body.removeChild(link);
 };
-
 
   return (
     <div className="p-4">
