@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
       optionalsize,
       optionmei,
       rfstatus,
-      numberlines, // Novo campo para filtrar quantidade mínima de telefones
+      numberlines,
+      percoperator
     } = await req.json();
 
     interface RelatedNumbersFilter {
@@ -116,9 +117,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Filtro por quantidade mínima de telefones
+    // Filtro por quantidade máxima de telefones
     const filteredResult = result.filter(
-      (org) => (org._count?.relatednumbers ?? 0) <= (numberlines ? parseInt(numberlines) : 0)
+      (org) => (org._count?.relatednumbers ?? 0) <= (numberlines ? parseInt(numberlines) : 1000000)
     );
 
     const mappedResult = filteredResult.map((org) => {
@@ -142,7 +143,18 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    return NextResponse.json(mappedResult);
+    const filteredByPercent = percoperator && operatorname && operatorname.length === 1
+      ? mappedResult.filter((org) => {
+          const total = org.relatednumberscount;
+          const target = operatorname[0];
+          const countTarget = org.relatednumbers.filter(num => num.operatorname === target).length;
+          const percentage = (countTarget / total) * 100;
+          return percentage >= parseFloat(percoperator);
+        })
+      : mappedResult;
+
+    return NextResponse.json(filteredByPercent);
+
   } catch (error: unknown) {
     console.error('Erro na API listOrganizationsPercent:', error);
     return NextResponse.json(

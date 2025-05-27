@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
       optionalsize,
       optionmei,
       rfstatus,
+      numberlines,
     } = await req.json();
 
     interface RelatedNumbersFilter {
@@ -90,24 +91,37 @@ export async function POST(req: NextRequest) {
 
     const result = await prisma.organizations.findMany({
       where: filters,
-      take: limit ? parseInt(limit) : 10,
+      take: limit ? parseInt(limit) : 1000000,
       include: {
         relatednumbers: {
           select: {
+            idNumber: true,
             mobilephone1: true,
+            mobilephone2: true,
             operatorname: true,
+            previousoperator: true,
             startofcontract: true,
+            createdat: true,
+            updatedat: true,
+            disabled: true,
+            pendant: true,
+            ported: true,
           },
         },
-      _count: {
-            select: {
-              relatednumbers: true
-            }
-          }
+        _count: {
+          select: {
+            relatednumbers: true,
+          },
+        },
       },
     });
 
-    const mappedResult = result.map((org) => {
+    // Filtro por quantidade máxima de telefones
+    const filteredResult = result.filter(
+      (org) => (org._count?.relatednumbers ?? 0) <= (numberlines ? parseInt(numberlines) : 1000000)
+    );
+
+    const mappedResult = filteredResult.map((org) => {
       const operatorCount: Record<string, number> = {};
 
       org.relatednumbers.forEach((num) => {
@@ -124,6 +138,7 @@ export async function POST(req: NextRequest) {
         ...org,
         relatednumberscount: org._count?.relatednumbers ?? 0,
         mostfrequentoperator: mostFrequentOperator,
+        relatednumbers: org.relatednumbers,
       };
     });
 
