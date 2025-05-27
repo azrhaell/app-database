@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
   try {
-    const { cnpj, name, phone, page = 1 } = await req.json();
+    const { cnpj, name, name2, phone, page = 1 } = await req.json();
     const pageSize = 50;
     const skip = (page - 1) * pageSize;
 
@@ -34,6 +34,31 @@ export async function POST(req: NextRequest) {
           {
             businessname: {
               contains: name,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      });
+    }
+
+    if (name2) {
+      (filters.AND as Prisma.organizationsWhereInput[]).push({
+        OR: [
+          {
+            email1: {
+              contains: name2,
+              mode: 'insensitive',
+            },
+          },
+          {
+            qualifyresponsible: {
+              contains: name2,
+              mode: 'insensitive',
+            },
+          },
+          {
+            partners: {
+              contains: name2,
               mode: 'insensitive',
             },
           },
@@ -78,6 +103,9 @@ export async function POST(req: NextRequest) {
         relatednumbers: {
             select: {
             mobilephone1: true,
+            operatorname: true,
+            startofcontract: true,
+            ported: true,
             },
         },
         },
