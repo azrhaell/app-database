@@ -57,6 +57,16 @@ const SearchOrganizations = () => {
     handleSearch(newPage);
   };
 
+  interface FormatDate {
+    (dateStr: string | undefined): string;
+  }
+
+  const formatDate: FormatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Pesquisar Empresas e Linhas</h2>
@@ -169,11 +179,26 @@ const SearchOrganizations = () => {
               <p><strong>Porte Opcional:</strong> {selectedOrg.optionalsize ? 'Sim' : 'Não'}</p>
               <p><strong>Optante MEI:</strong> {selectedOrg.optionmei ? 'Sim' : 'Não'}</p>
               <p className="mt-4"><strong>Telefones ({selectedOrg.relatednumbers.length}):</strong></p>
-              <ul className="list-disc list-inside">
-                {selectedOrg.relatednumbers.map((num, idx) => (
-                  <li key={idx}>{num.mobilephone1} - {num.operatorname} - {num.startofcontract} - {num.ported ? 'Sim' : 'Não'}</li>
-                ))}
-              </ul>
+              <table className="w-full text-sm text-left border border-gray-200">
+                <thead className="bg-gray-100 border-b border-gray-200">
+                  <tr>
+                    <th className="px-3 py-2">Número</th>
+                    <th className="px-3 py-2">Operadora</th>
+                    <th className="px-3 py-2">Início do Contrato</th>
+                    <th className="px-3 py-2">Portou</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedOrg.relatednumbers.map((num, idx) => (
+                    <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-3 py-2">{num.mobilephone1}</td>
+                      <td className="px-3 py-2">{num.operatorname}</td>
+                      <td className="px-3 py-2">{formatDate(num.startofcontract)}</td>
+                      <td className="px-3 py-2">{num.ported ? 'Sim' : 'Não'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
             <div className="p-4 border-t text-right">
               <button

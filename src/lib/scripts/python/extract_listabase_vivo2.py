@@ -1,6 +1,8 @@
 # EXTRAÇÃO DE NÚMEROS DE TELEFONE,RAZAO SOCIAL E CNPJ DO ARQUIVO CSV DA BASE VIVO (OS TELEFONES DE CADA CNPJ ESTÃO TODOS NA MESMA LINHA, MAS EM COLUNAS DIFERENTES)
 # Este script lê um arquivo CSV, extrai números de telefone, Razao Social e CNPJ, e grava os resultados em um novo arquivo CSV.
 
+#FORMATADO PARA A NOVA BASE DE DADOS VIVO - [CNPJ;NOME ORGANIZACAO;LINHA PRINCIPAL;LINHA 1;LINHA 2;LINHA 3;LINHA 4;LINHA 5]
+
 import pandas as pd
 
 # Caminho do arquivo de entrada

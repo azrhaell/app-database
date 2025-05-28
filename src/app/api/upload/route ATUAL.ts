@@ -75,7 +75,7 @@ export async function POST(req: Request): Promise<NextResponse> {
 
     const cnpjMap = new Map<string, number>();
     const seenCnpjs = new Set<string>();
-    const limit = pLimit(10);
+    const limit = pLimit(10); // máximo 10 promessas simultâneas
 
     const numerosComErro: string[] = [];
 
@@ -120,7 +120,6 @@ export async function POST(req: Request): Promise<NextResponse> {
             ddd1: (item.UF || item.DSUF || '').slice(0, 2),
           },
         });
-
         cnpjMap.set(cnpj, org.idCompany);
       })
     ));
@@ -147,35 +146,18 @@ export async function POST(req: Request): Promise<NextResponse> {
         } catch (err: unknown) {
           if ((err as { code?: string })?.code === 'P2002') {
             const existing = await prisma.numbers.findUnique({ where: { mobilephone1 } });
-
-            if (!existing) {
-              numerosComErro.push(mobilephone1);
-              return;
-            }
-
-            const sameCompany = existing.idCompany === idCompany;
-
-            if (existing.startofcontract && startofcontract > existing.startofcontract) {
+            if (
+              existing &&
+              existing.startofcontract &&
+              startofcontract > existing.startofcontract
+            ) {
               await prisma.numbers.update({
                 where: { idNumber: existing.idNumber },
                 data: { startofcontract, operatorname, idCompany },
               });
               registrosInseridos++;
-            } else if (existing.startofcontract && startofcontract <= existing.startofcontract && sameCompany) {
+            } else {
               numerosComErro.push(mobilephone1);
-            } else if (existing.startofcontract && startofcontract <= existing.startofcontract && !sameCompany) {
-              await prisma.numbers.update({
-                where: { idNumber: existing.idNumber },
-                data: { idCompany },
-              });
-              registrosInseridos++;
-            } else if (!existing.startofcontract) {
-              // Caso o campo startofcontract seja null, atualize com o novo valor
-              await prisma.numbers.update({
-                where: { idNumber: existing.idNumber },
-                data: { startofcontract, operatorname, idCompany },
-              });
-              registrosInseridos++;
             }
           } else {
             console.error('Erro ao inserir número:', err);
@@ -200,3 +182,4 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: `Erro interno no servidor: ${errorMessage}` }, { status: 500 });
   }
 }
+ 
