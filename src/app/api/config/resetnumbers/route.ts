@@ -19,8 +19,9 @@ export async function POST(request: Request) {
     await prisma.numbers.updateMany({
       data: {
         ported: false,
-        //startofcontract: null,
-        //previousoperator: '',
+        
+        startofcontract: null,
+        previousoperator: '',
       },
     });
 
