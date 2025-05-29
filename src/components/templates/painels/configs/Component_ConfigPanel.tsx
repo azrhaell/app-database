@@ -3,11 +3,14 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 
 const Component_ConfigPanel = () => {
-  const [loading, setLoading] = useState(false);
+  //const [loading, setLoading] = useState(false);
+  const [loadingAdjustOperatorName, setLoadingAdjustOperatorName] = useState(false);
+  const [loadingResetNumbers, setLoadingResetNumbers] = useState(false);
+  const [loadingResetRfStatus, setLoadingResetRfStatus] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const handleAdjustOperatorName = async () => {
-    setLoading(true);
+    setLoadingAdjustOperatorName(true);
     setMessage(null);
     try {
       const response = await fetch('/api/config/adjustoperatorname', {
@@ -21,7 +24,7 @@ const Component_ConfigPanel = () => {
       console.error(error);
       setMessage('Erro ao corrigir dados.');
     } finally {
-      setLoading(false);
+      setLoadingAdjustOperatorName(false);
     }
   };
 
@@ -29,7 +32,7 @@ const Component_ConfigPanel = () => {
     const token = prompt('Digite o token de segurança para resetar os dados:');
     if (!token) return;
 
-    setLoading(true);
+    setLoadingResetNumbers(true);
     setMessage(null);
 
     try {
@@ -52,7 +55,7 @@ const Component_ConfigPanel = () => {
           : 'Erro ao redefinir dados.'
       );
     } finally {
-      setLoading(false);
+      setLoadingResetNumbers(false);
     }
   };
 
@@ -60,7 +63,7 @@ const Component_ConfigPanel = () => {
     const token = prompt('Digite o token de segurança para redefinir o status RF:');
     if (!token) return;
 
-    setLoading(true);
+    setLoadingResetRfStatus(true);
     setMessage(null);
 
     try {
@@ -83,7 +86,7 @@ const Component_ConfigPanel = () => {
           : 'Erro ao redefinir status RF.'
       );
     } finally {
-      setLoading(false);
+      setLoadingResetRfStatus(false);
     }
   };
 
@@ -94,24 +97,24 @@ const Component_ConfigPanel = () => {
         <div className='flex flex-col gap-2 w-1/6'>
           <button
             onClick={handleAdjustOperatorName}
-            disabled={loading}
+            disabled={loadingAdjustOperatorName}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            {loading ? 'Corrigindo...' : 'Nomes de Operadora'}
+            {loadingAdjustOperatorName ? 'Corrigindo...' : 'Nomes de Operadora'}
           </button>
           <button
             onClick={handleResetNumbers}
-            disabled={loading}
+            disabled={loadingResetNumbers}
             className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
           >
-            {loading ? 'Redefinindo...' : 'Resetar Portabilidade'}
+            {loadingResetNumbers ? 'Redefinindo...' : 'Resetar Portabilidade'}
           </button>
           <button
             onClick={handleResetRfStatus}
-            disabled={loading}
+            disabled={loadingResetRfStatus}
             className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
           >
-            {loading ? 'Resetando...' : 'Resetar Status RF'}
+            {loadingResetRfStatus ? 'Resetando...' : 'Resetar Status RF'}
           </button>
         </div>
 

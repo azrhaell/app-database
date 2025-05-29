@@ -6,23 +6,23 @@ export async function POST() {
     // Primeira transação: atualiza operatorname
     await prisma.$transaction([
       prisma.numbers.updateMany({
-        where: { operatorname: '12' },
+        where: { previousoperator: { in: ['12', 'ALGAR', 'algar'] } },
         data: { operatorname: 'Algar' },
       }),
       prisma.numbers.updateMany({
-        where: { operatorname: { in: ['15', '20', '23', 'Telefonica'] } },
+        where: { previousoperator: { in: ['15', '20', '23', 'Telefonica', 'vivo', 'VIVO'] } },
         data: { operatorname: 'Vivo' },
       }),
       prisma.numbers.updateMany({
-        where: { operatorname: { in: ['21', '36'] } },
+        where: { previousoperator: { in: ['21', '36', 'Claro', 'claro'] } },
         data: { operatorname: 'CLARO' },
       }),
       prisma.numbers.updateMany({
-        where: { operatorname: { in: ['14', '31', '35'] } },
+        where: { previousoperator: { in: ['14', '31', '35', 'Oi', 'oi'] } },
         data: { operatorname: 'OI' },
       }),
       prisma.numbers.updateMany({
-        where: { operatorname: '41' },
+        where: { previousoperator: { in: ['41', 'TIM', 'tim'] } },
         data: { operatorname: 'Tim' },
       }),
       prisma.numbers.updateMany({
