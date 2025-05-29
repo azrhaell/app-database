@@ -6,9 +6,9 @@ import csv
 ddd_validos = {'21', '22', '23', '24', '27', '28'}
 
 # Caminho do arquivo CSV de entrada e saída
-arquivo_entrada = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\MISC\nps.csv'
+arquivo_entrada = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\BDO\nps.csv'
 
-arquivo_saida = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\MISC\bdo_filtrado.csv'
+arquivo_saida = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\BDO\bdo_filtrado.csv'
 
 with open(arquivo_entrada, mode='r', newline='', encoding='utf-8') as infile, \
      open(arquivo_saida, mode='w', newline='', encoding='utf-8') as outfile:
