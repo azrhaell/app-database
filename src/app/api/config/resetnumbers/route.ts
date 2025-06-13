@@ -21,7 +21,8 @@ export async function POST(request: Request) {
         ported: false,
         
         startofcontract: null,
-        previousoperator: '',
+        
+        //previousoperator: '',
       },
     });
 
