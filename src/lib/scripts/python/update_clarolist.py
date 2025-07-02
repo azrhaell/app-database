@@ -33,3 +33,4 @@ df_xlsx['DATA_ATIVACAO'] = df_xlsx['Telefone Socio'].apply(atualizar_data)
 df_xlsx.to_excel(caminho_saida, index=False)
 
 print("Arquivo atualizado salvo em:", caminho_saida)
+
