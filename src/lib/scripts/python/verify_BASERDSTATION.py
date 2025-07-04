@@ -44,5 +44,5 @@ def verificar_emails_xlsx(caminho_arquivo: str):
     return emails_invalidos
 
 # Exemplo de uso
-caminho = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\MISC\E-MAIL MKT VIVO TECH - LINK DEDICADO - JUNHO 2025.xlsx'  # Substitua pelo caminho do seu arquivo
+caminho = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\MISC\E-MAIL MKT ATENDIMENTO PERSONALIZADO - 03 07 2025.xlsx'  # Substitua pelo caminho do seu arquivo
 verificar_emails_xlsx(caminho)
