@@ -1,9 +1,9 @@
 import pandas as pd
 
 # Caminhos dos arquivos
-caminho_csv = r'd:\Github\Vivo_Database\app-database\public\BDO\bdo_filtrado.csv'
-caminho_xlsx = r'd:\Github\Vivo_Database\app-database\public\MISC\BASE - PF - INDIVIDUAL - RJ - ES - 05 08 2025.xlsx'
-caminho_saida = r'd:\Github\Vivo_Database\app-database\public\MISC\06082025\BASE - PF - INDIVIDUAL - RJ - ES - 05 08 2025 - SAIDA.xlsx'
+caminho_csv = r'd:\Github\Vivo_Database\app-database\public\BDO\bdo_filtrado_RJ_ES.csv'
+caminho_xlsx = r'd:\Github\Vivo_Database\app-database\public\MISC\TIM ES - JUNHO 2025.xlsx'
+caminho_saida = r'd:\Github\Vivo_Database\app-database\public\MISC\26082025\TIM ES - JUNHO 2025 - SAIDA.xlsx'
 
 # Lê o CSV
 df_csv = pd.read_csv(caminho_csv, dtype=str)
@@ -27,7 +27,7 @@ def atualizar_data(numero):
 
 # Atualiza os campos no XLSX
 df_xlsx['OPERADORA'] = df_xlsx['Telefone_Socio'].apply(atualizar_operadora)
-df_xlsx['ATUALIZACAO DATA ATIVACAO'] = df_xlsx['Telefone_Socio'].apply(atualizar_data)
+df_xlsx['DATA ATIVAÇÃO'] = df_xlsx['Telefone_Socio'].apply(atualizar_data)
 
 # Salva o resultado
 df_xlsx.to_excel(caminho_saida, index=False)

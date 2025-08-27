@@ -1,16 +1,17 @@
 import pandas as pd
 
 # Caminho do arquivo de entrada XLSX
-caminho_entrada = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\MISC\BANCO DE DDOS LINHAS VIVO - 17 JUNHO 2025.xlsx'
+caminho_entrada = r'd:\Github\Vivo_Database\app-database\public\MISC\BASE VIVO 21082025\ATUALIZACAO BANDO DE DADOS TC - LINHAS VIVO TC TELECOM - AGOSTO 2025.xlsx'
 
 # Caminho do arquivo de saída CSV
-caminho_saida = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\MISC\BANCO DE DDOS LINHAS VIVO - 17 JUNHO 2025.csv'
+caminho_saida = r'd:\Github\Vivo_Database\app-database\public\MISC\ATUALIZACAO BANDO DE DADOS TC - LINHAS VIVO TC TELECOM - AGOSTO 2025.csv'
 
 # Lê o arquivo Excel
 df = pd.read_excel(caminho_entrada, dtype=str)
 
 # Seleciona apenas as colunas desejadas
-colunas_desejadas = ['CNPJ_CLIENTE', 'NR_TELEFONE', 'OPERADORA']
+#colunas_desejadas = ['CNPJ_CLIENTE', 'NR_TELEFONE', 'OPERADORA']
+colunas_desejadas = ['CNPJ_CLIENTE', 'CELULAR']
 df_filtrado = df[colunas_desejadas]
 
 # Remove duplicatas

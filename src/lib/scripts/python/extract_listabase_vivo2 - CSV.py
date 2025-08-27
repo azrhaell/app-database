@@ -5,11 +5,12 @@
 
 import pandas as pd
 
+
 # Caminho do arquivo de entrada
-caminho_entrada = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\MISC\LINHAS VIVO OUTRS PV - BANCO DE DADOS - MAIO 2025.csv'
+caminho_entrada = r'd:\Github\Vivo_Database\app-database\public\MISC\BASE VIVO 21082025\ATUALIZACAO BANDO DE DADOS TC - LINHAS VIVO OUTROS PARCEIROS - AGOSTO 2025.csv'
 
 # Caminho do arquivo de saída
-caminho_saida = r'd:\GitHub\definitiveDATABASE\app-database\public\uploads\MISC\BaseVivo2.csv'
+caminho_saida = r'd:\Github\Vivo_Database\app-database\public\MISC\ATUALIZACAO BANDO DE DADOS TC - LINHAS VIVO OUTROS PARCEIROS - AGOSTO 2025.csv'
 
 # Lê o CSV de entrada (separador ;)
 df = pd.read_csv(caminho_entrada, sep=';', dtype=str)
@@ -19,11 +20,11 @@ linhas_saida = []
 
 # Percorre cada linha da tabela
 for _, row in df.iterrows():
-    cnpj = row['CNPJ']
-    razao_social = row['NOME ORGANIZACAO']
+    cnpj = row['CPF/CNPJ']
+    #razao_social = row['NOME ORGANIZACAO']
 
     # Coleta todos os telefones (ignorando campos vazios)
-    telefones = [row[col] for col in row.index if 'LINHA' in col and pd.notna(row[col]) and row[col].strip() != '']
+    telefones = [row[col] for col in row.index if 'LINHAS' in col and pd.notna(row[col]) and row[col].strip() != '']
 
     # Remove duplicatas mantendo a ordem
     telefones_unicos = list(dict.fromkeys(telefones))
@@ -32,7 +33,7 @@ for _, row in df.iterrows():
     for telefone in telefones_unicos:
         linhas_saida.append({
             'CNPJ_CLIENTE': cnpj,
-            'RAZAO_SOCIAL': razao_social,
+            #'RAZAO_SOCIAL': razao_social,
             'NR_TELEFONE': telefone
         })
 
