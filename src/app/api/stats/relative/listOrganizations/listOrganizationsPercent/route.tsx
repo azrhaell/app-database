@@ -143,15 +143,7 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    /*const filteredByPercent = percoperator && operatorname && operatorname.length === 1
-      ? mappedResult.filter((org) => {
-          const total = org.relatednumberscount;
-          const target = operatorname[0];
-          const countTarget = org.relatednumbers.filter(num => num.operatorname === target).length;
-          const percentage = (countTarget / total) * 100;
-          return percentage >= parseFloat(percoperator);
-        })
-      : mappedResult;*/
+    // Filtro por percentual de Base (Operadora)
     const filteredByPercent =
       percoperator && operatorname && operatorname.length > 0
       ? mappedResult.filter((org) => {
