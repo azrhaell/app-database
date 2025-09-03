@@ -160,87 +160,124 @@ export default function Component_ListPercentOrganization() {
     }
   }
   
-const exportToCSV = () => {
-  if (!results || results.length === 0) return;
+  const exportToCSV = () => {
+    if (!results || results.length === 0) return;
 
-  const headers = [
-    'NUMERO',
-    'OPERADORA',
-    'OPERADORA_ANTERIOR',
-    'INICIO_DO_CONTRATO',
-    'PORTOU',
-    'CNPJ',
-    'RAZAO_SOCIAL',
-    'CIDADE',
-    'UF',
-    'PORTE_EMPRESA',
-    'NATUREZA_JURIDICA',
-    'SIMPLES_NACIONAL',
-    'MEI',
-    'SITUACAO_CADASTRAL',
-    'ULTIMA_ATUALIZACAO',
-    'NUMERO_LINHAS_TOTAL',
-    'BASE_TOTAL',    
-  ];
+    const headers = [
+      'NUMERO',
+      'OPERADORA',
+      'OPERADORA_ANTERIOR',
+      'INICIO_DO_CONTRATO',
+      'PORTOU',
+      'CNPJ',
+      'RAZAO_SOCIAL',
+      'CIDADE',
+      'UF',
+      'PORTE_EMPRESA',
+      'NATUREZA_JURIDICA',
+      'SIMPLES_NACIONAL',
+      'MEI',
+      'SITUACAO_CADASTRAL',
+      'ULTIMA_ATUALIZACAO',
+      'NUMERO_LINHAS_TOTAL',
+      'BASE_TOTAL',
+      'NUMERO_LINHAS_BDO',
+      'BASE_BDO',    
+    ];
 
-  const csvRows = [headers.join(';')];
+    const csvRows = [headers.join(';')];
 
-  results.forEach(org => {
-    if (!Array.isArray(org.relatednumbers) || org.relatednumbers.length === 0) return;
+    results.forEach(org => {
+      if (!Array.isArray(org.relatednumbers) || org.relatednumbers.length === 0) return;
 
-    org.relatednumbers.forEach(num => {
-
-      // Formatar data no padrão dd/mm/aaaa
-      const formatDate = (dateStr: string | Date | undefined | null) => {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+      // Define types for related numbers
+      type RelatedNumber = {
+        mobilephone1?: string;
+        operatorname?: string;
+        previousoperator?: string;
+        startofcontract?: string | null;
+        ported?: boolean;
+        [key: string]: string | number | boolean | null | undefined;
       };
 
-      const row = [
-        num.mobilephone1 ?? '',
-        num.operatorname ?? '',
-        num.previousoperator ?? '',
-        formatDate(num.startofcontract ?? ''),
-        num.ported ? 'Sim' : 'Não',
-        org.cnpj ?? '',
-        org.companyname ?? '',
-        org.city ?? '',
-        org.state ?? '',
-        org.companysize ?? '',
-        org.legalnature ?? '',
-        org.optionalsize ? 'Sim' : 'Não',
-        org.optionmei ? 'Sim' : 'Não',
-        org.rfstatus ? 'Sim' : 'Não',
-        org.updatedat ?? '',
-        org.relatednumberscount ?? 0,
-        org.mostfrequentoperator ?? '-',
-      ];
-
-      // Escape valores com ";" ou quebra de linha
-      const escaped = row.map(value => {
-        if (typeof value === 'string' && (value.includes(';') || value.includes('\n'))) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value;
+      // Calcular dados BDO (linhas com contrato) para esta organização
+      const orgRelatedNumbers = org.relatednumbers as RelatedNumber[];
+      
+      // Linhas com startofcontract não vazio
+      const linesWithContract = orgRelatedNumbers.filter((num: RelatedNumber) => 
+        num.startofcontract !== null && num.startofcontract !== undefined && num.startofcontract !== ''
+      );
+      
+      const numeroLinhasBdo = linesWithContract.length;
+      
+      // Calcular a operadora mais frequente entre linhas com contrato
+      const operatorCountWithContract: Record<string, number> = {};
+      linesWithContract.forEach((num: RelatedNumber) => {
+        const op = num.operatorname || 'Desconhecido';
+        operatorCountWithContract[op] = (operatorCountWithContract[op] || 0) + 1;
       });
+      
+      const baseBdo = Object.keys(operatorCountWithContract).length > 0
+        ? Object.entries(operatorCountWithContract).reduce((a, b) => (b[1] > a[1] ? b : a), ['', 0])[0]
+        : '-';
 
-      csvRows.push(escaped.join(';'));
+      org.relatednumbers.forEach(num => {
+        const relatedNumber = num as RelatedNumber;
+
+        // Formatar data no padrão dd/mm/aaaa
+        const formatDate = (dateStr: string | Date | undefined | null) => {
+          if (!dateStr) return '';
+          const date = new Date(dateStr);
+          if (isNaN(date.getTime())) return '';
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}/${month}/${year}`;
+        };
+
+        const row = [
+          relatedNumber.mobilephone1 ?? '',
+          relatedNumber.operatorname ?? '',
+          relatedNumber.previousoperator ?? '',
+          formatDate(relatedNumber.startofcontract ?? ''),
+          relatedNumber.ported ? 'Sim' : 'Não',
+          org.cnpj ?? '',
+          org.companyname ?? '',
+          org.city ?? '',
+          org.state ?? '',
+          org.companysize ?? '',
+          org.legalnature ?? '',
+          org.optionalsize ? 'Sim' : 'Não',
+          org.optionmei ? 'Sim' : 'Não',
+          org.rfstatus ? 'Sim' : 'Não',
+          org.updatedat ?? '',
+          org.relatednumberscount ?? 0,
+          org.mostfrequentoperator ?? '-',
+          numeroLinhasBdo, // NUMERO_LINHAS_BDO
+          baseBdo,         // BASE_BDO
+        ];
+
+        // Escape valores com ";" ou quebra de linha
+        const escaped = row.map(value => {
+          if (typeof value === 'string' && (value.includes(';') || value.includes('\n'))) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return String(value);
+        });
+
+        csvRows.push(escaped.join(';'));
+      });
     });
-  });
 
-  const blob = new Blob([`\uFEFF${csvRows.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', 'resultado-consulta.csv');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+    const blob = new Blob([`\uFEFF${csvRows.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'resultado-consulta.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="p-4">
