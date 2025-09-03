@@ -18,9 +18,6 @@ export type FilterFormData = {
   optionalsize?: 'true' | 'false'
   optionmei?: 'true' | 'false'
   rfstatus?: string
-  // Novos campos
-  numberlinesWithContract?: string
-  percoperatorWithContract?: number
 }
 
 export default function Component_ListPercentOrganization() {
@@ -45,53 +42,7 @@ export default function Component_ListPercentOrganization() {
       })
 
       const json = await res.json()
-      
-      // Aplicar filtro por quantidade máxima de telefones com startofcontract não vazio
-      let filteredResults = json;
-      
-      // Define the type for relatednumbers
-      type RelatedNumber = {
-        mobilephone1?: string;
-        operatorname?: string;
-        previousoperator?: string;
-        startofcontract?: string | null;
-        ported?: boolean;
-      };
-
-      if (data.numberlinesWithContract) {
-        const maxLinesWithContract = parseInt(data.numberlinesWithContract);
-        filteredResults = filteredResults.filter((org: { relatednumbers: RelatedNumber[] }) => {
-          const linesWithContract = org.relatednumbers.filter((num: RelatedNumber) => 
-            num.startofcontract !== null && num.startofcontract !== undefined
-          ).length;
-          return linesWithContract <= maxLinesWithContract;
-        });
-      }
-
-      // Aplicar filtro por percentual de Base (Operadora) com startofcontract não vazio
-      if (data.percoperatorWithContract && data.operatorname && data.operatorname.length > 0) {
-        const targetOperators = Array.isArray(data.operatorname) ? data.operatorname : [data.operatorname];
-        filteredResults = filteredResults.filter((org: { relatednumbers: RelatedNumber[] }) => {
-          // Total de linhas com startofcontract não vazio
-          const totalWithContract = org.relatednumbers.filter((num: RelatedNumber) => 
-            num.startofcontract !== null && num.startofcontract !== undefined
-          ).length;
-          
-          if (totalWithContract === 0) return false;
-          
-          // Linhas da operadora selecionada com startofcontract não vazio
-          const targetWithContract = org.relatednumbers.filter((num: RelatedNumber) => 
-            num.startofcontract !== null && 
-            num.startofcontract !== undefined &&
-            num.operatorname && targetOperators.includes(num.operatorname)
-          ).length;
-          
-          const percentage = (targetWithContract / totalWithContract) * 100;
-          return percentage >= data.percoperatorWithContract!;
-        });
-      }
-      
-      setResults(filteredResults)
+      setResults(json)
     } catch (error) {
       console.error('Erro ao buscar dados:', error)
     } finally {
@@ -251,27 +202,6 @@ const exportToCSV = () => {
         <div>
           <label className="block mb-1">% de Base por CNPJ</label>
           <select {...register('percoperator')} className="w-full border rounded p-2">
-            <option value="">-</option>
-            <option value="40">40</option>
-            <option value="50">50</option>
-            <option value="60">60</option>
-            <option value="70">70</option>
-            <option value="75">75</option>
-            <option value="80">80</option>
-            <option value="90">90</option>
-            <option value="100">100</option>
-          </select>
-        </div>
-
-        {/* NOVOS CAMPOS */}
-        <div>
-          <label className="block mb-1">Núm. Máx. Linhas c/ Contrato por CNPJ</label>
-          <input type="number" min='1' {...register('numberlinesWithContract')} className="w-full border rounded p-2" />
-        </div>
-
-        <div>
-          <label className="block mb-1">% de Base c/ Contrato por CNPJ</label>
-          <select {...register('percoperatorWithContract')} className="w-full border rounded p-2">
             <option value="">-</option>
             <option value="40">40</option>
             <option value="50">50</option>
