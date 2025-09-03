@@ -49,18 +49,36 @@ export default function Component_ListPercentOrganization() {
       // Aplicar filtro por quantidade máxima de telefones com startofcontract não vazio
       let filteredResults = json;
       
-      // Define the type for relatednumbers
+      // Define types for organization and related numbers
       type RelatedNumber = {
         mobilephone1?: string;
         operatorname?: string;
         previousoperator?: string;
         startofcontract?: string | null;
         ported?: boolean;
+        [key: string]: string | number | boolean | null | undefined;
+      };
+
+      type Organization = {
+        cnpj?: string;
+        companyname?: string;
+        city?: string;
+        state?: string;
+        companysize?: string;
+        legalnature?: string;
+        optionalsize?: boolean;
+        optionmei?: boolean;
+        rfstatus?: boolean;
+        updatedat?: string;
+        relatednumberscount?: number;
+        mostfrequentoperator?: string;
+        relatednumbers: RelatedNumber[];
+        [key: string]: string | number | boolean | null | RelatedNumber[] | undefined;
       };
 
       if (data.numberlinesWithContract) {
         const maxLinesWithContract = parseInt(data.numberlinesWithContract);
-        filteredResults = filteredResults.filter((org: { relatednumbers: RelatedNumber[] }) => {
+        filteredResults = filteredResults.filter((org: Organization) => {
           const linesWithContract = org.relatednumbers.filter((num: RelatedNumber) => 
             num.startofcontract !== null && num.startofcontract !== undefined
           ).length;
@@ -71,7 +89,7 @@ export default function Component_ListPercentOrganization() {
       // Aplicar filtro por percentual de Base (Operadora) com startofcontract não vazio
       if (data.percoperatorWithContract && data.operatorname && data.operatorname.length > 0) {
         const targetOperators = Array.isArray(data.operatorname) ? data.operatorname : [data.operatorname];
-        filteredResults = filteredResults.filter((org: { relatednumbers: RelatedNumber[] }) => {
+        filteredResults = filteredResults.filter((org: Organization) => {
           // Total de linhas com startofcontract não vazio
           const totalWithContract = org.relatednumbers.filter((num: RelatedNumber) => 
             num.startofcontract !== null && num.startofcontract !== undefined
@@ -83,7 +101,7 @@ export default function Component_ListPercentOrganization() {
           const targetWithContract = org.relatednumbers.filter((num: RelatedNumber) => 
             num.startofcontract !== null && 
             num.startofcontract !== undefined &&
-            num.operatorname && targetOperators.includes(num.operatorname)
+            targetOperators.includes(num.operatorname ?? '')
           ).length;
           
           const percentage = (targetWithContract / totalWithContract) * 100;
