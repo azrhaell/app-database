@@ -10,10 +10,10 @@ import pandas as pd
 
 
 # Caminho do arquivo de entrada (agora no formato .xlsx)
-caminho_entrada = r'd:\Github\Vivo_Database\app-database\public\MISC\BASE VIVO 21082025\ATUALIZACAO BANDO DE DADOS TC - LINHAS VIVO TC TELECOM - AGOSTO 2025.xlsx'
+caminho_entrada = r'd:\Github\Vivo_Database\app-database\public\MISC\BASE VIVO 23092025\BANCO DE DADOS - CNPJ E LINHAS AO LADO - SETEMBRO 2025.xlsx'
 
 # Caminho do arquivo de saída
-caminho_saida = r'd:\Github\Vivo_Database\app-database\public\MISC\ATUALIZACAO BANDO DE DADOS TC - LINHAS VIVO TC TELECOM - AGOSTO 2025.csv'
+caminho_saida = r'd:\Github\Vivo_Database\app-database\public\MISC\ATUALIZACAO BANCO DE DADOS - CNPJ E LINHAS AO LADO - SETEMBRO 2025.csv'
 
 # Lê o arquivo XLSX de entrada
 # A função read_excel é usada para ler arquivos .xlsx
@@ -24,11 +24,11 @@ linhas_saida = []
 
 # Percorre cada linha da tabela
 for _, row in df.iterrows():
-    cnpj = row['CNPJ_CLIENTE']
+    cnpj = row['CNPJ']
     # razao_social = row['NOME ORGANIZACAO']
 
     # Coleta todos os telefones (ignorando campos vazios)
-    telefones = [row[col] for col in row.index if 'CELULAR' in col and pd.notna(row[col]) and row[col].strip() != '']
+    telefones = [row[col] for col in row.index if 'TEL' in col and pd.notna(row[col]) and row[col].strip() != '']
 
     # Remove duplicatas mantendo a ordem
     telefones_unicos = list(dict.fromkeys(telefones))
