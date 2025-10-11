@@ -6,8 +6,8 @@ import csv
 ddd_validos = {'21', '22', '23', '24', '27', '28'}
 
 # Caminho do arquivo CSV de entrada e saída
-arquivo_entrada = r'd:\Github\Vivo_Database\app-database\public\BDO\nps.csv'
-arquivo_saida =   r'd:\Github\Vivo_Database\app-database\public\BDO\bdo_filtrado_RJ_ES.csv'
+arquivo_entrada = r'E:\OneDrive\TC Telecom\DATABASE\app-database\public\BDO\nps.csv'
+arquivo_saida =   r'E:\OneDrive\TC Telecom\DATABASE\app-database\public\BDO\bdo_filtrado_RJ_ES.csv'
 
 with open(arquivo_entrada, mode='r', newline='', encoding='utf-8') as infile, \
      open(arquivo_saida, mode='w', newline='', encoding='utf-8') as outfile:

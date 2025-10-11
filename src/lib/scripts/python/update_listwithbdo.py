@@ -1,9 +1,9 @@
 import pandas as pd
 
 # Caminhos dos arquivos
-caminho_csv = r'd:\Github\Vivo_Database\app-database\public\BDO\bdo_filtrado_RJ_ES.csv'
-caminho_xlsx = r'd:\Github\Vivo_Database\app-database\public\MISC\CRUZAR OPERADORA BDO 26 09 25 - TOTAL MOVEL DISCADOR.xlsx'
-caminho_saida = r'd:\Github\Vivo_Database\app-database\public\MISC\CRUZAR OPERADORA BDO 26 09 25 - TOTAL MOVEL DISCADOR - SAIDA.xlsx'
+caminho_csv = r'E:\OneDrive\TC Telecom\DATABASE\app-database\public\BDO\bdo_filtrado_RJ_ES.csv'
+caminho_xlsx = r'E:\OneDrive\TC Telecom\DATABASE\app-database\public\MISC\CRUZAR BDO BASE PF - 10 10 2025.xlsx'
+caminho_saida = r'E:\OneDrive\TC Telecom\DATABASE\app-database\public\MISC\CRUZAR BDO BASE PF - 10 10 2025 - SAIDA.xlsx'
 
 # Lê o CSV
 df_csv = pd.read_csv(caminho_csv, dtype=str)
