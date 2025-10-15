@@ -55,5 +55,5 @@ def verificar_emails_xlsx(caminho_arquivo: str, salvar_em: str = None):
     return df_validos
 
 # Exemplo de uso
-caminho = r'd:\Github\Vivo_Database\app-database\public\MISC\E-MAIL MKT - ATENDIMENTO PERSONALIZADO - 03 08 2025.xlsx'
+caminho = r'd:\Github\Vivo_Database\app-database\public\MISC\RDSTATION\E-MAIL MKT - ATENDIMENTO PERSONALIZADO 13 10 25.xlsx'
 verificar_emails_xlsx(caminho)
