@@ -64,10 +64,8 @@ export default function Component_ListPercentOrganization() {
         companyname?: string;
         city?: string;
         state?: string;
-        neighborhood?: string;
         companysize?: string;
         legalnature?: string;
-        capital?: number;
         optionalsize?: boolean;
         optionmei?: boolean;
         rfstatus?: boolean;
@@ -175,10 +173,8 @@ export default function Component_ListPercentOrganization() {
       'RAZAO_SOCIAL',
       'CIDADE',
       'UF',
-      'BAIRRO',
       'PORTE_EMPRESA',
       'NATUREZA_JURIDICA',
-      'CAPITAL_SOCIAL',
       'SIMPLES_NACIONAL',
       'MEI',
       'SITUACAO_CADASTRAL',
@@ -249,10 +245,8 @@ export default function Component_ListPercentOrganization() {
           org.companyname ?? '',
           org.city ?? '',
           org.state ?? '',
-          org.neighborhood ?? '',
           org.companysize ?? '',
           org.legalnature ?? '',
-          org.capital ?? 0,
           org.optionalsize ? 'Sim' : 'Não',
           org.optionmei ? 'Sim' : 'Não',
           org.rfstatus ? 'Sim' : 'Não',
