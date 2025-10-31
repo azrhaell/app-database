@@ -2,9 +2,9 @@ import pandas as pd
 
 # Caminhos dos arquivos
 
-caminho_csv = r'E:\OneDrive\TC Telecom\DATABASE\app-database\public\BDO\bdo_filtrado_RJ_ES.csv'
-caminho_xlsx = r'E:\OneDrive\TC Telecom\DATABASE\app-database\public\MISC\CRUZAR BDO BASE PF - 10 10 2025.xlsx'
-caminho_saida = r'E:\OneDrive\TC Telecom\DATABASE\app-database\public\MISC\CRUZAR BDO BASE PF - 10 10 2025 - SAIDA.xlsx'
+caminho_csv = r'D:\BDO\bdo_filtrado_RJ_ES.csv'
+caminho_xlsx = r'D:\Github\Nova_Base\Claro_Base\03-BASE_JA_FILTRADA\BASE_CLARO_PJ_1 - SAIDA - BRF.xlsx'
+caminho_saida = r'D:\Github\Nova_Base\Claro_Base\03-BASE_JA_FILTRADA\BASE_CLARO_PJ_1 - SAIDA - BRF - SAIDA BDO.xlsx'
 
 
 # Lê o CSV
