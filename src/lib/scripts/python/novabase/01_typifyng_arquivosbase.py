@@ -2,14 +2,11 @@ import os
 import csv
 
 # Constante com o caminho da pasta
-PASTA_BASE = r"D:\Github\Nova_Base\Claro_Base\Base de Dados - CLARO - 2024"
+PASTA_BASE = r"C:\Users\marce\OneDrive\Área de Trabalho\CLARO"
 
 # Cabeçalho esperado
 COLUNAS_ESPERADAS = [
-    "ANO", "DOCUMENTO", "PROPRIETARIO", "DDD", "TELEFONE", 
-    "ENDERECO", "NUMERO", "COMPLEMENTO", "BAIRRO", "CEP", 
-    "CIDADE", "UF", "DATA INSTALACAO", "OPERADORA", 
-    "STATUS LINHA", "MODALIDAE COBRANCA"
+    "DDD","TEL","DOC","NOME","TP_LOG","LOGRAD","NUMERO","COMPLEM","BAIRRO","CIDADE","UF","CEP","INST","TDOC","OPERADORA"
 ]
 
 def validar_cnpj(cnpj):
@@ -119,9 +116,9 @@ def classificar_documentos():
             
             # Verifica se a coluna DOCUMENTO existe
             try:
-                idx_documento = cabecalho_original.index("DOCUMENTO")
+                idx_documento = cabecalho_original.index("DOC")
             except ValueError:
-                print(f"  [ERRO] Coluna 'DOCUMENTO' nao encontrada\n")
+                print(f"  [ERRO] Coluna 'DOC' nao encontrada\n")
                 continue
             
             # Verifica se a coluna TIPO já existe

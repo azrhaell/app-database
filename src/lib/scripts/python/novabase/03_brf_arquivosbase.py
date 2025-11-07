@@ -18,10 +18,7 @@ MAX_RECORDS_PER_FILE = 500000
 # Colunas esperadas nos arquivos de saída (originais + nova)
 # Usei exatamente os nomes que você forneceu
 SOURCE_COLS_LIST = [
-    "ANO", "DOCUMENTO", "PROPRIETARIO", "DDD", "TELEFONE", "ENDERECO", 
-    "NUMERO", "COMPLEMENTO", "BAIRRO", "CEP", "CIDADE", "UF", 
-    "DATA INSTALACAO", "OPERADORA", "STATUS LINHA", 
-    "MODALIDAE COBRANCA", "TIPO"
+    "DDD","TEL","DOC","NOME","TP_LOG","LOGRAD","NUMERO","COMPLEM","BAIRRO","CIDADE","UF","CEP","INST","TDOC","OPERADORA", "TIPO"
 ]
 OUTPUT_COLS = SOURCE_COLS_LIST + ['SITUACAO_CADASTRAL']
 

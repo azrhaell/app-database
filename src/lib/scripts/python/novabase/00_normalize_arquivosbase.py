@@ -2,14 +2,11 @@ import os
 import csv
 
 # Constante com o caminho da pasta
-PASTA_BASE = r"D:\Github\Nova_Base\Claro_Base\Base de Dados - CLARO - 2024"
+PASTA_BASE = r"C:\Users\marce\OneDrive\Área de Trabalho\CLARO"
 
 # Cabeçalho esperado
 CABECALHO_ESPERADO = [
-    "ANO", "DOCUMENTO", "PROPRIETARIO", "DDD", "TELEFONE", 
-    "ENDERECO", "NUMERO", "COMPLEMENTO", "BAIRRO", "CEP", 
-    "CIDADE", "UF", "DATA INSTALACAO", "OPERADORA", 
-    "STATUS LINHA", "MODALIDAE COBRANCA"
+    "DDD","TEL","DOC","NOME","TP_LOG","LOGRAD","NUMERO","COMPLEM","BAIRRO","CIDADE","UF","CEP","INST","TDOC","OPERADORA"
 ]
 
 def normalizar_arquivos_csv():

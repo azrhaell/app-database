@@ -2,16 +2,13 @@ import os
 import csv
 
 # Constantes
-PASTA_BASE = r"D:\Github\Nova_Base\Claro_Base\Base de Dados - CLARO - 2024"
-PASTA_SAIDA = r"D:\Github\Nova_Base\Claro_Base\Arquivos_Filtrados"
+PASTA_BASE = r"C:\Users\marce\OneDrive\Área de Trabalho\CLARO"
+PASTA_SAIDA = r"C:\Users\marce\OneDrive\Área de Trabalho\CLARO\Arquivos_Filtrados"
 MAX_REGISTROS_POR_ARQUIVO = 500000
 
 # Cabeçalho esperado
 COLUNAS_ESPERADAS = [
-    "ANO", "DOCUMENTO", "PROPRIETARIO", "DDD", "TELEFONE", 
-    "ENDERECO", "NUMERO", "COMPLEMENTO", "BAIRRO", "CEP", 
-    "CIDADE", "UF", "DATA INSTALACAO", "OPERADORA", 
-    "STATUS LINHA", "MODALIDAE COBRANCA", "TIPO"
+    "DDD","TEL","DOC","NOME","TP_LOG","LOGRAD","NUMERO","COMPLEM","BAIRRO","CIDADE","UF","CEP","INST","TDOC","OPERADORA", "TIPO"
 ]
 
 class GerenciadorArquivos:
@@ -65,23 +62,25 @@ class GerenciadorArquivos:
     
     def get_total_arquivos(self):
         """Retorna o número total de arquivos criados"""
-        return self.arquivo_numero if self.total_registros > 0 else 0
+        return self.arquivo_numero - 1 if self.total_registros > 0 else 0
 
 def filtrar_e_dividir_arquivos():
     """
-    Filtra registros por UF, STATUS LINHA e TIPO, e divide em arquivos separados.
+    Filtra registros por UF e TIPO, e divide em arquivos separados.
     """
     # Verifica se a pasta existe
     if not os.path.exists(PASTA_BASE):
         print(f"ERRO: A pasta '{PASTA_BASE}' nao existe!")
-        return
+        return [], 0, 0, None, None
     
-    # Lista todos os arquivos CSV na pasta
-    arquivos_csv = [f for f in os.listdir(PASTA_BASE) if f.lower().endswith('.csv')]
+    # Lista todos os arquivos CSV na pasta, excluindo a pasta de saída
+    arquivos_csv = [f for f in os.listdir(PASTA_BASE) 
+                    if f.lower().endswith('.csv') and 
+                    os.path.isfile(os.path.join(PASTA_BASE, f))]
     
     if not arquivos_csv:
         print(f"Nenhum arquivo CSV encontrado na pasta '{PASTA_BASE}'")
-        return
+        return [], 0, 0, None, None
     
     print(f"Encontrados {len(arquivos_csv)} arquivo(s) CSV na pasta.\n")
     
@@ -118,6 +117,7 @@ def filtrar_e_dividir_arquivos():
             pj_count = 0
             b2c_count = 0
             total_linhas = 0
+            linhas_ignoradas = 0
             
             # Lê o arquivo
             with open(caminho_completo, 'r', encoding='utf-8', errors='ignore') as arquivo:
@@ -128,38 +128,54 @@ def filtrar_e_dividir_arquivos():
                 continue
             
             # Separa cabeçalho e dados
-            cabecalho = linhas[0].strip().split(';')
+            cabecalho_linha = linhas[0].strip().split(';')
+            # Remove aspas do cabeçalho
+            cabecalho = [col.strip().strip('"').strip() for col in cabecalho_linha]
             dados = linhas[1:]
+            
+            print(f"  Cabecalho encontrado: {cabecalho}")
+            print(f"  Total de linhas de dados: {len(dados)}")
             
             # Verifica se as colunas necessárias existem
             try:
                 idx_uf = cabecalho.index("UF")
-                idx_status = cabecalho.index("STATUS LINHA")
                 idx_tipo = cabecalho.index("TIPO")
+                print(f"  Indices - UF: {idx_uf}, TIPO: {idx_tipo}")
             except ValueError as e:
-                print(f"  [ERRO] Coluna necessaria nao encontrada: {e}\n")
+                print(f"  [ERRO] Coluna necessaria nao encontrada: {e}")
+                print(f"  Colunas disponiveis: {', '.join(cabecalho)}\n")
                 continue
             
             # Processa cada linha de dados
-            for linha in dados:
+            for i, linha in enumerate(dados):
                 if not linha.strip():
                     continue
                 
                 total_linhas += 1
                 colunas = linha.strip().split(';')
                 
-                # Extrai valores das colunas
-                uf = colunas[idx_uf].strip().upper() if idx_uf < len(colunas) else ""
-                status = colunas[idx_status].strip().upper() if idx_status < len(colunas) else ""
-                tipo = colunas[idx_tipo].strip().upper() if idx_tipo < len(colunas) else ""
+                # Debug: mostra algumas linhas para análise
+                if i < 3:
+                    uf_debug = colunas[idx_uf].strip().strip('"').strip() if idx_uf < len(colunas) else 'N/A'
+                    tipo_debug = colunas[idx_tipo].strip().strip('"').strip() if idx_tipo < len(colunas) else 'N/A'
+                    print(f"  Linha {i+1} - Colunas: {len(colunas)}")
+                    print(f"    UF: '{uf_debug}'")
+                    print(f"    TIPO: '{tipo_debug}'")
+                
+                # Extrai valores das colunas e remove aspas
+                uf = colunas[idx_uf].strip().strip('"').strip().upper() if idx_uf < len(colunas) else ""
+                tipo = colunas[idx_tipo].strip().strip('"').strip().upper() if idx_tipo < len(colunas) else ""
                 
                 # Aplica os filtros
-                if uf in ufs_validas and status == "ATIVA" and tipo in ["PJ", "B2C"]:
-                    # Garante que a linha tenha todas as colunas
-                    while len(colunas) < len(COLUNAS_ESPERADAS):
-                        colunas.append("")
+                if uf in ufs_validas and tipo in ["PJ", "B2C"]:
+                    # Remove aspas de todas as colunas antes de salvar
+                    colunas_limpas = [col.strip().strip('"').strip() for col in colunas]
                     
-                    linha_formatada = ';'.join(colunas[:len(COLUNAS_ESPERADAS)]) + '\n'
+                    # Garante que a linha tenha todas as colunas
+                    while len(colunas_limpas) < len(COLUNAS_ESPERADAS):
+                        colunas_limpas.append("")
+                    
+                    linha_formatada = ';'.join(colunas_limpas[:len(COLUNAS_ESPERADAS)]) + '\n'
                     
                     # Adiciona ao arquivo apropriado
                     if tipo == "PJ":
@@ -168,6 +184,10 @@ def filtrar_e_dividir_arquivos():
                     elif tipo == "B2C":
                         gerenciador_b2c.adicionar_registro(linha_formatada)
                         b2c_count += 1
+                else:
+                    linhas_ignoradas += 1
+                    if i < 3:
+                        print(f"    -> IGNORADA (UF: {uf in ufs_validas}, TIPO: {tipo in ['PJ', 'B2C']})")
             
             # Atualiza contadores globais
             total_pj_filtrado += pj_count
@@ -179,13 +199,17 @@ def filtrar_e_dividir_arquivos():
                 'total_linhas': total_linhas,
                 'pj': pj_count,
                 'b2c': b2c_count,
-                'filtrados': pj_count + b2c_count
+                'filtrados': pj_count + b2c_count,
+                'ignorados': linhas_ignoradas
             })
             
-            print(f"  [OK] Total linhas: {total_linhas} | PJ filtrados: {pj_count} | B2C filtrados: {b2c_count}\n")
+            print(f"  [OK] Total: {total_linhas} | PJ: {pj_count} | B2C: {b2c_count} | Ignorados: {linhas_ignoradas}\n")
             
         except Exception as e:
-            print(f"  [ERRO] Erro ao processar: {str(e)}\n")
+            print(f"  [ERRO] Erro ao processar: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            print()
     
     # Fecha todos os arquivos
     gerenciador_pj.fechar()
@@ -203,7 +227,6 @@ def main():
     print(f"Limite por arquivo: {MAX_REGISTROS_POR_ARQUIVO:,} registros")
     print("\nFiltros aplicados:")
     print("  - UF: RJ ou ES")
-    print("  - STATUS LINHA: ATIVA")
     print("  - TIPO: PJ ou B2C")
     print("\n")
     
@@ -231,8 +254,8 @@ def main():
         print("\nARQUIVOS GERADOS:")
         print("-"*80)
         
-        arquivos_pj = ger_pj.get_total_arquivos()
-        arquivos_b2c = ger_b2c.get_total_arquivos()
+        arquivos_pj = ger_pj.get_total_arquivos() if ger_pj else 0
+        arquivos_b2c = ger_b2c.get_total_arquivos() if ger_b2c else 0
         
         if arquivos_pj > 0:
             print(f"PJ:  {arquivos_pj} arquivo(s) gerado(s) com {total_pj:,} registros")
