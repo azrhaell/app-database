@@ -26,6 +26,8 @@ def normalizar_cnpj_e_salvar_xlsx(csv_input, xlsx_output):
 
         # Normaliza a coluna 'CNPJ' removendo todos os caracteres não numéricos
         df['CNPJ'] = df['CNPJ'].astype(str).str.replace(r'\D', '', regex=True)
+        
+        df['CNPJ'] = df['CNPJ'].apply(lambda x: x.zfill(14) if x else '')
 
         # Salva o DataFrame em um arquivo XLSX
         df.to_excel(xlsx_output, index=False)
@@ -40,8 +42,8 @@ def normalizar_cnpj_e_salvar_xlsx(csv_input, xlsx_output):
 
 # --- Exemplo de uso ---
 if __name__ == '__main__':
-    arquivo_csv = r'C:\Users\marce\OneDrive\Área de Trabalho\resultado-consulta.csv'
-    arquivo_xlsx = r'C:\Users\marce\OneDrive\Área de Trabalho\dados_normalizados.xlsx'
+    arquivo_csv = r'C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\PJ\BASE_CLARO_PJ_1_validado.csv'
+    arquivo_xlsx = r'C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\PJ\BASE_CLARO_PJ_1_validado.xlsx'
 
     normalizar_cnpj_e_salvar_xlsx(arquivo_csv, arquivo_xlsx)
     

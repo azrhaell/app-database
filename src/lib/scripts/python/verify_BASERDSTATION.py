@@ -24,18 +24,18 @@ def verificar_emails_xlsx(caminho_arquivo: str, salvar_em: str = None):
     df.columns = df.columns.str.strip()
 
     # Verifica se as colunas obrigatórias existem
-    colunas_necessarias = {'CNPJ', 'Razao', 'EMAIL1'}
+    colunas_necessarias = {'CNPJ', 'RAZAO SOCIAL', 'E-MAIL'}
     if not colunas_necessarias.issubset(df.columns):
         raise ValueError(f"Arquivo deve conter as colunas: {colunas_necessarias}")
 
     # Aplica validação
-    df['EMAIL_VALIDO'] = df['EMAIL1'].apply(validar_email)
+    df['EMAIL_VALIDO'] = df['E-MAIL'].apply(validar_email)
 
     # Mostra inválidos
     emails_invalidos = df[~df['EMAIL_VALIDO']]
     if not emails_invalidos.empty:
         print("\nRegistros com e-mails inválidos:")
-        print(emails_invalidos[['CNPJ', 'Razao', 'EMAIL1']])
+        print(emails_invalidos[['CNPJ', 'RAZAO SOCIAL', 'E-MAIL']])
     else:
         print("\nTodos os e-mails são válidos.")
 
@@ -55,5 +55,5 @@ def verificar_emails_xlsx(caminho_arquivo: str, salvar_em: str = None):
     return df_validos
 
 # Exemplo de uso
-caminho = r'd:\Github\Vivo_Database\app-database\public\MISC\RDSTATION\E-MAIL MKT - ATENDIMENTO PERSONALIZADO 13 10 25.xlsx'
+caminho = r'C:\Users\marce\Downloads\E-MAIL MARKETING - VIVO TECH - 09 11 2025.xlsx'
 verificar_emails_xlsx(caminho)

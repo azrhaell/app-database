@@ -3,9 +3,8 @@ import pandas as pd
 # Caminhos dos arquivos
 
 caminho_csv = r'D:\BDO\bdo_filtrado_RJ_ES.csv'
-caminho_xlsx = r'D:\Github\Vivo_Database\app-database\public\MISC\BASE MOVEL 2 - CRUZAMENTO RECEITA E BDO - 05 11 25 - SAIDA - BRF.xlsx'
-caminho_saida = r'D:\Github\Vivo_Database\app-database\public\MISC\BASE MOVEL 2 - CRUZAMENTO RECEITA E BDO - 05 11 25 - SAIDA - BRF - SAIDA BDO.xlsx'
-
+caminho_xlsx = r'C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\PJ\BASE_CLARO_PJ_1_validado - CRUZAMENTO RECEITA.xlsx'
+caminho_saida = r'C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\PJ\BASE_CLARO_PJ_1_validado - CRUZAMENTO RECEITA - SAIDA BDO.xlsx'
 
 # Lê o CSV
 df_csv = pd.read_csv(caminho_csv, dtype=str)

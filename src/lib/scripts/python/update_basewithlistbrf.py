@@ -70,7 +70,7 @@ def atualizar_status_cnpj_multiplos_csvs(caminho_xlsx, caminho_pasta_csvs, camin
 # --- Exemplo de uso ---
 # Defina os caminhos dos seus arquivos e da pasta
 caminho_da_pasta_csvs = r"d:\Github\Vivo_Database\app-database\public\BRF"
-caminho_do_xlsx = r'D:\Github\Vivo_Database\app-database\public\MISC\BASE MOVEL 2 - CRUZAMENTO RECEITA E BDO - 05 11 25.xlsx'
-caminho_do_novo_xlsx = r'D:\Github\Vivo_Database\app-database\public\MISC\BASE MOVEL 2 - CRUZAMENTO RECEITA E BDO - 05 11 25 - SAIDA - BRF.xlsx'
+caminho_do_xlsx = r'C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\B2C\DIFERENCAS\BASE_CLARO_PJ_1_VALIDADO - CRUZAMENTO RECEITA - BDO.xlsx'
+caminho_do_novo_xlsx = r'C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\B2C\DIFERENCAS\BASE_CLARO_PJ_1_VALIDADO - CRUZAMENTO RECEITA - BDO - BRF.xlsx'
 
 atualizar_status_cnpj_multiplos_csvs(caminho_do_xlsx, caminho_da_pasta_csvs, caminho_do_novo_xlsx)

@@ -6,11 +6,11 @@ import time
 # --- 1. CONFIGURAÇÕES ---
 
 # Caminhos das pastas (use 'r' para strings "raw" e evitar problemas com '\')
-PATH_SOURCE = r"D:\Github\Nova_Base\Claro_Base\03-BASE_JA_FILTRADA"
+PATH_SOURCE = r"C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\PJ"
 PATH_REFERENCE = r"d:\Github\Vivo_Database\app-database\public\BRF"
 
 # Pasta de saída para os novos arquivos
-PATH_OUTPUT = r"D:\Github\Nova_Base\Claro_Base\04-OUTPUT_BRF"
+PATH_OUTPUT = r"C:\Users\marce\OneDrive\Área de Trabalho\CLARO\04-OUTPUT_BRF"
 
 # Limite de registros por arquivo de saída
 MAX_RECORDS_PER_FILE = 500000
