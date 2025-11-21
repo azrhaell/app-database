@@ -3,8 +3,8 @@ import pandas as pd
 # Caminhos dos arquivos
 
 caminho_csv = r'D:\BDO\bdo_filtrado_RJ_ES.csv'
-caminho_xlsx = r'C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\PJ\BASE_CLARO_PJ_1_validado - CRUZAMENTO RECEITA.xlsx'
-caminho_saida = r'C:\Users\marce\OneDrive\Área de Trabalho\CLARO\03-BASE_JA_FILTRADA\PJ\BASE_CLARO_PJ_1_validado - CRUZAMENTO RECEITA - SAIDA BDO.xlsx'
+caminho_xlsx = r'C:\Users\marce\Downloads\CRUZAR BDO - 17 11 2025.xlsx'
+caminho_saida = r'C:\Users\marce\Downloads\CRUZAR BDO - 17 11 2025 - SAIDA BDO.xlsx'
 
 # Lê o CSV
 df_csv = pd.read_csv(caminho_csv, dtype=str)
